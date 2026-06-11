@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#f7f3ea">
+<title>趣味帳 - 推し活図鑑・なんでも番付・俳句手帳</title>
+<style>
+:root{
+  --bg:#f7f3ea; --card:#fffdf8; --card2:#f2ecdd;
+  --text:#3a2e2a; --text2:#8a7a6e; --border:#e3d9c6;
+  --accent:#c0392b; --accent-light:#fbe9e5; --accent-dark:#96281c;
+  --gold:#b8860b; --green:#3a7d44; --shadow:0 2px 10px rgba(90,70,50,.10);
+  --ad-h:0px; --tab-h:62px;
+}
+body.dark{
+  --bg:#1c1a17; --card:#2a2723; --card2:#211e1a;
+  --text:#ece5d8; --text2:#a89a8a; --border:#3e382f;
+  --accent:#e8604c; --accent-light:#3d2520; --accent-dark:#f08a7a;
+  --gold:#d4a72c; --green:#6db877; --shadow:0 2px 10px rgba(0,0,0,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.55;transition:background .25s}
+.serif{font-family:"Hiragino Mincho ProN","Yu Mincho","BIZ UDMincho",serif}
+
+/* ===== 上部バー ===== */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:calc(8px + env(safe-area-inset-top)) 14px 8px;background:var(--bg);border-bottom:1px solid var(--border)}
+#topbar .app-title{font-weight:900;font-size:1.1rem;letter-spacing:.12em}
+#topbar .app-title small{font-weight:700;font-size:.68rem;color:var(--text2);letter-spacing:.05em;margin-left:8px}
+#theme-btn{border:none;background:var(--card2);border-radius:50%;width:36px;height:36px;font-size:1.05rem;cursor:pointer}
+
+/* ===== レイアウト ===== */
+main{padding:calc(58px + env(safe-area-inset-top)) 14px calc(var(--tab-h) + var(--ad-h) + 18px + env(safe-area-inset-bottom))}
+.page{display:none;max-width:680px;margin:0 auto}
+.page.active{display:block}
+.subview{display:none}
+.subview.active{display:block}
+
+/* ===== タブバー ===== */
+#tabbar{position:fixed;left:0;right:0;bottom:var(--ad-h);z-index:50;display:flex;background:var(--card);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom);height:calc(var(--tab-h) + env(safe-area-inset-bottom))}
+#tabbar button{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:inherit;font-size:.66rem;font-weight:800;color:var(--text2);cursor:pointer;padding-top:6px}
+#tabbar button .ico{font-size:1.3rem;line-height:1}
+#tabbar button.on{color:var(--accent)}
+
+/* ===== 共通部品 ===== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:14px;margin-bottom:12px}
+.hero{background:linear-gradient(135deg,var(--accent-light),var(--card));border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.hero h2{font-size:1.0rem;font-weight:900;margin-bottom:2px}
+.hero p{font-size:.78rem;color:var(--text2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:10px;font-family:inherit;font-weight:900;font-size:.92rem;padding:11px 18px;cursor:pointer;background:var(--accent);color:#fff}
+.btn.sub{background:var(--card2);color:var(--text)}
+.btn.small{padding:6px 12px;font-size:.8rem;border-radius:8px}
+.btn.danger{background:#a33}
+.btn.wide{width:100%}
+.fab{position:fixed;right:18px;bottom:calc(var(--tab-h) + var(--ad-h) + 18px + env(safe-area-inset-bottom));z-index:40;width:56px;height:56px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:1.9rem;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(150,40,28,.4);display:none;align-items:center;justify-content:center}
+.fab.show{display:flex}
+.row{display:flex;gap:8px;align-items:center}
+.row.between{justify-content:space-between}
+.muted{color:var(--text2);font-size:.8rem}
+.sec-title{font-size:.95rem;font-weight:900;margin:16px 0 8px;display:flex;align-items:center;gap:6px}
+.back-link{display:inline-flex;align-items:center;gap:4px;border:none;background:none;font-family:inherit;color:var(--text2);font-weight:800;font-size:.85rem;cursor:pointer;padding:4px 0;margin-bottom:8px}
+input[type=text],input[type=number],input[type=date],textarea,select{width:100%;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-family:inherit;font-size:1rem;padding:10px 12px}
+textarea{resize:vertical;min-height:70px}
+label.fld{display:block;font-size:.78rem;font-weight:800;color:var(--text2);margin:12px 0 4px}
+.empty{padding:36px 12px;text-align:center;color:var(--text2);font-size:.86rem}
+.empty .big{font-size:2.2rem;display:block;margin-bottom:8px}
+.chip{display:inline-block;background:var(--card2);border-radius:20px;padding:3px 11px;font-size:.74rem;font-weight:800;color:var(--text2)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chips .chip{cursor:pointer;border:1.5px solid transparent}
+.chips .chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+/* ===== 図鑑 ===== */
+.book-card{display:flex;align-items:center;gap:12px;cursor:pointer}
+.book-emoji{width:52px;height:52px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0}
+.book-info{flex:1;min-width:0}
+.book-info .name{font-weight:900;font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.book-info .meta{font-size:.74rem;color:var(--text2);margin-top:2px}
+.prog{height:8px;background:var(--card2);border-radius:6px;overflow:hidden;margin-top:6px}
+.prog>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:6px;transition:width .3s}
+.prog.full>i{background:linear-gradient(90deg,var(--gold),#e6c34a)}
+.comp-badge{font-size:.68rem;font-weight:900;color:var(--gold)}
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.item-cell{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:var(--shadow)}
+.item-cell .ph{width:100%;aspect-ratio:1;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--text2);object-fit:cover}
+img.ph{object-fit:cover;display:block}
+.item-cell .nm{font-size:.72rem;font-weight:800;padding:5px 7px 1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-cell .st{font-size:.62rem;padding:0 7px 6px;color:var(--gold)}
+.item-cell.notgot{opacity:.55}
+.item-cell.notgot .ph{filter:grayscale(1)}
+.searchbar{display:flex;gap:8px;margin-bottom:10px}
+.searchbar input{flex:1}
+.searchbar select{width:auto}
+.stars{display:flex;gap:4px;font-size:1.5rem;cursor:pointer;user-select:none}
+.stars span{color:var(--border)}
+.stars span.on{color:var(--gold)}
+#item-photo-prev{width:100%;max-height:240px;object-fit:contain;border-radius:10px;background:var(--card2);display:none}
+.photo-drop{border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;color:var(--text2);font-size:.84rem;cursor:pointer}
+
+/* ===== 番付 ===== */
+.bz-entry{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:6px}
+.bz-entry .rank{font-size:.7rem;font-weight:900;color:var(--accent);min-width:64px}
+.bz-entry .nm{flex:1;font-weight:800;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bz-entry .ctl{display:flex;gap:4px}
+.bz-entry .ctl button{border:none;background:var(--card2);border-radius:6px;width:30px;height:30px;font-size:.85rem;cursor:pointer;color:var(--text)}
+#bz-canvas-wrap{overflow:auto;text-align:center;background:var(--card2);border-radius:10px;padding:8px}
+#bz-canvas{max-width:100%;height:auto;border-radius:6px}
+
+/* ===== 俳句 ===== */
+.kigo-card{background:linear-gradient(135deg,var(--accent-light),var(--card));border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;text-align:center}
+.kigo-card .date{font-size:.74rem;color:var(--text2);font-weight:800}
+.kigo-card .kigo{font-size:1.7rem;font-weight:900;margin:6px 0 2px;letter-spacing:.15em}
+.kigo-card .season-tag{display:inline-block;font-size:.68rem;font-weight:900;color:#fff;background:var(--accent);border-radius:12px;padding:2px 10px;margin-bottom:6px}
+.kigo-card .desc{font-size:.8rem;color:var(--text2)}
+.haiku-list{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;flex-wrap:wrap;justify-content:flex-start}
+.haiku-card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;min-height:170px}
+.haiku-card .ku{writing-mode:vertical-rl;font-size:1.02rem;font-weight:600;letter-spacing:.14em;max-height:150px;line-height:1.9}
+.haiku-card .info{font-size:.62rem;color:var(--text2);margin-top:8px;writing-mode:horizontal-tb}
+.haiku-card .fav{color:var(--accent)}
+.ku-inputs{display:flex;flex-direction:column;gap:8px}
+.ku-inputs .cnt{font-size:.7rem;color:var(--text2);font-weight:800;text-align:right}
+.tate-view{display:flex;justify-content:center;padding:18px 8px;background:var(--card2);border-radius:12px}
+.tate-view .ku{writing-mode:vertical-rl;font-size:1.35rem;font-weight:600;letter-spacing:.2em;line-height:2.1;min-height:230px}
+
+/* ===== 設定 ===== */
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--border);font-size:.92rem;font-weight:700}
+.set-row:last-child{border-bottom:none}
+.set-row .muted{font-weight:600}
+
+/* ===== モーダル ===== */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(30,20,15,.5);display:none;align-items:flex-end;justify-content:center}
+.modal.open{display:flex}
+.modal-box{background:var(--bg);border-radius:18px 18px 0 0;width:100%;max-width:680px;max-height:88vh;overflow-y:auto;padding:18px 16px calc(20px + env(safe-area-inset-bottom))}
+.modal-box h3{font-size:1.05rem;font-weight:900;margin-bottom:4px}
+.modal-actions{display:flex;gap:8px;margin-top:18px}
+.modal-actions .btn{flex:1}
+.emoji-pick{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:6px}
+.emoji-pick button{border:1.5px solid transparent;background:var(--card);border-radius:8px;font-size:1.3rem;padding:5px 0;cursor:pointer}
+.emoji-pick button.on{border-color:var(--accent);background:var(--accent-light)}
+
+/* ===== トースト ===== */
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tab-h) + var(--ad-h) + 24px);z-index:200;background:var(--text);color:var(--bg);font-size:.84rem;font-weight:800;padding:10px 20px;border-radius:24px;opacity:0;pointer-events:none;transition:opacity .25s;max-width:86%;text-align:center}
+#toast.show{opacity:.95}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <span class="app-title">趣味帳<small id="topbar-sub">あなたの「好き」をしまう帳面</small></span>
+  <button id="theme-btn" onclick="toggleTheme()" aria-label="テーマ切替">🌓</button>
+</header>
+
+<main>
+  <!-- ============ 図鑑 ============ -->
+  <section id="page-zukan" class="page active">
+    <div id="zukan-list-view" class="subview active">
+      <div class="hero"><h2>📚 マイ図鑑</h2><p>推しグッズ・カード・昆虫・なんでも。写真とメモで自分だけの図鑑を作ろう</p></div>
+      <div id="zukan-books"></div>
+    </div>
+    <div id="zukan-detail-view" class="subview">
+      <button class="back-link" onclick="showZukanList()">← 図鑑一覧へ</button>
+      <div class="row between" style="margin-bottom:8px">
+        <div style="min-width:0">
+          <div id="zd-title" style="font-weight:900;font-size:1.1rem"></div>
+          <div id="zd-meta" class="muted"></div>
+        </div>
+        <button class="btn sub small" onclick="openBookForm(currentBookId)">設定</button>
+      </div>
+      <div id="zd-prog-wrap"></div>
+      <div class="searchbar" style="margin-top:10px">
+        <input type="text" id="zd-search" placeholder="🔍 検索" oninput="renderItems()">
+        <select id="zd-sort" onchange="renderItems()">
+          <option value="new">新しい順</option>
+          <option value="old">古い順</option>
+          <option value="name">名前順</option>
+          <option value="rate">評価順</option>
+        </select>
+      </div>
+      <div id="zd-items" class="item-grid"></div>
+    </div>
+  </section>
+
+  <!-- ============ 番付 ============ -->
+  <section id="page-banzuke" class="page">
+    <div id="bz-list-view" class="subview active">
+      <div class="hero"><h2>🏆 なんでも番付</h2><p>好きなもの何でも大相撲の番付風にランキング。画像にしてシェアもできる</p></div>
+      <div id="bz-sheets"></div>
+    </div>
+    <div id="bz-edit-view" class="subview">
+      <button class="back-link" onclick="showBzList()">← 番付一覧へ</button>
+      <label class="fld">番付のタイトル(例: わが家ラーメン番付)</label>
+      <input type="text" id="bz-title" maxlength="20" oninput="bzSaveMeta()">
+      <div class="sec-title">番付の顔ぶれ <span class="muted">(上から強い順・自動で東西に振り分け)</span></div>
+      <div id="bz-entries"></div>
+      <div class="row" style="margin-top:8px">
+        <input type="text" id="bz-new-name" maxlength="12" placeholder="名前を入れて追加">
+        <button class="btn small" onclick="bzAddEntry()">追加</button>
+      </div>
+      <div style="margin-top:16px" class="row">
+        <button class="btn wide" onclick="bzPreview()">🖼️ 番付表を見る・画像にする</button>
+      </div>
+      <div style="margin-top:8px" class="row">
+        <button class="btn sub wide" onclick="bzDelete()">この番付を削除</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 俳句 ============ -->
+  <section id="page-haiku" class="page">
+    <div class="kigo-card">
+      <div class="date" id="hk-today"></div>
+      <div class="kigo serif" id="hk-kigo"></div>
+      <div><span class="season-tag" id="hk-season"></span></div>
+      <div class="desc" id="hk-kigo-desc"></div>
+      <button class="btn small" style="margin-top:10px" onclick="openHaikuForm(null, true)">この季語で一句詠む</button>
+    </div>
+    <div class="row between">
+      <div class="sec-title" style="margin:4px 0">📜 わたしの句帳 <span class="muted" id="hk-count"></span></div>
+    </div>
+    <div class="chips" id="hk-filter">
+      <span class="chip on" data-s="">すべて</span><span class="chip" data-s="春">春</span><span class="chip" data-s="夏">夏</span><span class="chip" data-s="秋">秋</span><span class="chip" data-s="冬">冬</span><span class="chip" data-s="新年">新年</span><span class="chip" data-s="fav">♥</span>
+    </div>
+    <div id="hk-list" class="haiku-list"></div>
+  </section>
+
+  <!-- ============ 設定 ============ -->
+  <section id="page-settings" class="page">
+    <div class="card">
+      <div class="set-row"><span>テーマ</span>
+        <select id="set-theme" style="width:auto" onchange="setTheme(this.value)">
+          <option value="auto">端末に合わせる</option><option value="light">ライト</option><option value="dark">ダーク</option>
+        </select>
+      </div>
+      <div class="set-row"><span>俳号(句の署名)</span>
+        <input type="text" id="set-haigo" maxlength="10" style="width:140px" placeholder="未設定" onchange="saveHaigo()">
+      </div>
+    </div>
+    <div class="card">
+      <div class="set-row" onclick="exportData()" style="cursor:pointer"><span>📤 データを書き出す</span><span class="muted">写真以外をJSON保存</span></div>
+      <div class="set-row" onclick="document.getElementById('import-file').click()" style="cursor:pointer"><span>📥 データを読み込む</span><span class="muted">書き出したJSONを復元</span></div>
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importData(this)">
+    </div>
+    <div class="card">
+      <div class="set-row"><span>アプリ</span><span class="muted">趣味帳 v1.0.0</span></div>
+      <div class="set-row"><span>データの保存先</span><span class="muted">すべて端末内のみ(送信なし)</span></div>
+    </div>
+  </section>
+</main>
+
+<button id="fab" class="fab show" onclick="fabAction()">＋</button>
+
+<nav id="tabbar">
+  <button data-tab="zukan" class="on" onclick="switchTab('zukan')"><span class="ico">📚</span>図鑑</button>
+  <button data-tab="banzuke" onclick="switchTab('banzuke')"><span class="ico">🏆</span>番付</button>
+  <button data-tab="haiku" onclick="switchTab('haiku')"><span class="ico">🖌️</span>俳句</button>
+  <button data-tab="settings" onclick="switchTab('settings')"><span class="ico">⚙️</span>設定</button>
+</nav>
+
+<!-- 図鑑 作成/編集モーダル -->
+<div class="modal" id="modal-book">
+  <div class="modal-box">
+    <h3 id="mb-title">新しい図鑑を作る</h3>
+    <label class="fld">図鑑の名前</label>
+    <input type="text" id="mb-name" maxlength="20" placeholder="例: 推しアクスタ図鑑">
+    <label class="fld">アイコン</label>
+    <div class="emoji-pick" id="mb-emoji"></div>
+    <label class="fld">目標の数(任意・コンプ率が出ます)</label>
+    <input type="number" id="mb-goal" min="0" max="9999" placeholder="例: 50">
+    <div class="modal-actions">
+      <button class="btn sub" onclick="closeModal('modal-book')">やめる</button>
+      <button class="btn danger" id="mb-del" style="display:none" onclick="deleteBook()">削除</button>
+      <button class="btn" onclick="saveBook()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 図鑑 アイテム編集モーダル -->
+<div class="modal" id="modal-item">
+  <div class="modal-box">
+    <h3 id="mi-title">あたらしく登録</h3>
+    <label class="fld">写真</label>
+    <img id="item-photo-prev" alt="">
+    <div class="photo-drop" id="mi-photo-drop" onclick="document.getElementById('mi-photo').click()">📷 タップして写真を選ぶ(任意)</div>
+    <input type="file" id="mi-photo" accept="image/*" style="display:none" onchange="pickPhoto(this)">
+    <label class="fld">名前 *</label>
+    <input type="text" id="mi-name" maxlength="30" placeholder="例: ○○のアクスタ 夏ver.">
+    <label class="fld">手に入れた? </label>
+    <div class="chips" id="mi-got">
+      <span class="chip on" data-v="1" onclick="miGot(1)">✅ 入手済み</span><span class="chip" data-v="0" onclick="miGot(0)">🔜 ほしい(未入手)</span>
+    </div>
+    <label class="fld">お気に入り度</label>
+    <div class="stars" id="mi-stars"></div>
+    <label class="fld">日付</label>
+    <input type="date" id="mi-date">
+    <label class="fld">場所(任意)</label>
+    <input type="text" id="mi-place" maxlength="30" placeholder="例: 大阪遠征 物販列">
+    <label class="fld">メモ(任意)</label>
+    <textarea id="mi-memo" maxlength="500" placeholder="思い出・入手のいきさつ など"></textarea>
+    <div class="modal-actions">
+      <button class="btn sub" onclick="closeModal('modal-item')">やめる</button>
+      <button class="btn danger" id="mi-del" style="display:none" onclick="deleteItem()">削除</button>
+      <button class="btn" onclick="saveItem()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 番付プレビューモーダル -->
+<div class="modal" id="modal-bz-preview">
+  <div class="modal-box">
+    <h3 id="bzp-title">番付表</h3>
+    <div id="bz-canvas-wrap"><canvas id="bz-canvas"></canvas></div>
+    <div class="modal-actions">
+      <button class="btn sub" onclick="closeModal('modal-bz-preview')">閉じる</button>
+      <button class="btn" onclick="shareCanvas('bz-canvas','banzuke')">📤 画像を共有・保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 俳句 入力モーダル -->
+<div class="modal" id="modal-haiku">
+  <div class="modal-box">
+    <h3 id="mh-title">一句詠む</h3>
+    <div class="ku-inputs" style="margin-top:10px">
+      <input type="text" id="mh-k1" class="serif" maxlength="15" placeholder="上五 (例: 古池や)" oninput="kuCount()">
+      <input type="text" id="mh-k2" class="serif" maxlength="15" placeholder="中七 (例: 蛙飛び込む)" oninput="kuCount()">
+      <input type="text" id="mh-k3" class="serif" maxlength="15" placeholder="下五 (例: 水の音)" oninput="kuCount()">
+      <div class="cnt" id="mh-cnt">0・0・0</div>
+    </div>
+    <label class="fld">季語(任意)</label>
+    <input type="text" id="mh-kigo" maxlength="10">
+    <label class="fld">季節</label>
+    <select id="mh-season"><option value="">なし(川柳など)</option><option>春</option><option>夏</option><option>秋</option><option>冬</option><option>新年</option></select>
+    <label class="fld">メモ(任意)</label>
+    <textarea id="mh-memo" maxlength="300" placeholder="詠んだ場面・推敲メモ など"></textarea>
+    <div class="modal-actions">
+      <button class="btn sub" onclick="closeModal('modal-haiku')">やめる</button>
+      <button class="btn danger" id="mh-del" style="display:none" onclick="deleteHaiku()">削除</button>
+      <button class="btn" onclick="saveHaiku()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 俳句 清書モーダル -->
+<div class="modal" id="modal-haiku-view">
+  <div class="modal-box">
+    <h3>清書</h3>
+    <div class="tate-view"><div class="ku serif" id="hv-ku"></div></div>
+    <div class="muted" id="hv-info" style="text-align:center;margin-top:8px"></div>
+    <div class="modal-actions">
+      <button class="btn sub" onclick="closeModal('modal-haiku-view')">閉じる</button>
+      <button class="btn sub" id="hv-fav-btn" onclick="toggleFav()">♥</button>
+      <button class="btn sub" onclick="editHaikuFromView()">✏️ 編集</button>
+      <button class="btn" onclick="haikuToImage()">📤 画像に</button>
+    </div>
+    <div id="hv-canvas-wrap" style="display:none;margin-top:10px;text-align:center;background:var(--card2);border-radius:10px;padding:8px">
+      <canvas id="hv-canvas" style="max-width:100%;height:auto;border-radius:6px"></canvas>
+      <button class="btn wide" style="margin-top:8px" onclick="shareCanvas('hv-canvas','haiku')">📤 この画像を共有・保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ================= 共通基盤 ================= */
+let db = null;
+function openDB(){
+  return new Promise((res, rej)=>{
+    const rq = indexedDB.open('shumicho', 1);
+    rq.onupgradeneeded = e=>{
+      const d = e.target.result;
+      d.createObjectStore('books', {keyPath:'id', autoIncrement:true});
+      const it = d.createObjectStore('items', {keyPath:'id', autoIncrement:true});
+      it.createIndex('bookId', 'bookId');
+      d.createObjectStore('banzuke', {keyPath:'id', autoIncrement:true});
+      d.createObjectStore('haiku', {keyPath:'id', autoIncrement:true});
+    };
+    rq.onsuccess = ()=>{ db = rq.result; res(); };
+    rq.onerror = ()=>rej(rq.error);
+  });
+}
+function tx(store, mode){ return db.transaction(store, mode||'readonly').objectStore(store); }
+function dbAll(store){ return new Promise((res,rej)=>{ const r=tx(store).getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbGet(store,id){ return new Promise((res,rej)=>{ const r=tx(store).get(id); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbPut(store,obj){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').put(obj); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function dbDel(store,id){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').delete(id); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+function dbByIndex(store,idx,val){ return new Promise((res,rej)=>{ const r=tx(store).index(idx).getAll(val); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove('show'),2200); }
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('open'); }));
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtDate(s){ if(!s) return ''; const p=s.split('-'); return p.length===3 ? `${p[0]}年${+p[1]}月${+p[2]}日` : s; }
+
+/* ----- テーマ ----- */
+function applyTheme(){
+  const t = localStorage.getItem('sc_theme')||'auto';
+  const dark = t==='dark' || (t==='auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.body.classList.toggle('dark', dark);
+}
+function setTheme(v){ localStorage.setItem('sc_theme', v); applyTheme(); }
+function toggleTheme(){
+  const cur = document.body.classList.contains('dark') ? 'light' : 'dark';
+  localStorage.setItem('sc_theme', cur);
+  document.getElementById('set-theme').value = cur;
+  applyTheme();
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+/* ----- タブ ----- */
+let currentTab = 'zukan';
+const TAB_SUBS = {zukan:'あなたの「好き」をしまう帳面', banzuke:'なんでもランキング番付', haiku:'一日一句のすすめ', settings:'設定'};
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+tab));
+  document.querySelectorAll('#tabbar button').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
+  document.getElementById('topbar-sub').textContent = TAB_SUBS[tab]||'';
+  updateFab();
+}
+function updateFab(){
+  const fab = document.getElementById('fab');
+  let show = false;
+  if(currentTab==='zukan') show = true;
+  if(currentTab==='banzuke') show = document.getElementById('bz-list-view').classList.contains('active');
+  if(currentTab==='haiku') show = true;
+  fab.classList.toggle('show', show);
+}
+function fabAction(){
+  if(currentTab==='zukan'){
+    if(document.getElementById('zukan-detail-view').classList.contains('active')) openItemForm(null);
+    else openBookForm(null);
+  } else if(currentTab==='banzuke'){ bzCreate(); }
+  else if(currentTab==='haiku'){ openHaikuForm(null,false); }
+}
+function showSub(pageId, subId){
+  document.querySelectorAll('#'+pageId+' .subview').forEach(v=>v.classList.toggle('active', v.id===subId));
+  updateFab();
+}
+
+/* ================= 図鑑 ================= */
+const BOOK_EMOJIS = ['💖','🎤','✨','🃏','📮','🦋','🌸','🍜','⛰️','🚉','🏟️','🐚','🪙','📀','🧸','🍰','☕','⚾','🎮','📚','🗿','🎁','🖼️','🔖'];
+let currentBookId = null;
+let editingBookId = null;
+let editingItemId = null;
+let miGotVal = 1;
+let miRating = 0;
+let miPhotoBlob = undefined; // undefined=変更なし null=削除 Blob=新規
+
+async function renderBooks(){
+  const books = await dbAll('books');
+  const items = await dbAll('items');
+  const wrap = document.getElementById('zukan-books');
+  if(!books.length){
+    wrap.innerHTML = '<div class="empty"><span class="big">📚</span>まだ図鑑がありません。<br>右下の＋から最初の図鑑を作りましょう</div>';
+    return;
+  }
+  books.sort((a,b)=>b.id-a.id);
+  wrap.innerHTML = books.map(b=>{
+    const list = items.filter(i=>i.bookId===b.id);
+    const got = list.filter(i=>i.got).length;
+    let prog = '';
+    if(b.goal>0){
+      const pct = Math.min(100, Math.round(got/b.goal*100));
+      prog = `<div class="prog ${pct>=100?'full':''}"><i style="width:${pct}%"></i></div>
+        <div class="muted" style="margin-top:3px">${pct>=100?'<span class="comp-badge">🎊 コンプリート!</span> ':''}${got} / ${b.goal} (${pct}%)</div>`;
+    }
+    return `<div class="card book-card" onclick="openBook(${b.id})">
+      <div class="book-emoji">${b.emoji}</div>
+      <div class="book-info">
+        <div class="name">${esc(b.name)}</div>
+        <div class="meta">${list.length}件 登録${b.goal>0?'':''}</div>
+        ${prog}
+      </div><div style="color:var(--text2)">›</div></div>`;
+  }).join('');
+}
+
+function openBookForm(id){
+  editingBookId = id;
+  const pick = document.getElementById('mb-emoji');
+  pick.innerHTML = BOOK_EMOJIS.map(e=>`<button data-e="${e}" onclick="this.parentNode.querySelectorAll('button').forEach(x=>x.classList.remove('on'));this.classList.add('on')">${e}</button>`).join('');
+  document.getElementById('mb-title').textContent = id ? '図鑑の設定' : '新しい図鑑を作る';
+  document.getElementById('mb-del').style.display = id ? '' : 'none';
+  if(id){
+    dbGet('books', id).then(b=>{
+      document.getElementById('mb-name').value = b.name;
+      document.getElementById('mb-goal').value = b.goal||'';
+      const btn = pick.querySelector(`button[data-e="${b.emoji}"]`);
+      if(btn) btn.classList.add('on');
+    });
+  } else {
+    document.getElementById('mb-name').value = '';
+    document.getElementById('mb-goal').value = '';
+    pick.querySelector('button').classList.add('on');
+  }
+  openModal('modal-book');
+}
+async function saveBook(){
+  const name = document.getElementById('mb-name').value.trim();
+  if(!name){ toast('図鑑の名前を入れてください'); return; }
+  const emoji = (document.querySelector('#mb-emoji button.on')||{}).dataset?.e || '📚';
+  const goal = parseInt(document.getElementById('mb-goal').value)||0;
+  const obj = editingBookId ? await dbGet('books', editingBookId) : {created: Date.now()};
+  Object.assign(obj, {name, emoji, goal});
+  await dbPut('books', obj);
+  closeModal('modal-book');
+  toast(editingBookId ? '保存しました' : `図鑑「${name}」を作りました!`);
+  await renderBooks();
+  if(editingBookId && currentBookId===editingBookId) openBook(currentBookId);
+}
+async function deleteBook(){
+  if(!editingBookId) return;
+  if(!confirm('この図鑑と中の登録をすべて削除します。よろしいですか?')) return;
+  const items = await dbByIndex('items','bookId', editingBookId);
+  for(const it of items) await dbDel('items', it.id);
+  await dbDel('books', editingBookId);
+  closeModal('modal-book');
+  toast('削除しました');
+  showZukanList();
+}
+
+async function openBook(id){
+  currentBookId = id;
+  const b = await dbGet('books', id);
+  if(!b) return;
+  document.getElementById('zd-title').textContent = `${b.emoji} ${b.name}`;
+  document.getElementById('zd-search').value = '';
+  showSub('page-zukan','zukan-detail-view');
+  await renderItems();
+}
+function showZukanList(){ currentBookId=null; showSub('page-zukan','zukan-list-view'); renderBooks(); }
+
+async function renderItems(){
+  const b = await dbGet('books', currentBookId);
+  let items = await dbByIndex('items','bookId', currentBookId);
+  const got = items.filter(i=>i.got).length;
+  document.getElementById('zd-meta').textContent = `${items.length}件 登録 / 入手済み ${got}件`;
+  const pw = document.getElementById('zd-prog-wrap');
+  if(b.goal>0){
+    const pct = Math.min(100, Math.round(got/b.goal*100));
+    pw.innerHTML = `<div class="prog ${pct>=100?'full':''}"><i style="width:${pct}%"></i></div>
+      <div class="muted" style="margin-top:3px">${pct>=100?'<span class="comp-badge">🎊 コンプリート!</span> ':''}目標 ${b.goal} のうち ${got} (${pct}%)</div>`;
+  } else pw.innerHTML='';
+  const q = document.getElementById('zd-search').value.trim().toLowerCase();
+  if(q) items = items.filter(i=>(i.name+' '+(i.place||'')+' '+(i.memo||'')).toLowerCase().includes(q));
+  const sort = document.getElementById('zd-sort').value;
+  if(sort==='new') items.sort((a,b)=>b.id-a.id);
+  if(sort==='old') items.sort((a,b)=>a.id-b.id);
+  if(sort==='name') items.sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+  if(sort==='rate') items.sort((a,b)=>(b.rating||0)-(a.rating||0));
+  const grid = document.getElementById('zd-items');
+  if(!items.length){
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><span class="big">📷</span>右下の＋から登録しましょう</div>';
+    return;
+  }
+  grid.innerHTML = items.map(i=>`
+    <div class="item-cell ${i.got?'':'notgot'}" onclick="openItemForm(${i.id})">
+      ${i.photo ? `<img class="ph" data-iid="${i.id}" alt="">` : `<div class="ph">${i.got?'📦':'🔜'}</div>`}
+      <div class="nm">${esc(i.name)}</div>
+      <div class="st">${'★'.repeat(i.rating||0)}${i.got?'':' <span style="color:var(--text2)">未入手</span>'}</div>
+    </div>`).join('');
+  // 写真サムネをBlobから流し込む
+  items.filter(i=>i.photo).forEach(i=>{
+    const img = grid.querySelector(`img[data-iid="${i.id}"]`);
+    if(img){ const u = URL.createObjectURL(i.photo); img.src=u; img.onload=()=>URL.revokeObjectURL(u); }
+  });
+}
+
+function miGot(v){
+  miGotVal = v;
+  document.querySelectorAll('#mi-got .chip').forEach(c=>c.classList.toggle('on', +c.dataset.v===v));
+}
+function renderStars(){
+  const w = document.getElementById('mi-stars');
+  w.innerHTML = [1,2,3,4,5].map(n=>`<span class="${n<=miRating?'on':''}" onclick="miRating=(miRating===${n}?0:${n});renderStars()">★</span>`).join('');
+}
+async function openItemForm(id){
+  editingItemId = id;
+  miPhotoBlob = undefined;
+  document.getElementById('mi-title').textContent = id ? '登録の編集' : 'あたらしく登録';
+  document.getElementById('mi-del').style.display = id ? '' : 'none';
+  const prev = document.getElementById('item-photo-prev');
+  prev.style.display='none'; prev.src='';
+  document.getElementById('mi-photo').value='';
+  if(id){
+    const it = await dbGet('items', id);
+    document.getElementById('mi-name').value = it.name;
+    document.getElementById('mi-date').value = it.date||'';
+    document.getElementById('mi-place').value = it.place||'';
+    document.getElementById('mi-memo').value = it.memo||'';
+    miGot(it.got?1:0); miRating = it.rating||0;
+    if(it.photo){ const u=URL.createObjectURL(it.photo); prev.src=u; prev.style.display='block'; }
+  } else {
+    document.getElementById('mi-name').value='';
+    document.getElementById('mi-date').value = todayStr();
+    document.getElementById('mi-place').value='';
+    document.getElementById('mi-memo').value='';
+    miGot(1); miRating = 0;
+  }
+  renderStars();
+  openModal('modal-item');
+}
+function pickPhoto(input){
+  const f = input.files && input.files[0];
+  if(!f) return;
+  // 長辺1280pxに縮小してJPEG化(容量節約)
+  const img = new Image();
+  img.onload = ()=>{
+    const max = 1280;
+    let w=img.width, h=img.height;
+    if(Math.max(w,h)>max){ const r=max/Math.max(w,h); w=Math.round(w*r); h=Math.round(h*r); }
+    const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+    cv.getContext('2d').drawImage(img,0,0,w,h);
+    cv.toBlob(b=>{
+      miPhotoBlob = b;
+      const prev = document.getElementById('item-photo-prev');
+      const u = URL.createObjectURL(b); prev.src=u; prev.style.display='block';
+      URL.revokeObjectURL(img.src);
+    }, 'image/jpeg', 0.85);
+  };
+  img.src = URL.createObjectURL(f);
+}
+async function saveItem(){
+  const name = document.getElementById('mi-name').value.trim();
+  if(!name){ toast('名前を入れてください'); return; }
+  const obj = editingItemId ? await dbGet('items', editingItemId) : {bookId: currentBookId, created: Date.now()};
+  obj.name = name;
+  obj.date = document.getElementById('mi-date').value;
+  obj.place = document.getElementById('mi-place').value.trim();
+  obj.memo = document.getElementById('mi-memo').value.trim();
+  obj.got = miGotVal===1;
+  obj.rating = miRating;
+  if(miPhotoBlob!==undefined) obj.photo = miPhotoBlob;
+  await dbPut('items', obj);
+  closeModal('modal-item');
+  toast('保存しました');
+  await renderItems();
+  // コンプ達成チェック
+  const b = await dbGet('books', currentBookId);
+  if(b.goal>0){
+    const items = await dbByIndex('items','bookId', currentBookId);
+    const got = items.filter(i=>i.got).length;
+    if(got===b.goal) setTimeout(()=>toast('🎊 コンプリートおめでとうございます!'), 600);
+  }
+}
+async function deleteItem(){
+  if(!editingItemId) return;
+  if(!confirm('この登録を削除しますか?')) return;
+  await dbDel('items', editingItemId);
+  closeModal('modal-item');
+  toast('削除しました');
+  await renderItems();
+}
+
+/* ================= 番付 ================= */
+let currentBzId = null;
+let bzSaveTimer = null;
+const RANK_NAMES = ['横綱','大関','関脇','小結'];
+function rankLabel(i){
+  const tier = Math.floor(i/2), side = i%2===0 ? '東' : '西';
+  const name = tier<RANK_NAMES.length ? RANK_NAMES[tier] : '前頭'+(tier-RANK_NAMES.length+1)+'枚目';
+  return {side, name, tier};
+}
+
+async function renderBzSheets(){
+  const sheets = await dbAll('banzuke');
+  const wrap = document.getElementById('bz-sheets');
+  if(!sheets.length){
+    wrap.innerHTML = '<div class="empty"><span class="big">🏆</span>まだ番付がありません。<br>右下の＋から「マイ番付」を作りましょう<br><span style="font-size:.76rem">例: ラーメン番付・推し曲番付・温泉番付</span></div>';
+    return;
+  }
+  sheets.sort((a,b)=>b.id-a.id);
+  wrap.innerHTML = sheets.map(s=>`
+    <div class="card book-card" onclick="bzOpen(${s.id})">
+      <div class="book-emoji">🏆</div>
+      <div class="book-info">
+        <div class="name">${esc(s.title||'(無題の番付)')}</div>
+        <div class="meta">${(s.entries||[]).length}名 ${s.entries&&s.entries[0]?'/ 横綱: '+esc(s.entries[0].name):''}</div>
+      </div><div style="color:var(--text2)">›</div></div>`).join('');
+}
+async function bzCreate(){
+  const id = await dbPut('banzuke', {title:'', entries:[], created: Date.now()});
+  bzOpen(id);
+}
+async function bzOpen(id){
+  currentBzId = id;
+  const s = await dbGet('banzuke', id);
+  if(!s) return;
+  document.getElementById('bz-title').value = s.title||'';
+  document.getElementById('bz-new-name').value = '';
+  showSub('page-banzuke','bz-edit-view');
+  renderBzEntries(s);
+}
+function showBzList(){ currentBzId=null; showSub('page-banzuke','bz-list-view'); renderBzSheets(); }
+function renderBzEntries(s){
+  const wrap = document.getElementById('bz-entries');
+  const es = s.entries||[];
+  if(!es.length){ wrap.innerHTML = '<div class="empty" style="padding:18px">下の欄から名前を追加してください</div>'; return; }
+  wrap.innerHTML = es.map((e,i)=>{
+    const r = rankLabel(i);
+    return `<div class="bz-entry">
+      <span class="rank">${r.side} ${r.name}</span>
+      <span class="nm">${esc(e.name)}</span>
+      <span class="ctl">
+        <button onclick="bzMove(${i},-1)" ${i===0?'disabled':''}>▲</button>
+        <button onclick="bzMove(${i},1)" ${i===es.length-1?'disabled':''}>▼</button>
+        <button onclick="bzRemove(${i})">✕</button>
+      </span></div>`;
+  }).join('');
+}
+function bzSaveMeta(){
+  clearTimeout(bzSaveTimer);
+  bzSaveTimer = setTimeout(async ()=>{
+    const s = await dbGet('banzuke', currentBzId);
+    s.title = document.getElementById('bz-title').value.trim();
+    await dbPut('banzuke', s);
+  }, 400);
+}
+async function bzAddEntry(){
+  const inp = document.getElementById('bz-new-name');
+  const name = inp.value.trim();
+  if(!name){ toast('名前を入れてください'); return; }
+  const s = await dbGet('banzuke', currentBzId);
+  s.entries = s.entries||[];
+  if(s.entries.length>=40){ toast('番付は40名までです'); return; }
+  s.entries.push({name});
+  await dbPut('banzuke', s);
+  inp.value=''; inp.focus();
+  renderBzEntries(s);
+}
+async function bzMove(i, dir){
+  const s = await dbGet('banzuke', currentBzId);
+  const j = i+dir;
+  if(j<0 || j>=s.entries.length) return;
+  [s.entries[i], s.entries[j]] = [s.entries[j], s.entries[i]];
+  await dbPut('banzuke', s);
+  renderBzEntries(s);
+}
+async function bzRemove(i){
+  const s = await dbGet('banzuke', currentBzId);
+  s.entries.splice(i,1);
+  await dbPut('banzuke', s);
+  renderBzEntries(s);
+}
+async function bzDelete(){
+  if(!confirm('この番付を削除しますか?')) return;
+  await dbDel('banzuke', currentBzId);
+  toast('削除しました');
+  showBzList();
+}
+
+/* --- 縦書き描画ヘルパー(canvas) --- */
+function drawTate(ctx, text, x, y, size, opt){
+  opt = opt||{};
+  ctx.save();
+  ctx.font = (opt.weight||'900')+' '+size+'px "Hiragino Mincho ProN","Yu Mincho","BIZ UDMincho",serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const lh = size * (opt.lineHeight||1.12);
+  let cy = y;
+  for(const ch of String(text)){
+    if('ーｰ−‐〜~…'.includes(ch)){
+      ctx.save(); ctx.translate(x, cy+size/2); ctx.rotate(Math.PI/2);
+      ctx.fillText(ch, 0, -size/2); ctx.restore();
+    } else if('、。'.includes(ch)){
+      ctx.fillText(ch, x+size*0.32, cy-size*0.55);
+      cy += lh*0.45; continue;
+    } else if('「『'.includes(ch) || '」』'.includes(ch)){
+      ctx.save(); ctx.translate(x, cy+size/2); ctx.rotate(Math.PI/2);
+      ctx.fillText(ch, 0, -size/2); ctx.restore();
+    } else {
+      ctx.fillText(ch, x, cy);
+    }
+    cy += lh;
+  }
+  ctx.restore();
+  return cy;
+}
+
+async function bzPreview(){
+  const s = await dbGet('banzuke', currentBzId);
+  const es = s.entries||[];
+  if(!es.length){ toast('まず名前を追加してください'); return; }
+  const cv = document.getElementById('bz-canvas');
+  const W = 1080, H = 1440;
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  const dark = false; // 番付は常に紙色で
+  // 紙背景
+  ctx.fillStyle = '#f3ecd8'; ctx.fillRect(0,0,W,H);
+  // うっすら紙テクスチャ風の縦線
+  ctx.strokeStyle = 'rgba(160,140,100,.07)';
+  for(let x=0;x<W;x+=7){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  // 二重枠
+  ctx.strokeStyle = '#5a4632'; ctx.lineWidth = 10; ctx.strokeRect(18,18,W-36,H-36);
+  ctx.lineWidth = 3; ctx.strokeRect(34,34,W-68,H-68);
+  ctx.fillStyle = '#2e2218';
+  // 中央帯: タイトル
+  const title = s.title || 'マイ番付';
+  const cx = W/2;
+  const tSize = title.length<=6 ? 92 : (title.length<=9 ? 72 : 56);
+  drawTate(ctx, title, cx, 110, tSize, {lineHeight:1.08});
+  // 中央下部に朱印風「番付」
+  ctx.fillStyle = '#b03a2a';
+  ctx.fillRect(cx-46, H-218, 92, 150);
+  ctx.fillStyle = '#f3ecd8';
+  drawTate(ctx, '番付', cx, H-204, 56, {lineHeight:1.1});
+  ctx.fillStyle = '#2e2218';
+  // 東西ヘッダー
+  ctx.font = '900 54px "Hiragino Mincho ProN","Yu Mincho",serif';
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.save();
+  ctx.fillStyle = '#b03a2a';
+  ctx.beginPath(); ctx.arc(W-130, 105, 46, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.arc(130, 105, 46, 0, 7); ctx.fill();
+  ctx.fillStyle = '#f3ecd8';
+  ctx.fillText('東', W-130, 78);
+  ctx.fillText('西', 130, 78);
+  ctx.restore();
+  // 力士配置: 東=右半分(中央→右へ), 西=左半分(中央→左へ)
+  const east = [], west = [];
+  es.forEach((e,i)=>{ (i%2===0?east:west).push({name:e.name, tier:Math.floor(i/2)}); });
+  const sizes = [64,54,47,42,38];
+  const colW  = [86,74,66,60,54];
+  function drawSide(list, dir){ // dir: +1=東(右へ), -1=西(左へ)
+    let x = cx + dir*(tSize/2 + 70);
+    const edge = dir>0 ? W-70 : 70;
+    for(const p of list){
+      const si = Math.min(p.tier, sizes.length-1);
+      const sz = sizes[si], cw = colW[si];
+      if(dir>0 ? (x+cw/2>edge) : (x-cw/2<edge)) break; // 枠を超えたら打ち切り
+      const r = rankLabel(0); // dummy
+      const label = p.tier<RANK_NAMES.length ? RANK_NAMES[p.tier] : '前頭';
+      ctx.fillStyle = '#8a6a3a';
+      drawTate(ctx, label, x, 190, 24, {weight:'800', lineHeight:1.05});
+      ctx.fillStyle = '#2e2218';
+      drawTate(ctx, p.name.slice(0,10), x, 190 + 24*1.05*4 + 18, sz, {lineHeight:1.1});
+      x += dir*cw;
+    }
+  }
+  drawSide(east, 1);
+  drawSide(west, -1);
+  // 下部に日付と落款
+  ctx.fillStyle = '#8a6a3a';
+  ctx.font = '700 26px "Hiragino Mincho ProN","Yu Mincho",serif';
+  const d = new Date();
+  ctx.fillText(`${d.getFullYear()}年${d.getMonth()+1}月場所`, cx, H-58);
+  document.getElementById('bzp-title').textContent = title;
+  openModal('modal-bz-preview');
+}
+
+/* --- canvas共有/保存 --- */
+async function shareCanvas(canvasId, baseName){
+  const cv = document.getElementById(canvasId);
+  cv.toBlob(async blob=>{
+    const file = new File([blob], baseName+'_'+Date.now()+'.png', {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file]}); return; }catch(e){ if(e.name==='AbortError') return; }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = file.name;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    toast('画像を保存しました');
+  }, 'image/png');
+}
+
+/* ================= 俳句 ================= */
+/* 季語データ(月別・各10語)。季語名と短い説明はパブリックな事実情報 */
+const KIGO = {
+ 1:[{n:'初日の出',d:'元日の朝に昇る太陽。一年の始まりを寿ぐ',s:'新年'},{n:'初詣',d:'年が明けて初めての社寺参り',s:'新年'},{n:'お年玉',d:'新年の贈り物。子の喜ぶ顔も春隣',s:'新年'},{n:'七草',d:'一月七日、七草粥で無病息災を願う',s:'新年'},{n:'鏡開',d:'飾った鏡餅を下げていただく行事',s:'新年'},{n:'寒の入り',d:'小寒から立春前日まで。一年で最も寒い頃',s:'冬'},{n:'雪晴',d:'雪が止み、青空がまぶしく輝くこと',s:'冬'},{n:'氷柱',d:'つらら。軒先に下がる冬の造形',s:'冬'},{n:'冬木立',d:'葉を落とした冬の木々の立ち姿',s:'冬'},{n:'日脚伸ぶ',d:'冬至を過ぎ、日暮れが少しずつ遅くなる',s:'冬'}],
+ 2:[{n:'立春',d:'暦の上で春が始まる日。二月四日ごろ',s:'春'},{n:'梅',d:'春に先がけて香り高く咲く花',s:'春'},{n:'余寒',d:'立春後もなお残る寒さ',s:'春'},{n:'春浅し',d:'春とは名ばかりの、まだ寒い時期',s:'春'},{n:'雪解',d:'積もった雪がとけ始めること',s:'春'},{n:'猫の恋',d:'春先、恋に鳴く猫の声',s:'春'},{n:'バレンタインの日',d:'二月十四日。新しい季語のひとつ',s:'春'},{n:'春一番',d:'立春後に初めて吹く強い南風',s:'春'},{n:'下萌',d:'地面から草の芽が萌え出ること',s:'春'},{n:'針供養',d:'折れた針を豆腐などに刺して労う行事',s:'春'}],
+ 3:[{n:'雛祭',d:'三月三日、女児の健やかな成長を祝う',s:'春'},{n:'啓蟄',d:'冬ごもりの虫が地上に出てくる頃',s:'春'},{n:'春分',d:'昼夜の長さがほぼ等しくなる日',s:'春'},{n:'彼岸',d:'春分を中日とする七日間。墓参の頃',s:'春'},{n:'卒業',d:'学び舎を巣立つ春の別れ',s:'春'},{n:'桃の花',d:'雛祭に飾る、愛らしい春の花',s:'春'},{n:'蒲公英',d:'たんぽぽ。道ばたを黄色に彩る',s:'春'},{n:'春の雨',d:'しとしとと草木を潤す穏やかな雨',s:'春'},{n:'山笑ふ',d:'芽吹きで山が明るく見えるさま',s:'春'},{n:'燕',d:'つばめ。春に南から渡ってくる',s:'春'}],
+ 4:[{n:'花見',d:'桜の下に集い春を楽しむこと',s:'春'},{n:'桜',d:'春の代表花。咲いて散るまでが見どころ',s:'春'},{n:'花吹雪',d:'桜の花びらが吹雪のように舞い散る',s:'春'},{n:'入学',d:'真新しい鞄の眩しい春',s:'春'},{n:'春眠',d:'春の眠りの心地よさ。暁を覚えず',s:'春'},{n:'菜の花',d:'一面を黄に染める春の野の花',s:'春'},{n:'蝶',d:'ひらひらと舞う春の使い',s:'春'},{n:'春の海',d:'ひねもすのたりのたりと穏やかな海',s:'春'},{n:'若草',d:'萌え出たばかりのやわらかな草',s:'春'},{n:'朧月',d:'おぼろづき。春の夜のかすんだ月',s:'春'}],
+ 5:[{n:'立夏',d:'暦の上で夏が始まる日。五月五日ごろ',s:'夏'},{n:'こどもの日',d:'五月五日。端午の節句',s:'夏'},{n:'鯉幟',d:'こいのぼり。五月の空を泳ぐ',s:'夏'},{n:'新緑',d:'若葉のまぶしいみどり',s:'夏'},{n:'薫風',d:'若葉の香りを運ぶさわやかな風',s:'夏'},{n:'柏餅',d:'端午の節句に食べる和菓子',s:'夏'},{n:'母の日',d:'五月第二日曜。感謝を伝える日',s:'夏'},{n:'夏めく',d:'日ごとに夏らしくなっていくこと',s:'夏'},{n:'青葉',d:'みずみずしく勢いを増す初夏の葉',s:'夏'},{n:'田植',d:'早苗を植える初夏の農事',s:'夏'}],
+ 6:[{n:'梅雨',d:'六月から七月にかけて続く長雨',s:'夏'},{n:'紫陽花',d:'あじさい。雨に映る七変化の花',s:'夏'},{n:'蛍',d:'水辺に淡い光を放つ初夏の虫',s:'夏'},{n:'梅雨晴間',d:'梅雨の合間にのぞく晴れ',s:'夏'},{n:'青梅',d:'梅酒や梅干しに仕込む青い実',s:'夏'},{n:'蝸牛',d:'かたつむり。雨の似合う生きもの',s:'夏'},{n:'夏至',d:'一年で昼が最も長い日',s:'夏'},{n:'短夜',d:'みじかよ。明けやすい夏の夜',s:'夏'},{n:'父の日',d:'六月第三日曜。感謝を伝える日',s:'夏'},{n:'五月雨',d:'さみだれ。旧暦五月に降る長雨',s:'夏'}],
+ 7:[{n:'七夕',d:'七月七日、星に願いを託す行事',s:'秋'},{n:'天の川',d:'夜空を横切る星の帯',s:'秋'},{n:'朝顔',d:'夏の朝に咲き昼にしぼむ花',s:'秋'},{n:'土用',d:'立秋前の約十八日間。暑さの盛り',s:'夏'},{n:'夕立',d:'夏の午後に降るにわか雨',s:'夏'},{n:'風鈴',d:'軒先で涼を呼ぶ夏の音',s:'夏'},{n:'蝉',d:'せみ。夏の盛りを告げる声',s:'夏'},{n:'花火',d:'夏の夜空を彩る大輪',s:'秋'},{n:'西瓜',d:'すいか。夏の果物の王様(季語では秋)',s:'秋'},{n:'涼し',d:'暑さの中にふと感じる涼気',s:'夏'}],
+ 8:[{n:'立秋',d:'暦の上で秋が始まる日。八月七日ごろ',s:'秋'},{n:'残暑',d:'立秋を過ぎてなお続く暑さ',s:'秋'},{n:'盆',d:'祖先の霊を迎えるお盆の行事',s:'秋'},{n:'帰省',d:'ふるさとへ帰る夏の人の流れ',s:'秋'},{n:'墓参',d:'はかまいり。お盆の墓参り',s:'秋'},{n:'秋立つ',d:'風や光にふと秋の気配が立つこと',s:'秋'},{n:'蜩',d:'ひぐらし。夕暮れに澄んだ声で鳴く蝉',s:'秋'},{n:'流星',d:'夜空を流れる星。願いごとを三度',s:'秋'},{n:'踊',d:'盆踊り。やぐらを囲む夏の夜',s:'秋'},{n:'新涼',d:'秋になって感じる涼しさ',s:'秋'}],
+ 9:[{n:'名月',d:'陰暦八月十五日の月。中秋の名月',s:'秋'},{n:'月見',d:'すすきと団子を供えて月を愛でる',s:'秋'},{n:'秋彼岸',d:'秋分を中日とする七日間',s:'秋'},{n:'彼岸花',d:'田の畔を真紅に染める花',s:'秋'},{n:'敬老の日',d:'九月第三月曜。長寿を祝う日',s:'秋'},{n:'虫の声',d:'鈴虫・松虫など秋の夜の音色',s:'秋'},{n:'秋桜',d:'コスモス。秋風に揺れる花',s:'秋'},{n:'稲穂',d:'実りて頭を垂れる秋の田',s:'秋'},{n:'秋晴',d:'澄みわたる秋の青空',s:'秋'},{n:'夜長',d:'秋の夜の長さ。読書や趣味の友',s:'秋'}],
+ 10:[{n:'紅葉',d:'もみじ。山を彩る秋の錦',s:'秋'},{n:'秋深し',d:'秋がいよいよ深まる頃',s:'秋'},{n:'渡り鳥',d:'北から越冬に渡ってくる鳥たち',s:'秋'},{n:'木の実',d:'どんぐり・栗など秋の恵み',s:'秋'},{n:'新米',d:'今年とれたばかりの米',s:'秋'},{n:'運動会',d:'秋空の下の徒競走',s:'秋'},{n:'秋祭',d:'実りに感謝する村や町の祭',s:'秋'},{n:'柿',d:'秋の代表的な果物。柿食えば…',s:'秋'},{n:'芋煮会',d:'河原で鍋を囲む東北の秋の行事',s:'秋'},{n:'冬支度',d:'冬を迎える準備のあれこれ',s:'秋'}],
+ 11:[{n:'立冬',d:'暦の上で冬が始まる日。十一月七日ごろ',s:'冬'},{n:'小春日和',d:'初冬の、春のように暖かな晴天',s:'冬'},{n:'七五三',d:'子の成長を祝う十一月の行事',s:'冬'},{n:'時雨',d:'しぐれ。初冬に降ったり止んだりする雨',s:'冬'},{n:'落葉',d:'おちば。木々が葉を落とす頃',s:'冬'},{n:'銀杏散る',d:'いちょうの黄葉が舞い散るさま',s:'冬'},{n:'初霜',d:'その冬初めて降りる霜',s:'冬'},{n:'木枯',d:'こがらし。冬の到来を告げる北風',s:'冬'},{n:'炬燵',d:'こたつ。冬の団欒の中心',s:'冬'},{n:'冬めく',d:'日ごとに冬らしくなっていくこと',s:'冬'}],
+ 12:[{n:'師走',d:'十二月の異称。一年の締めくくり',s:'冬'},{n:'冬至',d:'一年で昼が最も短い日。柚子湯に入る',s:'冬'},{n:'柚子湯',d:'冬至の日に柚子を浮かべる風呂',s:'冬'},{n:'クリスマス',d:'十二月二十五日。聖夜の灯',s:'冬'},{n:'大掃除',d:'年の汚れを払う年末の行事',s:'冬'},{n:'年の暮',d:'押し詰まった年末の慌ただしさ',s:'冬'},{n:'初雪',d:'その冬初めて降る雪',s:'冬'},{n:'大晦日',d:'十二月三十一日。除夜の鐘を待つ',s:'冬'},{n:'年越蕎麦',d:'細く長くを願って食べる蕎麦',s:'冬'},{n:'冬銀河',d:'冴えわたる冬の夜空の天の川',s:'冬'}]
+};
+let editingHaikuId = null;
+let viewingHaikuId = null;
+let hkFilterVal = '';
+
+function todayKigo(){
+  const d = new Date();
+  const arr = KIGO[d.getMonth()+1];
+  return arr[(d.getDate()-1) % arr.length];
+}
+function renderKigoCard(){
+  const d = new Date();
+  const W = ['日','月','火','水','木','金','土'];
+  document.getElementById('hk-today').textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日(${W[d.getDay()]}) 今日の季語`;
+  const k = todayKigo();
+  document.getElementById('hk-kigo').textContent = k.n;
+  document.getElementById('hk-season').textContent = k.s;
+  document.getElementById('hk-kigo-desc').textContent = k.d;
+}
+function kuCount(){
+  const a = document.getElementById('mh-k1').value.length;
+  const b = document.getElementById('mh-k2').value.length;
+  const c = document.getElementById('mh-k3').value.length;
+  document.getElementById('mh-cnt').textContent = `${a}・${b}・${c} 文字`;
+}
+function openHaikuForm(id, useKigo){
+  editingHaikuId = id;
+  document.getElementById('mh-title').textContent = id ? '句の編集' : '一句詠む';
+  document.getElementById('mh-del').style.display = id ? '' : 'none';
+  if(id){
+    dbGet('haiku', id).then(h=>{
+      document.getElementById('mh-k1').value = h.k1||'';
+      document.getElementById('mh-k2').value = h.k2||'';
+      document.getElementById('mh-k3').value = h.k3||'';
+      document.getElementById('mh-kigo').value = h.kigo||'';
+      document.getElementById('mh-season').value = h.season||'';
+      document.getElementById('mh-memo').value = h.memo||'';
+      kuCount();
+    });
+  } else {
+    ['mh-k1','mh-k2','mh-k3','mh-memo'].forEach(i=>document.getElementById(i).value='');
+    const k = useKigo ? todayKigo() : null;
+    document.getElementById('mh-kigo').value = k ? k.n : '';
+    document.getElementById('mh-season').value = k ? k.s : '';
+    kuCount();
+  }
+  openModal('modal-haiku');
+}
+async function saveHaiku(){
+  const k1 = document.getElementById('mh-k1').value.trim();
+  const k2 = document.getElementById('mh-k2').value.trim();
+  const k3 = document.getElementById('mh-k3').value.trim();
+  if(!k1 && !k2 && !k3){ toast('句を入れてください'); return; }
+  const obj = editingHaikuId ? await dbGet('haiku', editingHaikuId) : {created: Date.now(), date: todayStr(), fav:false};
+  Object.assign(obj, {k1,k2,k3,
+    kigo: document.getElementById('mh-kigo').value.trim(),
+    season: document.getElementById('mh-season').value,
+    memo: document.getElementById('mh-memo').value.trim()});
+  await dbPut('haiku', obj);
+  closeModal('modal-haiku');
+  toast(editingHaikuId ? '保存しました' : '一句、句帳に収めました');
+  renderHaikuList();
+}
+async function deleteHaiku(){
+  if(!editingHaikuId) return;
+  if(!confirm('この句を削除しますか?')) return;
+  await dbDel('haiku', editingHaikuId);
+  closeModal('modal-haiku');
+  closeModal('modal-haiku-view');
+  toast('削除しました');
+  renderHaikuList();
+}
+async function renderHaikuList(){
+  let list = await dbAll('haiku');
+  document.getElementById('hk-count').textContent = list.length ? `${list.length}句` : '';
+  if(hkFilterVal==='fav') list = list.filter(h=>h.fav);
+  else if(hkFilterVal) list = list.filter(h=>h.season===hkFilterVal);
+  list.sort((a,b)=>b.id-a.id);
+  const wrap = document.getElementById('hk-list');
+  if(!list.length){
+    wrap.innerHTML = '<div class="empty" style="width:100%"><span class="big">🖌️</span>まだ句がありません。<br>今日の季語で一句どうぞ</div>';
+    return;
+  }
+  wrap.innerHTML = list.map(h=>`
+    <div class="haiku-card" onclick="viewHaiku(${h.id})">
+      <div class="ku serif">${esc(h.k1)}　${esc(h.k2)}　${esc(h.k3)}</div>
+      <div class="info">${h.fav?'<span class="fav">♥</span> ':''}${h.season?esc(h.season)+' ':''}${fmtDate(h.date)}</div>
+    </div>`).join('');
+}
+document.querySelectorAll('#hk-filter .chip').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    document.querySelectorAll('#hk-filter .chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on');
+    hkFilterVal = c.dataset.s;
+    renderHaikuList();
+  });
+});
+async function viewHaiku(id){
+  viewingHaikuId = id;
+  const h = await dbGet('haiku', id);
+  document.getElementById('hv-ku').textContent = `${h.k1}　${h.k2}　${h.k3}`;
+  const haigo = localStorage.getItem('sc_haigo')||'';
+  document.getElementById('hv-info').textContent = [h.kigo?'季語: '+h.kigo:'', h.season, fmtDate(h.date), haigo].filter(Boolean).join(' / ');
+  document.getElementById('hv-fav-btn').style.color = h.fav ? 'var(--accent)' : '';
+  document.getElementById('hv-canvas-wrap').style.display = 'none';
+  openModal('modal-haiku-view');
+}
+async function toggleFav(){
+  const h = await dbGet('haiku', viewingHaikuId);
+  h.fav = !h.fav;
+  await dbPut('haiku', h);
+  document.getElementById('hv-fav-btn').style.color = h.fav ? 'var(--accent)' : '';
+  toast(h.fav ? 'お気に入りにしました' : 'お気に入りを外しました');
+  renderHaikuList();
+}
+function editHaikuFromView(){
+  closeModal('modal-haiku-view');
+  openHaikuForm(viewingHaikuId, false);
+}
+async function haikuToImage(){
+  const h = await dbGet('haiku', viewingHaikuId);
+  const cv = document.getElementById('hv-canvas');
+  const W = 1080, H = 1440;
+  cv.width=W; cv.height=H;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#f6f1e3'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = 'rgba(160,140,100,.08)';
+  for(let y=0;y<H;y+=6){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.strokeStyle = '#7a6248'; ctx.lineWidth = 4; ctx.strokeRect(40,40,W-80,H-80);
+  ctx.fillStyle = '#2e2218';
+  // 3行を右から: 上五(右)、中七(中・少し下げ)、下五(左・さらに下げ)
+  const size = 84;
+  drawTate(ctx, h.k1||'', W/2+190, 150, size, {lineHeight:1.18});
+  drawTate(ctx, h.k2||'', W/2,     265, size, {lineHeight:1.18});
+  drawTate(ctx, h.k3||'', W/2-190, 385, size, {lineHeight:1.18});
+  // 左下に俳号と日付
+  const haigo = localStorage.getItem('sc_haigo')||'';
+  ctx.fillStyle = '#7a6248';
+  if(haigo) drawTate(ctx, haigo, 130, H-170-haigo.length*44, 40, {weight:'700'});
+  ctx.font = '700 28px "Hiragino Mincho ProN","Yu Mincho",serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(fmtDate(h.date), 70, H-72);
+  // 朱落款
+  ctx.fillStyle = '#b03a2a';
+  ctx.fillRect(W-150, H-180, 64, 100);
+  ctx.fillStyle = '#f6f1e3';
+  drawTate(ctx, haigo ? haigo.slice(0,2) : '一句', W-118, H-168, 36, {lineHeight:1.1});
+  document.getElementById('hv-canvas-wrap').style.display = 'block';
+}
+
+/* ================= 設定 ================= */
+function saveHaigo(){
+  localStorage.setItem('sc_haigo', document.getElementById('set-haigo').value.trim());
+  toast('俳号を保存しました');
+}
+async function exportData(){
+  const books = await dbAll('books');
+  const items = (await dbAll('items')).map(i=>{ const c={...i}; delete c.photo; return c; });
+  const banzuke = await dbAll('banzuke');
+  const haiku = await dbAll('haiku');
+  const data = {app:'shumicho', ver:1, exported: new Date().toISOString(), books, items, banzuke, haiku,
+    haigo: localStorage.getItem('sc_haigo')||''};
+  const blob = new Blob([JSON.stringify(data, null, 1)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '趣味帳バックアップ_'+todayStr()+'.json';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+  toast('書き出しました(写真は含まれません)');
+}
+async function importData(input){
+  const f = input.files && input.files[0];
+  if(!f) return;
+  try{
+    const data = JSON.parse(await f.text());
+    if(data.app!=='shumicho') throw new Error('format');
+    if(!confirm('読み込んだデータを追加します(今あるデータは消えません)。よろしいですか?')) { input.value=''; return; }
+    const idMap = {};
+    for(const b of (data.books||[])){ const old=b.id; delete b.id; idMap[old] = await dbPut('books', b); }
+    for(const i of (data.items||[])){ delete i.id; i.bookId = idMap[i.bookId] ?? i.bookId; await dbPut('items', i); }
+    for(const s of (data.banzuke||[])){ delete s.id; await dbPut('banzuke', s); }
+    for(const h of (data.haiku||[])){ delete h.id; await dbPut('haiku', h); }
+    if(data.haigo && !localStorage.getItem('sc_haigo')) localStorage.setItem('sc_haigo', data.haigo);
+    toast('読み込みました');
+    renderBooks(); renderBzSheets(); renderHaikuList();
+  }catch(e){ toast('読み込めませんでした。趣味帳のバックアップファイルを選んでください'); }
+  input.value='';
+}
+
+/* ================= AdMob ================= */
+function initAdMob(){
+  if(!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) return;
+  const AdMob = window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
+  if(!AdMob) return;
+  // バナーの実高さをCSS変数 --ad-h に反映し、タブバー・FABを持ち上げる
+  AdMob.addListener('bannerAdSizeChanged', info=>{
+    const h = (info && info.height) ? info.height : 0;
+    document.documentElement.style.setProperty('--ad-h', h+'px');
+  });
+  AdMob.initialize({ initializeForTesting: true })
+    .then(()=> AdMob.showBanner({
+      adId: 'ca-app-pub-3940256099942544/6300978111', // ★テストID。本番化は docs/RELEASE.md 参照
+      adSize: 'ADAPTIVE_BANNER',
+      position: 'BOTTOM_CENTER',
+      margin: 0,
+      isTesting: true
+    }))
+    .catch(e=>console.error('AdMob banner error:', e));
+}
+
+/* ================= 起動 ================= */
+(async function init(){
+  applyTheme();
+  document.getElementById('set-theme').value = localStorage.getItem('sc_theme')||'auto';
+  document.getElementById('set-haigo').value = localStorage.getItem('sc_haigo')||'';
+  await openDB();
+  renderKigoCard();
+  await renderBooks();
+  await renderBzSheets();
+  await renderHaikuList();
+  document.getElementById('bz-new-name').addEventListener('keydown', e=>{ if(e.key==='Enter') bzAddEntry(); });
+  initAdMob();
+})();
+</script>
+</body>
+</html>
