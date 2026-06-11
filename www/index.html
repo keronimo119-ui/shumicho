@@ -139,7 +139,9 @@ img.ph{object-fit:cover;display:block}
 .emoji-pick button.on{border-color:var(--accent);background:var(--accent-light)}
 
 /* ===== デコ帳 ===== */
-#deco-stage-wrap{position:relative;background:var(--card2);border-radius:12px;padding:8px}
+#deco-stage-wrap{position:sticky;top:calc(54px + env(safe-area-inset-top));z-index:30;background:var(--bg);border-radius:12px;padding:8px;box-shadow:0 6px 14px rgba(40,25,15,.18)}
+.deco-note{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-top:8px}
+.deco-note textarea{margin-top:6px;min-height:64px}
 #deco-stage{position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;border-radius:8px;touch-action:none;background:#fff}
 .deco-layer{position:absolute;transform-origin:center center;user-select:none}
 .deco-layer img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
@@ -198,24 +200,34 @@ img.ph{object-fit:cover;display:block}
   <!-- ============ 図鑑 ============ -->
   <section id="page-zukan" class="page active">
     <div id="zukan-list-view" class="subview active">
-      <div class="hero"><h2>📚 マイ図鑑</h2><p>推しグッズ・カード・昆虫・なんでも。写真とメモで自分だけの図鑑を作ろう</p></div>
+      <div class="hero"><h2>📚 マイ図鑑</h2><p>グッズ・カード・昆虫・なんでも。写真とメモで自分だけの図鑑を作ろう</p></div>
       <div class="card book-card" onclick="showDecoList()">
-        <div class="book-emoji">🎀</div>
+        <div class="book-emoji">📖</div>
         <div class="book-info">
-          <div class="name">デコ帳</div>
-          <div class="meta">推し活スクラップ・年表・プロフィール…自由にデコるページ</div>
+          <div class="name">軌跡</div>
+          <div class="meta">日記・年表・スクラップ…「好き」の軌跡を残すデコページ</div>
         </div><div style="color:var(--text2)">›</div>
       </div>
       <div id="zukan-books"></div>
     </div>
     <div id="deco-list-view" class="subview">
       <button class="back-link" onclick="showZukanList()">← 図鑑一覧へ</button>
-      <div class="hero"><h2>🎀 デコ帳</h2><p>写真・ステッカー風切り抜き・推しカラー・手描きペンで自由にデコるスクラップページ</p></div>
+      <div class="hero"><h2>📖 軌跡</h2><p>写真・ステッカー風切り抜き・2色カラー・手描きペンで自由にデコる記録ページ</p></div>
       <div id="deco-pages" class="deco-grid"></div>
     </div>
     <div id="deco-edit-view" class="subview">
-      <button class="back-link" onclick="decoBack()">← デコ帳一覧へ(自動保存)</button>
-      <input type="text" id="deco-title" maxlength="20" placeholder="ページ名(例: 推し活年表2026)" style="margin-bottom:8px" oninput="decoTouchSave()">
+      <button class="back-link" onclick="decoBack()">← 軌跡一覧へ(自動保存)</button>
+      <input type="text" id="deco-title" maxlength="20" placeholder="ページ名(例: 年表2026)" style="margin-bottom:8px" oninput="decoTouchSave()">
+      <details id="deco-notes-box" style="margin-bottom:8px">
+        <summary style="font-size:.85rem;font-weight:900;cursor:pointer;padding:6px 2px">📝 書き込み枠(日記・名言・プロフィールなど)</summary>
+        <div id="deco-notes"></div>
+        <div class="row" style="margin:8px 0 4px">
+          <select id="deco-note-cat" style="flex:1">
+            <option>日記</option><option>格言・名言</option><option>プロフィール</option><option>歌詞</option><option>分析</option><option>想い・コメント・感謝</option><option>妄想</option><option>エピソード</option><option>自由メモ</option>
+          </select>
+          <button class="btn small sub" onclick="decoAddNote()">＋枠を追加</button>
+        </div>
+      </details>
       <div id="deco-stage-wrap">
         <div id="deco-stage"><canvas id="deco-ink"></canvas></div>
       </div>
@@ -228,8 +240,10 @@ img.ph{object-fit:cover;display:block}
       </div>
       <input type="file" id="deco-img-in" accept="image/*" style="display:none" onchange="decoPickImg(this)">
       <div class="deco-panel" id="deco-bg-panel" style="display:none">
-        <div class="slider-row" style="margin-top:0">背景色(推しカラー)</div>
-        <div class="color-dots" id="deco-bg-dots" style="margin-top:6px"></div>
+        <div class="slider-row" style="margin-top:0">背景カラー1</div>
+        <div class="color-dots" id="deco-bg-dots1" style="margin-top:6px"></div>
+        <div class="slider-row">背景カラー2(2色グラデ) <button class="tool-btn mini" onclick="decoBg2Clear()">単色に戻す</button></div>
+        <div class="color-dots" id="deco-bg-dots2" style="margin-top:6px"></div>
       </div>
       <div class="deco-panel" id="deco-pen-panel" style="display:none">
         <div class="color-dots" id="deco-pen-dots"></div>
@@ -387,7 +401,7 @@ img.ph{object-fit:cover;display:block}
   <div class="modal-box">
     <h3 id="mb-title">新しい図鑑を作る</h3>
     <label class="fld">図鑑の名前</label>
-    <input type="text" id="mb-name" maxlength="20" placeholder="例: 推しアクスタ図鑑">
+    <input type="text" id="mb-name" maxlength="20" placeholder="例: アクスタ図鑑">
     <label class="fld">アイコン</label>
     <div class="emoji-pick" id="mb-emoji"></div>
     <label class="fld">目標の数(任意・コンプ率が出ます)</label>
@@ -500,6 +514,16 @@ img.ph{object-fit:cover;display:block}
       <canvas id="hv-canvas" style="max-width:100%;height:auto;border-radius:6px"></canvas>
       <button class="btn wide" style="margin-top:8px" onclick="shareCanvas('hv-canvas','haiku')">📤 この画像を共有・保存</button>
     </div>
+  </div>
+</div>
+
+<!-- 手帳プレビューモーダル(その日の完成手帳) -->
+<div class="modal" id="modal-diary">
+  <div class="modal-box">
+    <h3 id="dy-title" class="serif"></h3>
+    <div class="muted" id="dy-sub"></div>
+    <div id="dy-body" style="margin-top:10px"></div>
+    <div class="modal-actions"><button class="btn sub" onclick="closeModal('modal-diary')">閉じる</button></div>
   </div>
 </div>
 
@@ -863,14 +887,14 @@ async function showDecoList(){
   decoThumbUrls.forEach(u=>URL.revokeObjectURL(u)); decoThumbUrls=[];
   const wrap = document.getElementById('deco-pages');
   if(!list.length){
-    wrap.innerHTML = '<div class="empty" style="grid-column:1/-1"><span class="big">🎀</span>右下の＋で最初のページを作りましょう<br><span style="font-size:.76rem">推し活年表・プロフィール・歌詞メモ・スクラップ…何でも自由</span></div>';
+    wrap.innerHTML = '<div class="empty" style="grid-column:1/-1"><span class="big">📖</span>右下の＋で最初のページを作りましょう<br><span style="font-size:.76rem">日記・年表・プロフィール・歌詞メモ・スクラップ…何でも自由</span></div>';
     return;
   }
   wrap.innerHTML = list.map(p=>{
     let src='';
     if(p.thumb){ const u=URL.createObjectURL(p.thumb); decoThumbUrls.push(u); src=u; }
     return `<div class="deco-card" onclick="decoOpen(${p.id})">
-      ${src?`<img src="${src}" alt="">`:`<div style="width:100%;aspect-ratio:3/4;background:${esc(p.bg||'#fff')}"></div>`}
+      ${src?`<img src="${src}" alt="">`:`<div style="width:100%;aspect-ratio:3/4;background:${decoBgCss(p)}"></div>`}
       <div class="nm">${esc(p.title||'(無題ページ)')}</div></div>`;
   }).join('');
 }
@@ -896,9 +920,36 @@ async function decoOpen(id){
   ictx.clearRect(0,0,720,960);
   if(decoObj.ink){ const im = new Image(); im.onload = ()=>ictx.drawImage(im,0,0,720,960); im.src = decoObj.ink; }
   renderDecoStage();
-  renderColorDots('deco-bg-dots', c=>{ decoObj.bg=c; renderDecoStage(); decoTouchSave(); }, true);
+  renderDecoNotes();
+  document.getElementById('deco-notes-box').open = !!(decoObj.notes && decoObj.notes.length);
+  renderColorDots('deco-bg-dots1', c=>{ decoObj.bg=c; renderDecoStage(); decoTouchSave(); }, true);
+  renderColorDots('deco-bg-dots2', c=>{ decoObj.bgB=c; renderDecoStage(); decoTouchSave(); }, true);
   renderColorDots('deco-pen-dots', c=>{ decoPenColor=c; decoEraser=false; document.getElementById('deco-eraser-btn').classList.remove('on'); }, false);
 }
+
+/* --- 書き込み枠(日記・名言・プロフィールなど) --- */
+function renderDecoNotes(){
+  const notes = decoObj.notes||[];
+  document.getElementById('deco-notes').innerHTML = notes.map((n,i)=>`
+    <div class="deco-note">
+      <div class="row between"><span class="chip" style="color:var(--accent);background:var(--accent-light)">${esc(n.cat)}</span>
+      <button class="tool-btn mini" onclick="decoDelNote(${i})">✕</button></div>
+      <textarea maxlength="2000" placeholder="ここに書き込み" oninput="decoNoteChange(${i},this.value)">${esc(n.text)}</textarea>
+    </div>`).join('');
+}
+function decoAddNote(){
+  decoObj.notes = decoObj.notes||[];
+  decoObj.notes.push({cat: document.getElementById('deco-note-cat').value, text:''});
+  renderDecoNotes(); decoTouchSave();
+}
+function decoDelNote(i){
+  if(decoObj.notes[i].text && !confirm('この書き込み枠を削除しますか?')) return;
+  decoObj.notes.splice(i,1);
+  renderDecoNotes(); decoTouchSave();
+}
+function decoNoteChange(i, v){ decoObj.notes[i].text = v; decoTouchSave(); }
+function decoBg2Clear(){ decoObj.bgB = null; renderDecoStage(); decoTouchSave(); }
+function decoBgCss(p){ return p.bgB ? `linear-gradient(135deg,${p.bg||'#ffffff'},${p.bgB})` : (p.bg||'#ffffff'); }
 function renderColorDots(elId, onPick, withPicker){
   const el = document.getElementById(elId);
   el.innerHTML = DECO_COLORS.map(c=>`<button style="background:${c}" data-c="${c}"></button>`).join('') +
@@ -927,7 +978,7 @@ function decoTouchSave(){
 function decoStageRect(){ return document.getElementById('deco-stage').getBoundingClientRect(); }
 function renderDecoStage(){
   const st = document.getElementById('deco-stage');
-  st.style.background = decoObj.bg||'#ffffff';
+  st.style.background = decoBgCss(decoObj);
   st.querySelectorAll('.deco-layer').forEach(n=>n.remove());
   const stW = decoStageRect().width;
   decoObj.layers.forEach((L,i)=>{
@@ -1200,7 +1251,12 @@ async function decoCompose(W){
   const H = Math.round(W*4/3);
   const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
   const ctx = cv.getContext('2d');
-  ctx.fillStyle = decoObj.bg||'#ffffff'; ctx.fillRect(0,0,W,H);
+  if(decoObj.bgB){
+    const g = ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0, decoObj.bg||'#ffffff'); g.addColorStop(1, decoObj.bgB);
+    ctx.fillStyle = g;
+  } else ctx.fillStyle = decoObj.bg||'#ffffff';
+  ctx.fillRect(0,0,W,H);
   for(const L of decoObj.layers){
     ctx.save();
     ctx.globalAlpha = L.opacity==null?1:L.opacity;
@@ -1252,7 +1308,7 @@ async function decoBack(){
 }
 async function decoDelete(){
   if(!currentDecoId) return;
-  if(!confirm('このデコページを削除しますか?')) return;
+  if(!confirm('この軌跡ページを削除しますか?')) return;
   await dbDel('deco', currentDecoId);
   decoObj=null; currentDecoId=null;
   toast('削除しました');
@@ -1749,7 +1805,7 @@ async function calData(){
     push(h.date, {kind:'俳句', color:'var(--accent)', hex:'#c0392b', label:[h.k1,h.k2,h.k3].filter(Boolean).join('　'), go:`calGoHaiku(${h.id})`});
   });
   deco.filter(p=>p.onCal!==false).forEach(p=>{
-    push(p.date, {kind:'デコ', color:'#e84393', hex:'#e84393', label:p.title||'(無題ページ)', go:`calGoDeco(${p.id})`});
+    push(p.date, {kind:'軌跡', color:'#e84393', hex:'#e84393', label:p.title||'(無題ページ)', go:`calGoDeco(${p.id})`});
   });
   banzuke.filter(s=>s.onCal!==false && s.date).forEach(s=>{
     push(s.date, {kind:'番付', color:'#7a5230', hex:'#7a5230', label:s.title||'(無題の番付)', go:`calGoBz(${s.id})`});
@@ -1782,8 +1838,59 @@ function renderCalDay(ev){
   const list = ev[calSelDate]||[];
   document.getElementById('cal-day-title').textContent = `📌 ${fmtDate(calSelDate)} の記録 ${list.length?`(${list.length}件)`:''}`;
   document.getElementById('cal-day-list').innerHTML = list.length
-    ? list.map(e=>`<div class="cal-item" onclick="${e.go}"><span class="tag" style="background:${e.hex}">${e.kind}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.label)}</span></div>`).join('')
+    ? `<button class="btn wide" style="margin-bottom:8px" onclick="openDiary('${calSelDate}')">📖 この日の手帳をひらく</button>`
+      + list.map(e=>`<div class="cal-item" onclick="${e.go}"><span class="tag" style="background:${e.hex}">${e.kind}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.label)}</span></div>`).join('')
     : '<div class="empty" style="padding:14px">この日の記録はありません</div>';
+}
+
+/* --- 完成手帳プレビュー(閲覧専用) --- */
+let diaryUrls = [];
+async function openDiary(ds){
+  const [items, haiku, deco, banzuke, books] = await Promise.all([dbAll('items'), dbAll('haiku'), dbAll('deco'), dbAll('banzuke'), dbAll('books')]);
+  const bookMap = {}; books.forEach(b=>bookMap[b.id]=b);
+  const d = new Date(ds+'T00:00:00');
+  const W = ['日','月','火','水','木','金','土'];
+  const hol = holidaysOf(d.getFullYear())[(d.getMonth()+1)+'-'+d.getDate()];
+  const kArr = KIGO[d.getMonth()+1];
+  const k = kArr[(d.getDate()-1) % kArr.length];
+  document.getElementById('dy-title').textContent = `${fmtDate(ds)} (${W[d.getDay()]})`;
+  document.getElementById('dy-sub').textContent = (hol ? '🎌 '+hol+' / ' : '') + 'この日の季語: '+k.n+'('+k.s+')';
+  diaryUrls.forEach(u=>URL.revokeObjectURL(u)); diaryUrls=[];
+  let html = '';
+  // 軌跡ページ(デコ+書き込み枠)
+  for(const p of deco.filter(p=>p.onCal!==false && p.date===ds)){
+    let img = '';
+    if(p.thumb){ const u=URL.createObjectURL(p.thumb); diaryUrls.push(u); img=`<img src="${u}" style="width:100%;border-radius:10px" alt="">`; }
+    const notes = (p.notes||[]).filter(n=>n.text).map(n=>
+      `<div style="margin-top:8px"><span class="chip" style="color:var(--accent);background:var(--accent-light)">${esc(n.cat)}</span>
+      <div class="serif" style="white-space:pre-wrap;font-size:.94rem;margin-top:4px;line-height:1.8">${esc(n.text)}</div></div>`).join('');
+    html += `<div class="card"><div class="sec-title" style="margin-top:0">📖 ${esc(p.title||'軌跡ページ')}</div>${img}${notes}</div>`;
+  }
+  // 俳句
+  for(const h of haiku.filter(h=>h.onCal!==false && h.date===ds)){
+    let st='';
+    if(h.photo){ const u=URL.createObjectURL(h.photo); diaryUrls.push(u); st=`style="background:linear-gradient(rgba(20,12,8,.55),rgba(20,12,8,.55)),url('${u}') center/cover;border-color:transparent"`; }
+    html += `<div class="card" ${st}>
+      <div class="tate-view" style="background:transparent"><div class="ku serif" style="${h.photo?'color:#fff':''}">${esc(h.k1)}　${esc(h.k2)}　${esc(h.k3)}</div></div>
+      <div class="muted" style="text-align:center;${h.photo?'color:rgba(255,255,255,.85)':''}">${h.fav?'♥ ':''}${h.kigo?'季語: '+esc(h.kigo)+' ':''}${esc(h.season||'')}</div></div>`;
+  }
+  // 図鑑アイテム
+  for(const i of items.filter(i=>i.onCal!==false && i.date===ds)){
+    const b = bookMap[i.bookId];
+    let ph='';
+    if(i.photo){ const u=URL.createObjectURL(i.photo); diaryUrls.push(u); ph=`<img src="${u}" style="width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin-top:6px" alt="">`; }
+    html += `<div class="card"><div class="sec-title" style="margin-top:0">${b?b.emoji:'📚'} ${esc(i.name)} <span class="muted">${esc(b?b.name:'')}</span></div>${ph}
+      <div class="muted" style="margin-top:4px"><span style="color:var(--gold)">${'★'.repeat(i.rating||0)}</span>${i.place?' / '+esc(i.place):''}${i.got?'':' / 🔜未入手'}</div>
+      ${i.memo?`<div style="font-size:.88rem;white-space:pre-wrap;margin-top:4px">${esc(i.memo)}</div>`:''}</div>`;
+  }
+  // 番付
+  for(const s of banzuke.filter(s=>s.onCal!==false && s.date===ds)){
+    const top = (s.entries||[]).slice(0,4).map((e,i)=>{ const r=rankLabel(i); return r.side+r.name+' '+esc(e.name); }).join(' / ');
+    html += `<div class="card"><div class="sec-title" style="margin-top:0">🏆 ${esc(s.title||'(無題の番付)')}</div><div class="muted">${top}${(s.entries||[]).length>4?' …':''}</div></div>`;
+  }
+  if(!html) html = '<div class="empty">この日の記録はありません</div>';
+  document.getElementById('dy-body').innerHTML = html;
+  openModal('modal-diary');
 }
 function calGoItem(bookId, itemId){ switchTab('zukan'); openBook(bookId).then(()=>openItemForm(itemId)); }
 function calGoHaiku(id){ switchTab('haiku'); viewHaiku(id); }
