@@ -328,8 +328,15 @@ img.ph{object-fit:cover;display:block}
     </div>
     <label class="fld">季語(任意)</label>
     <input type="text" id="mh-kigo" maxlength="10">
-    <label class="fld">季節</label>
-    <select id="mh-season"><option value="">なし(川柳など)</option><option>春</option><option>夏</option><option>秋</option><option>冬</option><option>新年</option></select>
+    <label class="fld">季節 <span style="font-weight:600">(参考: 立春〜立冬の区切り)</span></label>
+    <select id="mh-season">
+      <option value="">なし(川柳など)</option>
+      <option value="春">春 (2/4〜5/5)</option>
+      <option value="夏">夏 (5/6〜8/7)</option>
+      <option value="秋">秋 (8/8〜11/6)</option>
+      <option value="冬">冬 (11/7〜2/3)</option>
+      <option value="新年">新年 (1/1〜1/7ごろ)</option>
+    </select>
     <label class="fld">メモ(任意)</label>
     <textarea id="mh-memo" maxlength="300" placeholder="詠んだ場面・推敲メモ など"></textarea>
     <div class="modal-actions">
@@ -389,9 +396,15 @@ function dbByIndex(store,idx,val){ return new Promise((res,rej)=>{ const r=tx(st
 
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove('show'),2200); }
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('open'); }));
+function openModal(id){ document.getElementById(id).classList.add('open'); adOnModalChange(); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); adOnModalChange(); }
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click', e=>{ if(e.target===m) closeModal(m.id); }));
+// 入力モーダル中は広告を隠して操作のじゃまをしない(閉じたら戻す=収益は維持)
+function adOnModalChange(){
+  const anyOpen = !!document.querySelector('.modal.open');
+  if(anyOpen){ if(window.shumichoHideAd) window.shumichoHideAd(); }
+  else { if(window.shumichoShowAd) window.shumichoShowAd(); }
+}
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function fmtDate(s){ if(!s) return ''; const p=s.split('-'); return p.length===3 ? `${p[0]}年${+p[1]}月${+p[2]}日` : s; }
 
@@ -1076,11 +1089,29 @@ function initAdMob(){
   if(!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) return;
   const AdMob = window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
   if(!AdMob) return;
+  let adShown = false;   // バナーが画面に出ているか
+  let lastAdH = 0;       // 直近のバナー実高さ(resume時の復元用)
   // バナーの実高さをCSS変数 --ad-h に反映し、タブバー・FABを持ち上げる
   AdMob.addListener('bannerAdSizeChanged', info=>{
     const h = (info && info.height) ? info.height : 0;
-    document.documentElement.style.setProperty('--ad-h', h+'px');
+    if(h>0) lastAdH = h;
+    if(adShown) document.documentElement.style.setProperty('--ad-h', h+'px');
   });
+  // モーダル中の一時非表示/復帰(closeで再表示=リフレッシュ収益は維持)
+  window.shumichoHideAd = ()=>{
+    if(!adShown) return;
+    adShown = false;
+    document.documentElement.style.setProperty('--ad-h', '0px');
+    AdMob.hideBanner().catch(()=>{});
+  };
+  window.shumichoShowAd = ()=>{
+    if(adShown) return;
+    adShown = true;
+    AdMob.resumeBanner().then(()=>{
+      // bannerAdSizeChanged が再発火しない端末でも余白を復元する
+      if(lastAdH>0) document.documentElement.style.setProperty('--ad-h', lastAdH+'px');
+    }).catch(()=>{});
+  };
   AdMob.initialize({ initializeForTesting: true })
     .then(()=> AdMob.showBanner({
       adId: 'ca-app-pub-3940256099942544/6300978111', // ★テストID。本番化は docs/RELEASE.md 参照
@@ -1089,6 +1120,7 @@ function initAdMob(){
       margin: 0,
       isTesting: true
     }))
+    .then(()=>{ adShown = true; })
     .catch(e=>console.error('AdMob banner error:', e));
 }
 
