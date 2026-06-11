@@ -26,8 +26,8 @@ body{font-family:system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-ser
 
 /* ===== 上部バー ===== */
 #topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:calc(8px + env(safe-area-inset-top)) 14px 8px;background:var(--bg);border-bottom:1px solid var(--border)}
-#topbar .app-title{font-weight:900;font-size:1.1rem;letter-spacing:.12em}
-#topbar .app-title small{font-weight:700;font-size:.68rem;color:var(--text2);letter-spacing:.05em;margin-left:8px}
+#topbar .app-title{font-weight:900;font-size:1.1rem;letter-spacing:.12em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#topbar .app-title small{font-weight:700;font-size:.66rem;color:var(--text2);letter-spacing:.02em;margin-left:6px}
 #theme-btn{border:none;background:var(--card2);border-radius:50%;width:36px;height:36px;font-size:1.05rem;cursor:pointer}
 
 /* ===== レイアウト ===== */
@@ -138,6 +138,47 @@ img.ph{object-fit:cover;display:block}
 .emoji-pick button{border:1.5px solid transparent;background:var(--card);border-radius:8px;font-size:1.3rem;padding:5px 0;cursor:pointer}
 .emoji-pick button.on{border-color:var(--accent);background:var(--accent-light)}
 
+/* ===== デコ帳 ===== */
+#deco-stage-wrap{position:relative;background:var(--card2);border-radius:12px;padding:8px}
+#deco-stage{position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;border-radius:8px;touch-action:none;background:#fff}
+.deco-layer{position:absolute;transform-origin:center center;user-select:none}
+.deco-layer img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.deco-layer.sel{outline:2.5px dashed var(--accent);outline-offset:2px}
+.deco-layer .txt{white-space:pre-wrap;font-weight:900;line-height:1.25;pointer-events:none;word-break:break-all}
+#deco-ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+#deco-ink.inkmode{pointer-events:auto}
+.deco-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.tool-btn{border:1.5px solid var(--border);background:var(--card);border-radius:10px;padding:8px 11px;font-family:inherit;font-size:.78rem;font-weight:800;color:var(--text);cursor:pointer}
+.tool-btn.on{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.tool-btn.mini{padding:6px 8px;font-size:.72rem}
+.deco-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-top:8px}
+.slider-row{display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;color:var(--text2);margin-top:6px}
+.slider-row input[type=range]{flex:1;accent-color:var(--accent)}
+.deco-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.deco-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:var(--shadow)}
+.deco-card img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--card2)}
+.deco-card .nm{font-size:.76rem;font-weight:800;padding:6px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.color-dots{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.color-dots button{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);cursor:pointer;padding:0}
+.color-dots input[type=color]{width:34px;height:34px;border:none;background:none;padding:0;cursor:pointer}
+
+/* ===== カレンダー ===== */
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cal-head .ttl{font-weight:900;font-size:1.05rem}
+.cal-head button{border:none;background:var(--card2);border-radius:8px;width:38px;height:38px;font-size:1rem;cursor:pointer;color:var(--text)}
+#cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dow{text-align:center;font-size:.68rem;font-weight:900;color:var(--text2);padding:2px 0}
+.cal-cell{min-height:54px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:3px 4px;font-size:.76rem;font-weight:800;cursor:pointer}
+.cal-cell.today{border-color:var(--accent);background:var(--accent-light)}
+.cal-cell.selected{border-color:var(--accent);border-width:2.5px}
+.cal-cell.blank{background:transparent;border-color:transparent;cursor:default}
+.cal-cell .sun{color:#d04040}.cal-cell .sat{color:#4070d0}.cal-cell .hol{color:#d04040}
+.cal-cell .holname{font-size:.5rem;color:#d04040;font-weight:800;display:block;line-height:1.1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cal-dots{display:flex;gap:2px;flex-wrap:wrap;margin-top:1px}
+.cal-dots i{width:7px;height:7px;border-radius:50%;display:block}
+.cal-item{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 11px;margin-bottom:6px;cursor:pointer;font-size:.86rem;font-weight:700}
+.cal-item .tag{font-size:.66rem;font-weight:900;border-radius:6px;padding:2px 7px;color:#fff;flex-shrink:0}
+
 /* ===== トースト ===== */
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tab-h) + var(--ad-h) + 24px);z-index:200;background:var(--text);color:var(--bg);font-size:.84rem;font-weight:800;padding:10px 20px;border-radius:24px;opacity:0;pointer-events:none;transition:opacity .25s;max-width:86%;text-align:center}
 #toast.show{opacity:.95}
@@ -147,7 +188,10 @@ img.ph{object-fit:cover;display:block}
 
 <header id="topbar">
   <span class="app-title">趣味帳<small id="topbar-sub">あなたの「好き」をしまう帳面</small></span>
-  <button id="theme-btn" onclick="toggleTheme()" aria-label="テーマ切替">🌓</button>
+  <span class="row" style="gap:6px">
+    <button id="cal-btn" style="border:none;background:var(--card2);border-radius:50%;width:36px;height:36px;font-size:1.02rem;cursor:pointer" onclick="showCal()" aria-label="カレンダー">📅</button>
+    <button id="theme-btn" onclick="toggleTheme()" aria-label="テーマ切替">🌓</button>
+  </span>
 </header>
 
 <main>
@@ -155,7 +199,71 @@ img.ph{object-fit:cover;display:block}
   <section id="page-zukan" class="page active">
     <div id="zukan-list-view" class="subview active">
       <div class="hero"><h2>📚 マイ図鑑</h2><p>推しグッズ・カード・昆虫・なんでも。写真とメモで自分だけの図鑑を作ろう</p></div>
+      <div class="card book-card" onclick="showDecoList()">
+        <div class="book-emoji">🎀</div>
+        <div class="book-info">
+          <div class="name">デコ帳</div>
+          <div class="meta">推し活スクラップ・年表・プロフィール…自由にデコるページ</div>
+        </div><div style="color:var(--text2)">›</div>
+      </div>
       <div id="zukan-books"></div>
+    </div>
+    <div id="deco-list-view" class="subview">
+      <button class="back-link" onclick="showZukanList()">← 図鑑一覧へ</button>
+      <div class="hero"><h2>🎀 デコ帳</h2><p>写真・ステッカー風切り抜き・推しカラー・手描きペンで自由にデコるスクラップページ</p></div>
+      <div id="deco-pages" class="deco-grid"></div>
+    </div>
+    <div id="deco-edit-view" class="subview">
+      <button class="back-link" onclick="decoBack()">← デコ帳一覧へ(自動保存)</button>
+      <input type="text" id="deco-title" maxlength="20" placeholder="ページ名(例: 推し活年表2026)" style="margin-bottom:8px" oninput="decoTouchSave()">
+      <div id="deco-stage-wrap">
+        <div id="deco-stage"><canvas id="deco-ink"></canvas></div>
+      </div>
+      <div class="deco-tools">
+        <button class="tool-btn" onclick="document.getElementById('deco-img-in').click()">🖼️ 写真</button>
+        <button class="tool-btn" onclick="decoAddText()">🅰️ 文字</button>
+        <button class="tool-btn" id="deco-pen-btn" onclick="decoTogglePen()">🖊️ ペン</button>
+        <button class="tool-btn" onclick="decoTogglePanel('deco-bg-panel')">🎨 背景</button>
+        <button class="tool-btn" onclick="decoExport()">📤 画像に</button>
+      </div>
+      <input type="file" id="deco-img-in" accept="image/*" style="display:none" onchange="decoPickImg(this)">
+      <div class="deco-panel" id="deco-bg-panel" style="display:none">
+        <div class="slider-row" style="margin-top:0">背景色(推しカラー)</div>
+        <div class="color-dots" id="deco-bg-dots" style="margin-top:6px"></div>
+      </div>
+      <div class="deco-panel" id="deco-pen-panel" style="display:none">
+        <div class="color-dots" id="deco-pen-dots"></div>
+        <div class="slider-row">太さ <input type="range" id="deco-pen-w" min="2" max="30" value="6"></div>
+        <div class="deco-tools" style="margin-top:6px">
+          <button class="tool-btn mini" id="deco-eraser-btn" onclick="decoToggleEraser()">🧽 消しゴム</button>
+          <button class="tool-btn mini" onclick="decoInkClear()">🗑️ 手描き全消し</button>
+        </div>
+      </div>
+      <div class="deco-panel" id="deco-sel-panel" style="display:none">
+        <div class="row" id="deco-text-row" style="display:none">
+          <input type="text" id="deco-text-in" maxlength="100" placeholder="文字を入力" oninput="decoTextChange()">
+          <input type="color" id="deco-text-color" onchange="decoTextChange()" style="width:38px;height:38px;border:none;background:none;padding:0">
+          <button class="tool-btn mini" id="deco-font-btn" onclick="decoToggleFont()">明朝</button>
+        </div>
+        <div class="slider-row">大きさ <input type="range" id="deco-sl-size" min="4" max="160" value="50" oninput="decoSlide()"></div>
+        <div class="slider-row">回転 <input type="range" id="deco-sl-rot" min="-180" max="180" value="0" oninput="decoSlide()"></div>
+        <div class="slider-row">透明度 <input type="range" id="deco-sl-op" min="10" max="100" value="100" oninput="decoSlide()"></div>
+        <div class="deco-tools" style="margin-top:6px" id="deco-mask-row">
+          <button class="tool-btn mini" onclick="decoMask(null)">⬜ 四角</button>
+          <button class="tool-btn mini" onclick="decoMask('round')">▢ 角丸</button>
+          <button class="tool-btn mini" onclick="decoMask('circle')">⚪ 丸</button>
+          <button class="tool-btn mini" onclick="decoMask('star')">⭐ 星</button>
+          <button class="tool-btn mini" onclick="decoWhiteClear()">✨ 白背景を透過</button>
+        </div>
+        <div class="deco-tools" style="margin-top:6px">
+          <button class="tool-btn mini" onclick="decoZ(1)">⬆️ 前面へ</button>
+          <button class="tool-btn mini" onclick="decoZ(-1)">⬇️ 背面へ</button>
+          <button class="tool-btn mini" onclick="decoDup()">📋 複製</button>
+          <button class="tool-btn mini" onclick="decoDelLayer()">🗑️ 削除</button>
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:.85rem;font-weight:800"><input type="checkbox" id="deco-oncal" checked onchange="decoTouchSave()"> 📅 カレンダーに載せる(作成日)</label>
+      <div class="row" style="margin-top:10px"><button class="btn sub wide" onclick="decoDelete()">このページを削除</button></div>
     </div>
     <div id="zukan-detail-view" class="subview">
       <button class="back-link" onclick="showZukanList()">← 図鑑一覧へ</button>
@@ -196,7 +304,8 @@ img.ph{object-fit:cover;display:block}
         <input type="text" id="bz-new-name" maxlength="12" placeholder="名前を入れて追加">
         <button class="btn small" onclick="bzAddEntry()">追加</button>
       </div>
-      <div style="margin-top:16px" class="row">
+      <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:.85rem;font-weight:800"><input type="checkbox" id="bz-oncal" checked onchange="bzSaveMeta()"> 📅 カレンダーに載せる(作成日)</label>
+      <div style="margin-top:12px" class="row">
         <button class="btn wide" onclick="bzPreview()">🖼️ 番付表を見る・画像にする</button>
       </div>
       <div style="margin-top:8px" class="row">
@@ -223,8 +332,25 @@ img.ph{object-fit:cover;display:block}
     <div id="hk-list" class="haiku-list"></div>
   </section>
 
+  <!-- ============ カレンダー ============ -->
+  <section id="page-cal" class="page">
+    <div class="cal-head">
+      <button onclick="calMove(-1)">◀</button>
+      <span class="ttl" id="cal-title"></span>
+      <button onclick="calMove(1)">▶</button>
+    </div>
+    <div id="cal-grid"></div>
+    <div class="sec-title" id="cal-day-title"></div>
+    <div id="cal-day-list"></div>
+  </section>
+
   <!-- ============ 設定 ============ -->
   <section id="page-settings" class="page">
+    <div class="card">
+      <div class="sec-title" style="margin-top:0">タブの並び順</div>
+      <div id="tab-order-list"></div>
+      <div class="muted">▲▼でお好みの順番に(設定タブは右端固定)</div>
+    </div>
     <div class="card">
       <div class="set-row"><span>テーマ</span>
         <select id="set-theme" style="width:auto" onchange="setTheme(this.value)">
@@ -296,6 +422,7 @@ img.ph{object-fit:cover;display:block}
     <input type="text" id="mi-place" maxlength="30" placeholder="例: 大阪遠征 物販列">
     <label class="fld">メモ(任意)</label>
     <textarea id="mi-memo" maxlength="500" placeholder="思い出・入手のいきさつ など"></textarea>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:.85rem;font-weight:800"><input type="checkbox" id="mi-oncal" checked> 📅 カレンダーに載せる</label>
     <div class="modal-actions">
       <button class="btn sub" onclick="closeModal('modal-item')">やめる</button>
       <button class="btn danger" id="mi-del" style="display:none" onclick="deleteItem()">削除</button>
@@ -337,8 +464,18 @@ img.ph{object-fit:cover;display:block}
       <option value="冬">冬 (11/7〜2/3)</option>
       <option value="新年">新年 (1/1〜1/7ごろ)</option>
     </select>
+    <label class="fld">写真(任意・散歩のお供に。清書の背景になります)</label>
+    <img id="mh-photo-prev" alt="" style="width:100%;max-height:200px;object-fit:contain;border-radius:10px;background:var(--card2);display:none;margin-bottom:6px">
+    <div class="row">
+      <button class="btn sub small" onclick="document.getElementById('mh-cam').click()">📷 撮影</button>
+      <button class="btn sub small" onclick="document.getElementById('mh-pick').click()">🖼️ 選ぶ</button>
+      <button class="btn sub small" id="mh-photo-del" style="display:none" onclick="mhDelPhoto()">✕ 外す</button>
+    </div>
+    <input type="file" id="mh-cam" accept="image/*" capture="environment" style="display:none" onchange="mhPhoto(this)">
+    <input type="file" id="mh-pick" accept="image/*" style="display:none" onchange="mhPhoto(this)">
     <label class="fld">メモ(任意)</label>
     <textarea id="mh-memo" maxlength="300" placeholder="詠んだ場面・推敲メモ など"></textarea>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:.85rem;font-weight:800"><input type="checkbox" id="mh-oncal" checked> 📅 カレンダーに載せる</label>
     <div class="modal-actions">
       <button class="btn sub" onclick="closeModal('modal-haiku')">やめる</button>
       <button class="btn danger" id="mh-del" style="display:none" onclick="deleteHaiku()">削除</button>
@@ -374,14 +511,17 @@ img.ph{object-fit:cover;display:block}
 let db = null;
 function openDB(){
   return new Promise((res, rej)=>{
-    const rq = indexedDB.open('shumicho', 1);
+    const rq = indexedDB.open('shumicho', 2);
     rq.onupgradeneeded = e=>{
       const d = e.target.result;
-      d.createObjectStore('books', {keyPath:'id', autoIncrement:true});
-      const it = d.createObjectStore('items', {keyPath:'id', autoIncrement:true});
-      it.createIndex('bookId', 'bookId');
-      d.createObjectStore('banzuke', {keyPath:'id', autoIncrement:true});
-      d.createObjectStore('haiku', {keyPath:'id', autoIncrement:true});
+      if(!d.objectStoreNames.contains('books')) d.createObjectStore('books', {keyPath:'id', autoIncrement:true});
+      if(!d.objectStoreNames.contains('items')){
+        const it = d.createObjectStore('items', {keyPath:'id', autoIncrement:true});
+        it.createIndex('bookId', 'bookId');
+      }
+      if(!d.objectStoreNames.contains('banzuke')) d.createObjectStore('banzuke', {keyPath:'id', autoIncrement:true});
+      if(!d.objectStoreNames.contains('haiku')) d.createObjectStore('haiku', {keyPath:'id', autoIncrement:true});
+      if(!d.objectStoreNames.contains('deco')) d.createObjectStore('deco', {keyPath:'id', autoIncrement:true});
     };
     rq.onsuccess = ()=>{ db = rq.result; res(); };
     rq.onerror = ()=>rej(rq.error);
@@ -425,7 +565,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme
 
 /* ----- タブ ----- */
 let currentTab = 'zukan';
-const TAB_SUBS = {zukan:'あなたの「好き」をしまう帳面', banzuke:'なんでもランキング番付', haiku:'一日一句のすすめ', settings:'設定'};
+const TAB_SUBS = {zukan:'あなたの「好き」をしまう帳面', banzuke:'なんでもランキング番付', haiku:'一日一句のすすめ', settings:'設定', cal:'趣味ごよみ — 記録カレンダー'};
 function switchTab(tab){
   currentTab = tab;
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+tab));
@@ -433,20 +573,61 @@ function switchTab(tab){
   document.getElementById('topbar-sub').textContent = TAB_SUBS[tab]||'';
   updateFab();
 }
+function showCal(){
+  switchTab('cal');
+  renderCal();
+}
+function activeSubId(pageId){
+  const v = document.querySelector('#'+pageId+' .subview.active');
+  return v ? v.id : '';
+}
 function updateFab(){
   const fab = document.getElementById('fab');
   let show = false;
-  if(currentTab==='zukan') show = true;
-  if(currentTab==='banzuke') show = document.getElementById('bz-list-view').classList.contains('active');
+  if(currentTab==='zukan') show = activeSubId('page-zukan')!=='deco-edit-view';
+  if(currentTab==='banzuke') show = activeSubId('page-banzuke')==='bz-list-view';
   if(currentTab==='haiku') show = true;
   fab.classList.toggle('show', show);
 }
 function fabAction(){
   if(currentTab==='zukan'){
-    if(document.getElementById('zukan-detail-view').classList.contains('active')) openItemForm(null);
+    const sub = activeSubId('page-zukan');
+    if(sub==='zukan-detail-view') openItemForm(null);
+    else if(sub==='deco-list-view') decoCreate();
     else openBookForm(null);
   } else if(currentTab==='banzuke'){ bzCreate(); }
   else if(currentTab==='haiku'){ openHaikuForm(null,false); }
+}
+
+/* ----- タブ並び替え ----- */
+function getTabOrder(){
+  try{
+    const o = JSON.parse(localStorage.getItem('sc_tab_order'));
+    if(Array.isArray(o) && o.length===3 && ['zukan','banzuke','haiku'].every(t=>o.includes(t))) return o;
+  }catch(e){}
+  return ['zukan','banzuke','haiku'];
+}
+function applyTabOrder(){
+  const bar = document.getElementById('tabbar');
+  const set = bar.querySelector('button[data-tab="settings"]');
+  getTabOrder().forEach(t=>bar.insertBefore(bar.querySelector(`button[data-tab="${t}"]`), set));
+}
+function renderTabOrderList(){
+  const names = {zukan:'📚 図鑑', banzuke:'🏆 番付', haiku:'🖌️ 俳句'};
+  const order = getTabOrder();
+  document.getElementById('tab-order-list').innerHTML = order.map((t,i)=>`
+    <div class="bz-entry"><span class="nm">${names[t]}</span>
+      <span class="ctl">
+        <button onclick="tabOrderMove(${i},-1)" ${i===0?'disabled':''}>▲</button>
+        <button onclick="tabOrderMove(${i},1)" ${i===order.length-1?'disabled':''}>▼</button>
+      </span></div>`).join('');
+}
+function tabOrderMove(i, dir){
+  const o = getTabOrder(); const j = i+dir;
+  if(j<0 || j>=o.length) return;
+  [o[i],o[j]] = [o[j],o[i]];
+  localStorage.setItem('sc_tab_order', JSON.stringify(o));
+  applyTabOrder(); renderTabOrderList();
 }
 function showSub(pageId, subId){
   document.querySelectorAll('#'+pageId+' .subview').forEach(v=>v.classList.toggle('active', v.id===subId));
@@ -604,12 +785,14 @@ async function openItemForm(id){
     document.getElementById('mi-place').value = it.place||'';
     document.getElementById('mi-memo').value = it.memo||'';
     miGot(it.got?1:0); miRating = it.rating||0;
+    document.getElementById('mi-oncal').checked = it.onCal!==false;
     if(it.photo){ const u=URL.createObjectURL(it.photo); prev.src=u; prev.style.display='block'; }
   } else {
     document.getElementById('mi-name').value='';
     document.getElementById('mi-date').value = todayStr();
     document.getElementById('mi-place').value='';
     document.getElementById('mi-memo').value='';
+    document.getElementById('mi-oncal').checked = true;
     miGot(1); miRating = 0;
   }
   renderStars();
@@ -645,6 +828,7 @@ async function saveItem(){
   obj.memo = document.getElementById('mi-memo').value.trim();
   obj.got = miGotVal===1;
   obj.rating = miRating;
+  obj.onCal = document.getElementById('mi-oncal').checked;
   if(miPhotoBlob!==undefined) obj.photo = miPhotoBlob;
   await dbPut('items', obj);
   closeModal('modal-item');
@@ -665,6 +849,414 @@ async function deleteItem(){
   closeModal('modal-item');
   toast('削除しました');
   await renderItems();
+}
+
+/* ================= デコ帳 ================= */
+const DECO_COLORS = ['#ffffff','#ffe4ec','#f8b6cd','#e84393','#c0392b','#ff7f50','#f6e58d','#ffeaa7','#b8e994','#3a7d44','#aee6ff','#74b9ff','#a29bfe','#6c5ce7','#2d3436','#000000'];
+let currentDecoId = null, decoObj = null, decoSel = -1, decoPen = false, decoEraser = false, decoSaveTimer = null;
+let decoThumbUrls = [];
+
+async function showDecoList(){
+  showSub('page-zukan','deco-list-view');
+  const list = await dbAll('deco');
+  list.sort((a,b)=>b.id-a.id);
+  decoThumbUrls.forEach(u=>URL.revokeObjectURL(u)); decoThumbUrls=[];
+  const wrap = document.getElementById('deco-pages');
+  if(!list.length){
+    wrap.innerHTML = '<div class="empty" style="grid-column:1/-1"><span class="big">🎀</span>右下の＋で最初のページを作りましょう<br><span style="font-size:.76rem">推し活年表・プロフィール・歌詞メモ・スクラップ…何でも自由</span></div>';
+    return;
+  }
+  wrap.innerHTML = list.map(p=>{
+    let src='';
+    if(p.thumb){ const u=URL.createObjectURL(p.thumb); decoThumbUrls.push(u); src=u; }
+    return `<div class="deco-card" onclick="decoOpen(${p.id})">
+      ${src?`<img src="${src}" alt="">`:`<div style="width:100%;aspect-ratio:3/4;background:${esc(p.bg||'#fff')}"></div>`}
+      <div class="nm">${esc(p.title||'(無題ページ)')}</div></div>`;
+  }).join('');
+}
+async function decoCreate(){
+  const id = await dbPut('deco', {title:'', bg:'#ffffff', layers:[], ink:null, thumb:null, onCal:true, date:todayStr(), created:Date.now()});
+  await decoOpen(id);
+}
+async function decoOpen(id){
+  currentDecoId = id;
+  decoObj = await dbGet('deco', id);
+  if(!decoObj) return;
+  decoSel = -1; decoPen = false; decoEraser = false;
+  document.getElementById('deco-title').value = decoObj.title||'';
+  document.getElementById('deco-oncal').checked = decoObj.onCal!==false;
+  document.getElementById('deco-pen-btn').classList.remove('on');
+  ['deco-bg-panel','deco-pen-panel','deco-sel-panel'].forEach(i=>document.getElementById(i).style.display='none');
+  showSub('page-zukan','deco-edit-view');
+  // inkキャンバス初期化
+  const ink = document.getElementById('deco-ink');
+  ink.width = 720; ink.height = 960;
+  ink.classList.remove('inkmode');
+  const ictx = ink.getContext('2d');
+  ictx.clearRect(0,0,720,960);
+  if(decoObj.ink){ const im = new Image(); im.onload = ()=>ictx.drawImage(im,0,0,720,960); im.src = decoObj.ink; }
+  renderDecoStage();
+  renderColorDots('deco-bg-dots', c=>{ decoObj.bg=c; renderDecoStage(); decoTouchSave(); }, true);
+  renderColorDots('deco-pen-dots', c=>{ decoPenColor=c; decoEraser=false; document.getElementById('deco-eraser-btn').classList.remove('on'); }, false);
+}
+function renderColorDots(elId, onPick, withPicker){
+  const el = document.getElementById(elId);
+  el.innerHTML = DECO_COLORS.map(c=>`<button style="background:${c}" data-c="${c}"></button>`).join('') +
+    (withPicker?'<input type="color" title="自由に選ぶ">':'<input type="color" title="自由に選ぶ">');
+  el.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>onPick(b.dataset.c)));
+  el.querySelector('input[type=color]').addEventListener('input', e=>onPick(e.target.value));
+}
+function decoTogglePanel(id){
+  const el = document.getElementById(id);
+  el.style.display = el.style.display==='none' ? '' : 'none';
+}
+function decoTouchSave(){
+  if(!decoObj) return;
+  clearTimeout(decoSaveTimer);
+  decoSaveTimer = setTimeout(async ()=>{
+    decoObj.title = document.getElementById('deco-title').value.trim();
+    decoObj.onCal = document.getElementById('deco-oncal').checked;
+    decoObj.ink = document.getElementById('deco-ink').toDataURL();
+    const save = {...decoObj};
+    save.layers = decoObj.layers.map(L=>{ const c={...L}; delete c._url; return c; });
+    await dbPut('deco', save);
+  }, 700);
+}
+
+/* --- ステージ描画 --- */
+function decoStageRect(){ return document.getElementById('deco-stage').getBoundingClientRect(); }
+function renderDecoStage(){
+  const st = document.getElementById('deco-stage');
+  st.style.background = decoObj.bg||'#ffffff';
+  st.querySelectorAll('.deco-layer').forEach(n=>n.remove());
+  const stW = decoStageRect().width;
+  decoObj.layers.forEach((L,i)=>{
+    const d = document.createElement('div');
+    d.className = 'deco-layer'+(i===decoSel?' sel':'');
+    d.dataset.idx = i;
+    d.style.left = L.x+'%'; d.style.top = L.y+'%';
+    d.style.zIndex = i+1;
+    d.style.opacity = L.opacity==null?1:L.opacity;
+    d.style.transform = `translate(-50%,-50%) rotate(${L.rot||0}deg)`;
+    if(L.type==='img'){
+      d.style.width = L.w+'%';
+      d.style.height = (L.w*L.ar*3/4)+'%';
+      d.style.borderRadius = L.mask==='circle' ? '50%' : (L.mask==='round' ? '14%' : '0');
+      d.style.overflow = (L.mask==='circle'||L.mask==='round') ? 'hidden' : 'visible';
+      d.style.clipPath = L.mask==='star' ? 'polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)' : 'none';
+      if(!L._url) L._url = URL.createObjectURL(L.blob);
+      const img = document.createElement('img');
+      img.src = L._url; img.draggable = false;
+      d.appendChild(img);
+    } else {
+      const t = document.createElement('div');
+      t.className = 'txt';
+      t.textContent = L.text;
+      t.style.color = L.color;
+      t.style.fontSize = (L.size/100*stW)+'px';
+      if(L.font==='serif') t.style.fontFamily = '"Hiragino Mincho ProN","Yu Mincho",serif';
+      d.appendChild(t);
+    }
+    st.appendChild(d);
+  });
+}
+function decoSelect(i){
+  decoSel = i;
+  document.querySelectorAll('#deco-stage .deco-layer').forEach(n=>n.classList.toggle('sel', +n.dataset.idx===i));
+  const panel = document.getElementById('deco-sel-panel');
+  if(i<0){ panel.style.display='none'; return; }
+  panel.style.display='';
+  const L = decoObj.layers[i];
+  document.getElementById('deco-text-row').style.display = L.type==='text' ? '' : 'none';
+  document.getElementById('deco-mask-row').style.display = L.type==='img' ? '' : 'none';
+  document.getElementById('deco-sl-size').value = L.type==='img' ? L.w : L.size*4;
+  document.getElementById('deco-sl-rot').value = L.rot||0;
+  document.getElementById('deco-sl-op').value = (L.opacity==null?1:L.opacity)*100;
+  if(L.type==='text'){
+    document.getElementById('deco-text-in').value = L.text;
+    document.getElementById('deco-text-color').value = L.color;
+    document.getElementById('deco-font-btn').classList.toggle('on', L.font==='serif');
+  }
+}
+function decoSlide(){
+  if(decoSel<0) return;
+  const L = decoObj.layers[decoSel];
+  const v = +document.getElementById('deco-sl-size').value;
+  if(L.type==='img') L.w = v; else L.size = v/4;
+  L.rot = +document.getElementById('deco-sl-rot').value;
+  L.opacity = +document.getElementById('deco-sl-op').value/100;
+  renderDecoStage(); decoTouchSave();
+}
+function decoTextChange(){
+  if(decoSel<0) return;
+  const L = decoObj.layers[decoSel];
+  if(L.type!=='text') return;
+  L.text = document.getElementById('deco-text-in').value || ' ';
+  L.color = document.getElementById('deco-text-color').value;
+  renderDecoStage(); decoTouchSave();
+}
+function decoToggleFont(){
+  if(decoSel<0) return;
+  const L = decoObj.layers[decoSel];
+  L.font = L.font==='serif' ? '' : 'serif';
+  document.getElementById('deco-font-btn').classList.toggle('on', L.font==='serif');
+  renderDecoStage(); decoTouchSave();
+}
+function decoAddText(){
+  decoObj.layers.push({type:'text', text:'タップして文字パネルで編集', color:'#e84393', size:6, font:'', x:50, y:50, rot:0, opacity:1});
+  renderDecoStage(); decoSelect(decoObj.layers.length-1); decoTouchSave();
+}
+function decoPickImg(input){
+  const f = input.files && input.files[0];
+  input.value='';
+  if(!f) return;
+  const img = new Image();
+  img.onload = ()=>{
+    const max = 1280;
+    let w=img.width, h=img.height;
+    if(Math.max(w,h)>max){ const r=max/Math.max(w,h); w=Math.round(w*r); h=Math.round(h*r); }
+    const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+    cv.getContext('2d').drawImage(img,0,0,w,h);
+    cv.toBlob(b=>{
+      decoObj.layers.push({type:'img', blob:b, ar:h/w, w:55, x:50, y:50, rot:0, opacity:1, mask:null});
+      renderDecoStage(); decoSelect(decoObj.layers.length-1); decoTouchSave();
+      URL.revokeObjectURL(img.src);
+    }, 'image/png');
+  };
+  img.src = URL.createObjectURL(f);
+}
+function decoMask(m){
+  if(decoSel<0) return;
+  const L = decoObj.layers[decoSel];
+  if(L.type!=='img') return;
+  L.mask = m; renderDecoStage(); decoSelect(decoSel); decoTouchSave();
+}
+function decoWhiteClear(){
+  if(decoSel<0) return;
+  const L = decoObj.layers[decoSel];
+  if(L.type!=='img') return;
+  const img = new Image();
+  img.onload = ()=>{
+    const cv = document.createElement('canvas'); cv.width=img.width; cv.height=img.height;
+    const c = cv.getContext('2d');
+    c.drawImage(img,0,0);
+    const id = c.getImageData(0,0,cv.width,cv.height), p = id.data;
+    for(let i=0;i<p.length;i+=4){
+      if(p[i]>232 && p[i+1]>232 && p[i+2]>232) p[i+3]=0;
+    }
+    c.putImageData(id,0,0);
+    cv.toBlob(b=>{
+      if(L._url) URL.revokeObjectURL(L._url);
+      L.blob=b; L._url=null;
+      renderDecoStage(); decoSelect(decoSel); decoTouchSave();
+      toast('白っぽい背景を透過しました');
+    },'image/png');
+    URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(L.blob);
+}
+function decoZ(dir){
+  if(decoSel<0) return;
+  const j = decoSel+dir;
+  if(j<0 || j>=decoObj.layers.length) return;
+  [decoObj.layers[decoSel], decoObj.layers[j]] = [decoObj.layers[j], decoObj.layers[decoSel]];
+  decoSel = j;
+  renderDecoStage(); decoTouchSave();
+}
+function decoDup(){
+  if(decoSel<0) return;
+  const L = decoObj.layers[decoSel];
+  const c = {...L}; delete c._url;
+  c.x = Math.min(95, L.x+5); c.y = Math.min(95, L.y+5);
+  decoObj.layers.push(c);
+  renderDecoStage(); decoSelect(decoObj.layers.length-1); decoTouchSave();
+}
+function decoDelLayer(){
+  if(decoSel<0) return;
+  const L = decoObj.layers[decoSel];
+  if(L._url) URL.revokeObjectURL(L._url);
+  decoObj.layers.splice(decoSel,1);
+  decoSelect(-1); renderDecoStage(); decoTouchSave();
+}
+
+/* --- ペン --- */
+let decoPenColor = '#e84393';
+function decoTogglePen(){
+  decoPen = !decoPen;
+  document.getElementById('deco-pen-btn').classList.toggle('on', decoPen);
+  document.getElementById('deco-ink').classList.toggle('inkmode', decoPen);
+  document.getElementById('deco-pen-panel').style.display = decoPen ? '' : 'none';
+  if(decoPen) decoSelect(-1);
+}
+function decoToggleEraser(){
+  decoEraser = !decoEraser;
+  document.getElementById('deco-eraser-btn').classList.toggle('on', decoEraser);
+}
+function decoInkClear(){
+  const ink = document.getElementById('deco-ink');
+  ink.getContext('2d').clearRect(0,0,ink.width,ink.height);
+  decoTouchSave();
+}
+
+/* --- ポインタ操作(ドラッグ移動+2本指ピンチ拡縮回転) --- */
+const decoPtrs = new Map();
+let decoDrag = null, decoPinch = null, decoInkDraw = false;
+function decoInitPointer(){
+  const st = document.getElementById('deco-stage');
+  const ink = document.getElementById('deco-ink');
+  st.addEventListener('pointerdown', e=>{
+    if(decoPen) return;
+    e.preventDefault();
+    st.setPointerCapture(e.pointerId);
+    decoPtrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(decoPtrs.size===1){
+      const t = e.target.closest('.deco-layer');
+      decoSelect(t ? +t.dataset.idx : -1);
+      if(decoSel>=0){
+        const L = decoObj.layers[decoSel];
+        decoDrag = {px:e.clientX, py:e.clientY, x:L.x, y:L.y};
+      }
+    } else if(decoPtrs.size===2 && decoSel>=0){
+      const [a,b] = [...decoPtrs.values()];
+      const L = decoObj.layers[decoSel];
+      decoPinch = {dist:Math.hypot(a.x-b.x,a.y-b.y), ang:Math.atan2(b.y-a.y,b.x-a.x), w:(L.type==='img'?L.w:L.size), rot:L.rot||0};
+      decoDrag = null;
+    }
+  });
+  st.addEventListener('pointermove', e=>{
+    if(decoPen || !decoPtrs.has(e.pointerId)) return;
+    decoPtrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(decoSel<0) return;
+    const L = decoObj.layers[decoSel];
+    const r = decoStageRect();
+    if(decoPtrs.size===1 && decoDrag){
+      L.x = Math.max(0, Math.min(100, decoDrag.x + (e.clientX-decoDrag.px)/r.width*100));
+      L.y = Math.max(0, Math.min(100, decoDrag.y + (e.clientY-decoDrag.py)/r.height*100));
+      const d = document.querySelector(`#deco-stage .deco-layer[data-idx="${decoSel}"]`);
+      if(d){ d.style.left=L.x+'%'; d.style.top=L.y+'%'; }
+    } else if(decoPtrs.size===2 && decoPinch){
+      const [a,b] = [...decoPtrs.values()];
+      const dist = Math.hypot(a.x-b.x, a.y-b.y);
+      const ang = Math.atan2(b.y-a.y, b.x-a.x);
+      const scale = dist/decoPinch.dist;
+      const nv = Math.max(3, Math.min(200, decoPinch.w*scale));
+      if(L.type==='img') L.w = nv; else L.size = Math.max(2, Math.min(40, nv));
+      L.rot = Math.round(decoPinch.rot + (ang-decoPinch.ang)*180/Math.PI);
+      renderDecoStage();
+      document.querySelectorAll('#deco-stage .deco-layer').forEach(n=>n.classList.toggle('sel', +n.dataset.idx===decoSel));
+    }
+  });
+  const up = e=>{
+    decoPtrs.delete(e.pointerId);
+    if(decoPtrs.size<2) decoPinch=null;
+    if(decoPtrs.size<1){ decoDrag=null; if(decoObj) { decoSelect(decoSel); decoTouchSave(); } }
+  };
+  st.addEventListener('pointerup', up);
+  st.addEventListener('pointercancel', up);
+  // ペン描画
+  ink.addEventListener('pointerdown', e=>{
+    if(!decoPen) return;
+    e.preventDefault();
+    ink.setPointerCapture(e.pointerId);
+    decoInkDraw = true;
+    const c = ink.getContext('2d');
+    const r = ink.getBoundingClientRect();
+    c.beginPath();
+    c.moveTo((e.clientX-r.left)*ink.width/r.width, (e.clientY-r.top)*ink.height/r.height);
+  });
+  ink.addEventListener('pointermove', e=>{
+    if(!decoPen || !decoInkDraw) return;
+    const c = ink.getContext('2d');
+    const r = ink.getBoundingClientRect();
+    c.globalCompositeOperation = decoEraser ? 'destination-out' : 'source-over';
+    c.strokeStyle = decoPenColor;
+    c.lineWidth = +document.getElementById('deco-pen-w').value * (decoEraser?3:1);
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    c.lineTo((e.clientX-r.left)*ink.width/r.width, (e.clientY-r.top)*ink.height/r.height);
+    c.stroke();
+  });
+  const inkUp = ()=>{ if(decoInkDraw){ decoInkDraw=false; decoTouchSave(); } };
+  ink.addEventListener('pointerup', inkUp);
+  ink.addEventListener('pointercancel', inkUp);
+}
+
+/* --- 合成・書き出し --- */
+function blobToImg(blob){ return new Promise(res=>{ const im=new Image(); im.onload=()=>res(im); im.src=URL.createObjectURL(blob); }); }
+function urlToImg(url){ return new Promise(res=>{ const im=new Image(); im.onload=()=>res(im); im.src=url; }); }
+function starClip(ctx, w, h){
+  const pts = [[50,0],[61,35],[98,35],[68,57],[79,91],[50,70],[21,91],[32,57],[2,35],[39,35]];
+  ctx.beginPath();
+  pts.forEach((p,i)=>{ const x=(p[0]/100-0.5)*w, y=(p[1]/100-0.5)*h; i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+  ctx.closePath(); ctx.clip();
+}
+function roundClip(ctx, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(-w/2+r,-h/2);
+  ctx.arcTo(w/2,-h/2,w/2,h/2,r); ctx.arcTo(w/2,h/2,-w/2,h/2,r);
+  ctx.arcTo(-w/2,h/2,-w/2,-h/2,r); ctx.arcTo(-w/2,-h/2,w/2,-h/2,r);
+  ctx.closePath(); ctx.clip();
+}
+async function decoCompose(W){
+  const H = Math.round(W*4/3);
+  const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = decoObj.bg||'#ffffff'; ctx.fillRect(0,0,W,H);
+  for(const L of decoObj.layers){
+    ctx.save();
+    ctx.globalAlpha = L.opacity==null?1:L.opacity;
+    ctx.translate(L.x/100*W, L.y/100*H);
+    ctx.rotate((L.rot||0)*Math.PI/180);
+    if(L.type==='img'){
+      const img = await blobToImg(L.blob);
+      const w = L.w/100*W, h = w*L.ar;
+      if(L.mask==='circle'){ ctx.beginPath(); ctx.ellipse(0,0,w/2,h/2,0,0,7); ctx.clip(); }
+      else if(L.mask==='round'){ roundClip(ctx,w,h,Math.min(w,h)*0.14); }
+      else if(L.mask==='star'){ starClip(ctx,w,h); }
+      ctx.drawImage(img,-w/2,-h/2,w,h);
+      URL.revokeObjectURL(img.src);
+    } else {
+      ctx.fillStyle = L.color;
+      const fs = L.size/100*W;
+      ctx.font = '900 '+fs+'px '+(L.font==='serif'?'"Hiragino Mincho ProN","Yu Mincho",serif':'system-ui,sans-serif');
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      const lines = String(L.text).split('\n');
+      lines.forEach((ln,i)=>ctx.fillText(ln, 0, (i-(lines.length-1)/2)*fs*1.25));
+    }
+    ctx.restore();
+  }
+  const inkUrl = document.getElementById('deco-ink').toDataURL();
+  const inkImg = await urlToImg(inkUrl);
+  ctx.drawImage(inkImg, 0, 0, W, H);
+  return cv;
+}
+async function decoExport(){
+  if(!decoObj) return;
+  const cv = await decoCompose(1080);
+  shareCanvas(cv, 'deco');
+}
+async function decoBack(){
+  clearTimeout(decoSaveTimer);
+  if(decoObj){
+    decoObj.title = document.getElementById('deco-title').value.trim();
+    decoObj.onCal = document.getElementById('deco-oncal').checked;
+    decoObj.ink = document.getElementById('deco-ink').toDataURL();
+    const cv = await decoCompose(420);
+    const thumb = await new Promise(r=>cv.toBlob(r,'image/jpeg',0.8));
+    decoObj.thumb = thumb;
+    const save = {...decoObj};
+    save.layers = decoObj.layers.map(L=>{ const c={...L}; delete c._url; return c; });
+    await dbPut('deco', save);
+  }
+  decoObj=null; currentDecoId=null;
+  showDecoList();
+}
+async function decoDelete(){
+  if(!currentDecoId) return;
+  if(!confirm('このデコページを削除しますか?')) return;
+  await dbDel('deco', currentDecoId);
+  decoObj=null; currentDecoId=null;
+  toast('削除しました');
+  showDecoList();
 }
 
 /* ================= 番付 ================= */
@@ -694,7 +1286,7 @@ async function renderBzSheets(){
       </div><div style="color:var(--text2)">›</div></div>`).join('');
 }
 async function bzCreate(){
-  const id = await dbPut('banzuke', {title:'', entries:[], created: Date.now()});
+  const id = await dbPut('banzuke', {title:'', entries:[], onCal:true, date:todayStr(), created: Date.now()});
   bzOpen(id);
 }
 async function bzOpen(id){
@@ -702,6 +1294,7 @@ async function bzOpen(id){
   const s = await dbGet('banzuke', id);
   if(!s) return;
   document.getElementById('bz-title').value = s.title||'';
+  document.getElementById('bz-oncal').checked = s.onCal!==false;
   document.getElementById('bz-new-name').value = '';
   showSub('page-banzuke','bz-edit-view');
   renderBzEntries(s);
@@ -728,6 +1321,8 @@ function bzSaveMeta(){
   bzSaveTimer = setTimeout(async ()=>{
     const s = await dbGet('banzuke', currentBzId);
     s.title = document.getElementById('bz-title').value.trim();
+    s.onCal = document.getElementById('bz-oncal').checked;
+    if(!s.date) s.date = todayStr();
     await dbPut('banzuke', s);
   }, 400);
 }
@@ -864,8 +1459,8 @@ async function bzPreview(){
 }
 
 /* --- canvas共有/保存 --- */
-async function shareCanvas(canvasId, baseName){
-  const cv = document.getElementById(canvasId);
+async function shareCanvas(canvasOrId, baseName){
+  const cv = typeof canvasOrId==='string' ? document.getElementById(canvasOrId) : canvasOrId;
   cv.toBlob(async blob=>{
     const file = new File([blob], baseName+'_'+Date.now()+'.png', {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -920,8 +1515,32 @@ function kuCount(){
   const c = document.getElementById('mh-k3').value.length;
   document.getElementById('mh-cnt').textContent = `${a}・${b}・${c} 文字`;
 }
+let mhPhotoBlob = undefined; // undefined=変更なし null=削除 Blob=新規
+function mhSetPrev(blob){
+  const prev = document.getElementById('mh-photo-prev');
+  const del = document.getElementById('mh-photo-del');
+  if(blob){ const u=URL.createObjectURL(blob); prev.src=u; prev.style.display='block'; del.style.display=''; }
+  else { prev.src=''; prev.style.display='none'; del.style.display='none'; }
+}
+function mhPhoto(input){
+  const f = input.files && input.files[0];
+  input.value='';
+  if(!f) return;
+  const img = new Image();
+  img.onload = ()=>{
+    const max = 1600;
+    let w=img.width, h=img.height;
+    if(Math.max(w,h)>max){ const r=max/Math.max(w,h); w=Math.round(w*r); h=Math.round(h*r); }
+    const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+    cv.getContext('2d').drawImage(img,0,0,w,h);
+    cv.toBlob(b=>{ mhPhotoBlob=b; mhSetPrev(b); URL.revokeObjectURL(img.src); }, 'image/jpeg', 0.85);
+  };
+  img.src = URL.createObjectURL(f);
+}
+function mhDelPhoto(){ mhPhotoBlob=null; mhSetPrev(null); }
 function openHaikuForm(id, useKigo){
   editingHaikuId = id;
+  mhPhotoBlob = undefined;
   document.getElementById('mh-title').textContent = id ? '句の編集' : '一句詠む';
   document.getElementById('mh-del').style.display = id ? '' : 'none';
   if(id){
@@ -932,6 +1551,8 @@ function openHaikuForm(id, useKigo){
       document.getElementById('mh-kigo').value = h.kigo||'';
       document.getElementById('mh-season').value = h.season||'';
       document.getElementById('mh-memo').value = h.memo||'';
+      document.getElementById('mh-oncal').checked = h.onCal!==false;
+      mhSetPrev(h.photo||null);
       kuCount();
     });
   } else {
@@ -939,6 +1560,8 @@ function openHaikuForm(id, useKigo){
     const k = useKigo ? todayKigo() : null;
     document.getElementById('mh-kigo').value = k ? k.n : '';
     document.getElementById('mh-season').value = k ? k.s : '';
+    document.getElementById('mh-oncal').checked = true;
+    mhSetPrev(null);
     kuCount();
   }
   openModal('modal-haiku');
@@ -953,6 +1576,8 @@ async function saveHaiku(){
     kigo: document.getElementById('mh-kigo').value.trim(),
     season: document.getElementById('mh-season').value,
     memo: document.getElementById('mh-memo').value.trim()});
+  obj.onCal = document.getElementById('mh-oncal').checked;
+  if(mhPhotoBlob!==undefined) obj.photo = mhPhotoBlob;
   await dbPut('haiku', obj);
   closeModal('modal-haiku');
   toast(editingHaikuId ? '保存しました' : '一句、句帳に収めました');
@@ -978,12 +1603,21 @@ async function renderHaikuList(){
     wrap.innerHTML = '<div class="empty" style="width:100%"><span class="big">🖌️</span>まだ句がありません。<br>今日の季語で一句どうぞ</div>';
     return;
   }
-  wrap.innerHTML = list.map(h=>`
-    <div class="haiku-card" onclick="viewHaiku(${h.id})">
+  hkPhotoUrls.forEach(u=>URL.revokeObjectURL(u)); hkPhotoUrls=[];
+  wrap.innerHTML = list.map(h=>{
+    let st='', cls='';
+    if(h.photo){
+      const u = URL.createObjectURL(h.photo); hkPhotoUrls.push(u);
+      st = `style="background:linear-gradient(rgba(20,12,8,.55),rgba(20,12,8,.55)),url('${u}') center/cover;color:#fff;border-color:transparent"`;
+      cls = ' haiku-photo';
+    }
+    return `<div class="haiku-card${cls}" ${st} onclick="viewHaiku(${h.id})">
       <div class="ku serif">${esc(h.k1)}　${esc(h.k2)}　${esc(h.k3)}</div>
-      <div class="info">${h.fav?'<span class="fav">♥</span> ':''}${h.season?esc(h.season)+' ':''}${fmtDate(h.date)}</div>
-    </div>`).join('');
+      <div class="info" ${h.photo?'style="color:rgba(255,255,255,.85)"':''}>${h.fav?'<span class="fav">♥</span> ':''}${h.season?esc(h.season)+' ':''}${fmtDate(h.date)}</div>
+    </div>`;
+  }).join('');
 }
+let hkPhotoUrls = [];
 document.querySelectorAll('#hk-filter .chip').forEach(c=>{
   c.addEventListener('click', ()=>{
     document.querySelectorAll('#hk-filter .chip').forEach(x=>x.classList.remove('on'));
@@ -1020,11 +1654,26 @@ async function haikuToImage(){
   const W = 1080, H = 1440;
   cv.width=W; cv.height=H;
   const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#f6f1e3'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle = 'rgba(160,140,100,.08)';
-  for(let y=0;y<H;y+=6){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-  ctx.strokeStyle = '#7a6248'; ctx.lineWidth = 4; ctx.strokeRect(40,40,W-80,H-80);
-  ctx.fillStyle = '#2e2218';
+  const withPhoto = !!h.photo;
+  if(withPhoto){
+    // 写真背景(cover配置)+読みやすくする薄幕
+    const img = await blobToImg(h.photo);
+    const s = Math.max(W/img.width, H/img.height);
+    const dw = img.width*s, dh = img.height*s;
+    ctx.drawImage(img, (W-dw)/2, (H-dh)/2, dw, dh);
+    URL.revokeObjectURL(img.src);
+    ctx.fillStyle = 'rgba(15,10,8,.38)'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 3; ctx.strokeRect(40,40,W-80,H-80);
+  } else {
+    ctx.fillStyle = '#f6f1e3'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle = 'rgba(160,140,100,.08)';
+    for(let y=0;y<H;y+=6){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+    ctx.strokeStyle = '#7a6248'; ctx.lineWidth = 4; ctx.strokeRect(40,40,W-80,H-80);
+  }
+  const inkMain = withPhoto ? '#ffffff' : '#2e2218';
+  const inkSub  = withPhoto ? 'rgba(255,255,255,.9)' : '#7a6248';
+  if(withPhoto){ ctx.shadowColor='rgba(0,0,0,.55)'; ctx.shadowBlur=10; }
+  ctx.fillStyle = inkMain;
   // 3行を右から: 上五(右)、中七(中・少し下げ)、下五(左・さらに下げ)
   const size = 84;
   drawTate(ctx, h.k1||'', W/2+190, 150, size, {lineHeight:1.18});
@@ -1032,11 +1681,12 @@ async function haikuToImage(){
   drawTate(ctx, h.k3||'', W/2-190, 385, size, {lineHeight:1.18});
   // 左下に俳号と日付
   const haigo = localStorage.getItem('sc_haigo')||'';
-  ctx.fillStyle = '#7a6248';
+  ctx.fillStyle = inkSub;
   if(haigo) drawTate(ctx, haigo, 130, H-170-haigo.length*44, 40, {weight:'700'});
   ctx.font = '700 28px "Hiragino Mincho ProN","Yu Mincho",serif';
   ctx.textAlign = 'left';
   ctx.fillText(fmtDate(h.date), 70, H-72);
+  ctx.shadowBlur = 0;
   // 朱落款
   ctx.fillStyle = '#b03a2a';
   ctx.fillRect(W-150, H-180, 64, 100);
@@ -1044,6 +1694,101 @@ async function haikuToImage(){
   drawTate(ctx, haigo ? haigo.slice(0,2) : '一句', W-118, H-168, 36, {lineHeight:1.1});
   document.getElementById('hv-canvas-wrap').style.display = 'block';
 }
+
+/* ================= カレンダー(趣味ごよみ) ================= */
+let calY = new Date().getFullYear(), calM = new Date().getMonth()+1, calSelDate = todayStr();
+
+function vernalDay(y){ return Math.floor(20.8431 + 0.242194*(y-1980) - Math.floor((y-1980)/4)); }
+function autumnDay(y){ return Math.floor(23.2488 + 0.242194*(y-1980) - Math.floor((y-1980)/4)); }
+function nthMonday(y, m, n){
+  const first = new Date(y, m-1, 1).getDay();
+  return 1 + ((1-first)+7)%7 + (n-1)*7;
+}
+function holidaysOf(y){
+  const h = {};
+  const add = (m,d,name)=>{ h[m+'-'+d] = name; };
+  add(1,1,'元日'); add(1,nthMonday(y,1,2),'成人の日');
+  add(2,11,'建国記念の日'); add(2,23,'天皇誕生日');
+  add(3,vernalDay(y),'春分の日');
+  add(4,29,'昭和の日'); add(5,3,'憲法記念日'); add(5,4,'みどりの日'); add(5,5,'こどもの日');
+  add(7,nthMonday(y,7,3),'海の日'); add(8,11,'山の日');
+  add(9,nthMonday(y,9,3),'敬老の日'); add(9,autumnDay(y),'秋分の日');
+  add(10,nthMonday(y,10,2),'スポーツの日'); add(11,3,'文化の日'); add(11,23,'勤労感謝の日');
+  // 国民の休日(敬老の日と秋分の日に挟まれた平日)
+  const kei = nthMonday(y,9,3), shu = autumnDay(y);
+  if(shu - kei === 2) h['9-'+(kei+1)] = h['9-'+(kei+1)] || '国民の休日';
+  // 振替休日: 祝日が日曜→直後の祝日でない日
+  for(const key of Object.keys({...h})){
+    const [m,d] = key.split('-').map(Number);
+    if(new Date(y,m-1,d).getDay()===0){
+      let nm=m, nd=d+1;
+      const dim = new Date(y,nm,0).getDate();
+      if(nd>dim){ nd=1; nm++; }
+      while(h[nm+'-'+nd]){ nd++; }
+      if(nm<=12) h[nm+'-'+nd] = '振替休日';
+    }
+  }
+  return h;
+}
+function calMove(dir){
+  calM += dir;
+  if(calM<1){ calM=12; calY--; }
+  if(calM>12){ calM=1; calY++; }
+  renderCal();
+}
+async function calData(){
+  const [items, haiku, deco, banzuke, books] = await Promise.all([dbAll('items'), dbAll('haiku'), dbAll('deco'), dbAll('banzuke'), dbAll('books')]);
+  const bookMap = {}; books.forEach(b=>bookMap[b.id]=b);
+  const ev = {}; // 'YYYY-MM-DD' -> [{kind,color,label,go}]
+  const push = (date, e)=>{ if(!date) return; (ev[date] = ev[date]||[]).push(e); };
+  items.filter(i=>i.onCal!==false).forEach(i=>{
+    const b = bookMap[i.bookId];
+    push(i.date, {kind:'図鑑', color:'var(--gold)', hex:'#b8860b', label:(b?b.emoji+' ':'')+i.name, go:`calGoItem(${i.bookId},${i.id})`});
+  });
+  haiku.filter(h=>h.onCal!==false).forEach(h=>{
+    push(h.date, {kind:'俳句', color:'var(--accent)', hex:'#c0392b', label:[h.k1,h.k2,h.k3].filter(Boolean).join('　'), go:`calGoHaiku(${h.id})`});
+  });
+  deco.filter(p=>p.onCal!==false).forEach(p=>{
+    push(p.date, {kind:'デコ', color:'#e84393', hex:'#e84393', label:p.title||'(無題ページ)', go:`calGoDeco(${p.id})`});
+  });
+  banzuke.filter(s=>s.onCal!==false && s.date).forEach(s=>{
+    push(s.date, {kind:'番付', color:'#7a5230', hex:'#7a5230', label:s.title||'(無題の番付)', go:`calGoBz(${s.id})`});
+  });
+  return ev;
+}
+async function renderCal(){
+  const ev = await calData();
+  document.getElementById('cal-title').textContent = `${calY}年 ${calM}月`;
+  const hol = holidaysOf(calY);
+  const dim = new Date(calY, calM, 0).getDate();
+  const firstDow = new Date(calY, calM-1, 1).getDay();
+  const today = todayStr();
+  let html = ['日','月','火','水','木','金','土'].map((d,i)=>`<div class="cal-dow" style="color:${i===0?'#d04040':i===6?'#4070d0':'var(--text2)'}">${d}</div>`).join('');
+  for(let i=0;i<firstDow;i++) html += '<div class="cal-cell blank"></div>';
+  for(let d=1; d<=dim; d++){
+    const ds = `${calY}-${String(calM).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dow = (firstDow+d-1)%7;
+    const hname = hol[calM+'-'+d];
+    const cls = ['cal-cell', ds===today?'today':'', ds===calSelDate?'selected':''].filter(Boolean).join(' ');
+    const numCls = hname?'hol':(dow===0?'sun':dow===6?'sat':'');
+    const dots = (ev[ds]||[]).slice(0,6).map(e=>`<i style="background:${e.color}"></i>`).join('');
+    html += `<div class="${cls}" onclick="calPick('${ds}')"><span class="${numCls}">${d}</span>${hname?`<span class="holname">${hname}</span>`:''}<div class="cal-dots">${dots}</div></div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+  renderCalDay(ev);
+}
+function calPick(ds){ calSelDate = ds; renderCal(); }
+function renderCalDay(ev){
+  const list = ev[calSelDate]||[];
+  document.getElementById('cal-day-title').textContent = `📌 ${fmtDate(calSelDate)} の記録 ${list.length?`(${list.length}件)`:''}`;
+  document.getElementById('cal-day-list').innerHTML = list.length
+    ? list.map(e=>`<div class="cal-item" onclick="${e.go}"><span class="tag" style="background:${e.hex}">${e.kind}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.label)}</span></div>`).join('')
+    : '<div class="empty" style="padding:14px">この日の記録はありません</div>';
+}
+function calGoItem(bookId, itemId){ switchTab('zukan'); openBook(bookId).then(()=>openItemForm(itemId)); }
+function calGoHaiku(id){ switchTab('haiku'); viewHaiku(id); }
+function calGoDeco(id){ switchTab('zukan'); decoOpen(id); }
+function calGoBz(id){ switchTab('banzuke'); bzOpen(id); }
 
 /* ================= 設定 ================= */
 function saveHaigo(){
@@ -1054,7 +1799,7 @@ async function exportData(){
   const books = await dbAll('books');
   const items = (await dbAll('items')).map(i=>{ const c={...i}; delete c.photo; return c; });
   const banzuke = await dbAll('banzuke');
-  const haiku = await dbAll('haiku');
+  const haiku = (await dbAll('haiku')).map(h=>{ const c={...h}; delete c.photo; return c; });
   const data = {app:'shumicho', ver:1, exported: new Date().toISOString(), books, items, banzuke, haiku,
     haigo: localStorage.getItem('sc_haigo')||''};
   const blob = new Blob([JSON.stringify(data, null, 1)], {type:'application/json'});
@@ -1063,7 +1808,7 @@ async function exportData(){
   a.download = '趣味帳バックアップ_'+todayStr()+'.json';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
-  toast('書き出しました(写真は含まれません)');
+  toast('書き出しました(写真とデコ帳は含まれません)');
 }
 async function importData(input){
   const f = input.files && input.files[0];
@@ -1129,6 +1874,9 @@ function initAdMob(){
   applyTheme();
   document.getElementById('set-theme').value = localStorage.getItem('sc_theme')||'auto';
   document.getElementById('set-haigo').value = localStorage.getItem('sc_haigo')||'';
+  applyTabOrder();
+  renderTabOrderList();
+  decoInitPointer();
   await openDB();
   renderKigoCard();
   await renderBooks();
