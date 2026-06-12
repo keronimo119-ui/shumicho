@@ -144,6 +144,11 @@ cd android; .\gradlew.bat assembleDebug
   左右から引っ張り合い・2本モミモミ可。離した指の分だけ個別にばね戻り。**引っ張り限界を超えた指の動きは
   全体スライド**: 縦=モーダルスクロール(`closest('.modal-box')`)、横=累積90pxで前後の作品へページ送り
   (観覧/手帳両モーダル対応・1ジェスチャー1回)。指2本以上のときはスライドせず引っ張り合い優先。実機検証済み。
+- 2026-06-12(夜5): **餅チューニング**(ユーザー「遅く感じる・マスを半分に・プルンとしたい」)。
+  ①低遅延canvas(`desynchronized:true`)+rAFで1フレーム1描画(`requestDraw`)+変形ゼロのマスはスキップ(土台を先に敷く方式)
+  ②マス48分割を試したら35ms/フレームで重すぎ→**32分割+指の近くへの集中度アップ(密度5倍・σ=0.55R)**で
+  触る部分は従来の半分以下の細かさのまま60fps(17ms/フレーム=vsync1回)を確保
+  ③バネをk0.22→0.35/減衰0.84→0.80=速くプルンと戻る。実機計測済み。
 - 検証ツール: `tools/cdp.mjs`(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
   使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
 

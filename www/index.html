@@ -2105,23 +2105,28 @@ function mochify(img){
   if(img.complete) apply(); else img.onload = apply;
 }
 function initMochiCanvas(cv, src){
-  const ctx = cv.getContext('2d');
+  const ctx = cv.getContext('2d', {desynchronized:true}); // 低遅延描画
   const W = cv.width, H = cv.height;
-  const COLS = 24, ROWS = Math.max(16, Math.round(24*H/W));
+  const COLS = 32, ROWS = Math.max(22, Math.round(32*H/W)); // マス数は速度と両立する範囲で増量
   const R = Math.max(W,H)/3;  // 指の影響半径
   const LIM = R*0.6;          // 引っ張り限界
   const ptrs = new Map();     // 指ごとの状態(マルチタッチ): id -> {gx,gy,dx,dy,vx,vy,up,px,py}
-  let anim = 0, cumX = 0, flipDone = false;
+  let anim = 0, cumX = 0, flipDone = false, dirty = false;
+  function requestDraw(){ // 1フレーム1回だけ描く(無駄な多重描画をなくし反応を安定させる)
+    if(dirty) return;
+    dirty = true;
+    requestAnimationFrame(()=>{ dirty = false; draw(); });
+  }
   // 格子線の位置: 指(複数可)の近くほどマスを細かく
   function nodesAxis(n, size, gs){
     const pts = [];
     if(!gs.length){ for(let i=0;i<=n;i++) pts.push(i*size/n); return pts; }
-    const S = 160, sig = R*0.8;
+    const S = 160, sig = R*0.55;
     let acc = 0; const cum = [0];
     for(let i=1;i<=S;i++){
       const x = (i-.5)*size/S;
       let d = 1;
-      for(const g of gs) d += 2.2*Math.exp(-((x-g)**2)/(2*sig*sig));
+      for(const g of gs) d += 5*Math.exp(-((x-g)**2)/(2*sig*sig)); // 指の近くは約半分以下の細かさに集中
       acc += d; cum.push(acc);
     }
     let j = 0;
@@ -2137,8 +2142,9 @@ function initMochiCanvas(cv, src){
   function draw(){
     ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0,0,W,H);
+    ctx.drawImage(src,0,0); // まず土台(変形ゼロの全体)を敷く
     const ps = [...ptrs.values()].filter(p=>!p.up || Math.hypot(p.dx,p.dy)>0.01);
-    if(!ps.length){ ctx.drawImage(src,0,0); return; }
+    if(!ps.length) return;
     const xs = nodesAxis(COLS, W, ps.map(p=>p.gx));
     const ys = nodesAxis(ROWS, H, ps.map(p=>p.gy));
     const ox = [], oy = [];
@@ -2153,8 +2159,13 @@ function initMochiCanvas(cv, src){
         ox[c][r] = X; oy[c][r] = Y;
       }
     }
-    // 各マスを平行四辺形として描く(斜めの変形でも辺がつながり隙間が出ない)
+    // 変形しているマスだけ平行四辺形として描き直す(動かないマスは土台のままでOK=高速化)
+    const EPS = 0.5;
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      if(Math.abs(ox[c][r])<EPS && Math.abs(oy[c][r])<EPS &&
+         Math.abs(ox[c+1][r])<EPS && Math.abs(oy[c+1][r])<EPS &&
+         Math.abs(ox[c][r+1])<EPS && Math.abs(oy[c][r+1])<EPS &&
+         Math.abs(ox[c+1][r+1])<EPS && Math.abs(oy[c+1][r+1])<EPS) continue;
       const sw = xs[c+1]-xs[c], sh = ys[r+1]-ys[r];
       if(sw<=0 || sh<=0) continue;
       const x00 = xs[c]+ox[c][r],     y00 = ys[r]+oy[c][r];
@@ -2176,7 +2187,7 @@ function initMochiCanvas(cv, src){
     const p = pos(e);
     if(![...ptrs.values()].some(z=>!z.up)){ cumX = 0; flipDone = false; } // 新しいジェスチャー開始
     ptrs.set(e.pointerId, {gx:p.x, gy:p.y, dx:0, dy:0, vx:0, vy:0, up:false, px:e.clientX, py:e.clientY});
-    draw();
+    requestDraw();
   });
   cv.addEventListener('pointermove', e=>{
     const p = ptrs.get(e.pointerId);
@@ -2203,7 +2214,7 @@ function initMochiCanvas(cv, src){
     }
     p.dx = ndx; p.dy = ndy;
     p.px = e.clientX; p.py = e.clientY;
-    draw();
+    requestDraw();
   });
   const up = e=>{
     const p = ptrs.get(e.pointerId);
@@ -2214,7 +2225,7 @@ function initMochiCanvas(cv, src){
       let alive = false;
       for(const [id, z] of ptrs){
         if(!z.up) continue;
-        z.vx += -z.dx*0.22; z.vy += -z.dy*0.22; z.vx *= 0.84; z.vy *= 0.84;
+        z.vx += -z.dx*0.35; z.vy += -z.dy*0.35; z.vx *= 0.80; z.vy *= 0.80; // 強め&軽めのバネ=速くプルン
         z.dx += z.vx; z.dy += z.vy;
         if(Math.hypot(z.dx,z.dy)<.5 && Math.hypot(z.vx,z.vy)<.5) ptrs.delete(id);
         else alive = true;
