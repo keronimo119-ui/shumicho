@@ -132,6 +132,9 @@ cd android; .\gradlew.bat assembleDebug
   ④剣強化: 中央が太い斬撃ビーム(radial-gradient)+閃光(.dy-flash)+揺れ増大 ⑤波紋強化: 3重の輪が減速しながら
   広がり輪が細く淡くなる+中心しぶき(.dy-drop)。ギミック委譲は`initGimmicks(body)`でdy-body/gl-body共用。
   番付画像生成は`bzCompose(s,cv)`に部品化(bzPreviewと観覧モードで共用・日付はs.date基準)。全て実機検証済み。
+- 2026-06-12(夜2): **餅の見た目を細密化**(ユーザー要望「四角を細かく・隙間を中間色で埋めてアナログ感」)。
+  マス目16→24分割。描画を「マスごと平行移動(隙間が出る)」→**格子点変位の網目変形**(隣のマスと辺を共有し
+  +0.6px重ねる)に変更=白い隙間が原理的に出ない連続変形。描画1フレーム約4ms(60fps圏内・実機計測)。
 - 検証ツール: `tools/cdp.mjs`(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
   使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
 
