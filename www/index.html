@@ -143,6 +143,15 @@ img.ph{object-fit:cover;display:block}
 #deco-stage-wrap.compact #deco-stage{width:52%;margin:0 auto}
 #deco-stage.locked{touch-action:pan-y}
 #deco-edit-view.locked .edit-only{display:none}
+/* ===== 観覧モードギミック(餅・剣・波紋) ===== */
+.dy-mochi{touch-action:none;will-change:transform;display:block}
+.dy-bz,.dy-haiku{position:relative;overflow:hidden}
+.dy-slash{position:absolute;height:3px;background:linear-gradient(90deg,transparent,#fff 15%,#dceeff 50%,#fff 85%,transparent);box-shadow:0 0 14px 3px rgba(150,205,255,.9);transform-origin:left center;pointer-events:none;z-index:5;animation:dySlash .5s ease-out forwards}
+@keyframes dySlash{0%{clip-path:inset(0 100% 0 0);opacity:1}35%{clip-path:inset(0 0 0 0);opacity:1}100%{clip-path:inset(0 0 0 0);opacity:0}}
+.dy-bz.cut{animation:dyCut .45s ease-out}
+@keyframes dyCut{0%{transform:none}25%{transform:translate(3px,-2px) rotate(.7deg)}55%{transform:translate(-3px,2px) rotate(-.7deg)}100%{transform:none}}
+.dy-ripple{position:absolute;border:2px solid rgba(120,190,255,.8);border-radius:50%;width:14px;height:14px;transform:translate(-50%,-50%) scale(0);pointer-events:none;z-index:5;animation:dyRipple 1.2s ease-out forwards}
+@keyframes dyRipple{60%{opacity:.55}100%{transform:translate(-50%,-50%) scale(15);opacity:0}}
 .deco-note{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-top:8px}
 .deco-note textarea{margin-top:6px;min-height:64px}
 #deco-stage{position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;border-radius:8px;touch-action:none;background:#fff}
@@ -356,6 +365,7 @@ img.ph{object-fit:cover;display:block}
       <button onclick="calMove(-1)">◀</button>
       <span class="ttl" id="cal-title"></span>
       <button onclick="calMove(1)">▶</button>
+      <button onclick="calToday()" style="font-size:.78rem;font-weight:800">今日</button>
     </div>
     <div id="cal-grid"></div>
     <div class="sec-title" id="cal-day-title"></div>
@@ -907,8 +917,8 @@ async function showDecoList(){
       <div class="nm">${esc(p.title||'(無題ページ)')}</div></div>`;
   }).join('');
 }
-async function decoCreate(){
-  const id = await dbPut('deco', {title:'', bg:'#ffffff', layers:[], ink:null, thumb:null, onCal:true, date:todayStr(), created:Date.now()});
+async function decoCreate(forDate){
+  const id = await dbPut('deco', {title:'', bg:'#ffffff', layers:[], ink:null, thumb:null, onCal:true, date:(typeof forDate==='string'&&forDate)||todayStr(), created:Date.now()});
   await decoOpen(id);
 }
 async function decoOpen(id){
@@ -1387,8 +1397,8 @@ async function renderBzSheets(){
         <div class="meta">${(s.entries||[]).length}名 ${s.entries&&s.entries[0]?'/ 横綱: '+esc(s.entries[0].name):''}</div>
       </div><div style="color:var(--text2)">›</div></div>`).join('');
 }
-async function bzCreate(){
-  const id = await dbPut('banzuke', {title:'', entries:[], onCal:true, date:todayStr(), created: Date.now()});
+async function bzCreate(forDate){
+  const id = await dbPut('banzuke', {title:'', entries:[], onCal:true, date:(typeof forDate==='string'&&forDate)||todayStr(), created: Date.now()});
   bzOpen(id);
 }
 async function bzOpen(id){
@@ -1597,11 +1607,12 @@ let editingHaikuId = null;
 let viewingHaikuId = null;
 let hkFilterVal = '';
 
-function todayKigo(){
-  const d = new Date();
+function kigoOf(ds){
+  const d = new Date(ds+'T00:00:00');
   const arr = KIGO[d.getMonth()+1];
   return arr[(d.getDate()-1) % arr.length];
 }
+function todayKigo(){ return kigoOf(todayStr()); }
 function renderKigoCard(){
   const d = new Date();
   const W = ['日','月','火','水','木','金','土'];
@@ -1640,9 +1651,11 @@ function mhPhoto(input){
   img.src = URL.createObjectURL(f);
 }
 function mhDelPhoto(){ mhPhotoBlob=null; mhSetPrev(null); }
-function openHaikuForm(id, useKigo){
+let mhNewDate = null; // カレンダーから「この日に詠む」とき指定される
+function openHaikuForm(id, useKigo, forDate){
   editingHaikuId = id;
   mhPhotoBlob = undefined;
+  mhNewDate = (!id && typeof forDate==='string' && forDate) ? forDate : null;
   document.getElementById('mh-title').textContent = id ? '句の編集' : '一句詠む';
   document.getElementById('mh-del').style.display = id ? '' : 'none';
   if(id){
@@ -1659,7 +1672,7 @@ function openHaikuForm(id, useKigo){
     });
   } else {
     ['mh-k1','mh-k2','mh-k3','mh-memo'].forEach(i=>document.getElementById(i).value='');
-    const k = useKigo ? todayKigo() : null;
+    const k = useKigo ? (mhNewDate ? kigoOf(mhNewDate) : todayKigo()) : null;
     document.getElementById('mh-kigo').value = k ? k.n : '';
     document.getElementById('mh-season').value = k ? k.s : '';
     document.getElementById('mh-oncal').checked = true;
@@ -1673,7 +1686,7 @@ async function saveHaiku(){
   const k2 = document.getElementById('mh-k2').value.trim();
   const k3 = document.getElementById('mh-k3').value.trim();
   if(!k1 && !k2 && !k3){ toast('句を入れてください'); return; }
-  const obj = editingHaikuId ? await dbGet('haiku', editingHaikuId) : {created: Date.now(), date: todayStr(), fav:false};
+  const obj = editingHaikuId ? await dbGet('haiku', editingHaikuId) : {created: Date.now(), date: mhNewDate||todayStr(), fav:false};
   Object.assign(obj, {k1,k2,k3,
     kigo: document.getElementById('mh-kigo').value.trim(),
     season: document.getElementById('mh-season').value,
@@ -1838,6 +1851,15 @@ function calMove(dir){
   if(calM>12){ calM=1; calY++; }
   renderCal();
 }
+function calToday(){
+  const t = new Date();
+  calY = t.getFullYear(); calM = t.getMonth()+1; calSelDate = todayStr();
+  renderCal();
+}
+/* カレンダーで選んだ日付に新規作成(予定・過去の記録) */
+function calNewHaiku(){ switchTab('haiku'); openHaikuForm(null, true, calSelDate); }
+function calNewDeco(){ switchTab('zukan'); decoCreate(calSelDate); }
+function calNewBz(){ switchTab('banzuke'); bzCreate(calSelDate); }
 async function calData(){
   const [items, haiku, deco, banzuke, books] = await Promise.all([dbAll('items'), dbAll('haiku'), dbAll('deco'), dbAll('banzuke'), dbAll('books')]);
   const bookMap = {}; books.forEach(b=>bookMap[b.id]=b);
@@ -1883,10 +1905,17 @@ function calPick(ds){ calSelDate = ds; renderCal(); }
 function renderCalDay(ev){
   const list = ev[calSelDate]||[];
   document.getElementById('cal-day-title').textContent = `📌 ${fmtDate(calSelDate)} の記録 ${list.length?`(${list.length}件)`:''}`;
-  document.getElementById('cal-day-list').innerHTML = list.length
+  const addRow = `<div class="deco-tools" style="margin-bottom:8px;align-items:center">
+    <span class="muted" style="font-size:.76rem;font-weight:800">＋この日に:</span>
+    <button class="tool-btn mini" onclick="calNewHaiku()">🖌️ 一句</button>
+    <button class="tool-btn mini" onclick="calNewDeco()">📖 軌跡</button>
+    <button class="tool-btn mini" onclick="calNewBz()">🏆 番付</button>
+  </div>`;
+  document.getElementById('cal-day-list').innerHTML = (list.length
     ? `<button class="btn wide" style="margin-bottom:8px" onclick="openDiary('${calSelDate}')">📖 この日の手帳をひらく</button>`
-      + list.map(e=>`<div class="cal-item" onclick="${e.go}"><span class="tag" style="background:${e.hex}">${e.kind}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.label)}</span></div>`).join('')
-    : '<div class="empty" style="padding:14px">この日の記録はありません</div>';
+    : '') + addRow + (list.length
+    ? list.map(e=>`<div class="cal-item" onclick="${e.go}"><span class="tag" style="background:${e.hex}">${e.kind}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.label)}</span></div>`).join('')
+    : '<div class="empty" style="padding:14px">この日の記録はありません</div>');
 }
 
 /* --- 完成手帳プレビュー(閲覧専用・記録日をパラパラめくれる) --- */
@@ -1928,7 +1957,7 @@ async function openDiary(ds){
   for(const h of haiku.filter(h=>h.onCal!==false && h.date===ds)){
     let st='';
     if(h.photo){ const u=URL.createObjectURL(h.photo); diaryUrls.push(u); st=`style="background:linear-gradient(rgba(20,12,8,.55),rgba(20,12,8,.55)),url('${u}') center/cover;border-color:transparent"`; }
-    html += `<div class="card" ${st}>
+    html += `<div class="card dy-haiku" ${st}>
       <div class="tate-view" style="background:transparent"><div class="ku serif" style="${h.photo?'color:#fff':''}">${esc(h.k1)}　${esc(h.k2)}　${esc(h.k3)}</div></div>
       <div class="muted" style="text-align:center;${h.photo?'color:rgba(255,255,255,.85)':''}">${h.fav?'♥ ':''}${h.kigo?'季語: '+esc(h.kigo)+' ':''}${esc(h.season||'')}</div></div>`;
   }
@@ -1936,7 +1965,7 @@ async function openDiary(ds){
   for(const i of items.filter(i=>i.onCal!==false && i.date===ds)){
     const b = bookMap[i.bookId];
     let ph='';
-    if(i.photo){ const u=URL.createObjectURL(i.photo); diaryUrls.push(u); ph=`<img src="${u}" style="width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin-top:6px" alt="">`; }
+    if(i.photo){ const u=URL.createObjectURL(i.photo); diaryUrls.push(u); ph=`<img src="${u}" class="dy-mochi" style="width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin-top:6px" alt="">`; }
     html += `<div class="card"><div class="sec-title" style="margin-top:0">${b?b.emoji:'📚'} ${esc(i.name)} <span class="muted">${esc(b?b.name:'')}</span></div>${ph}
       <div class="muted" style="margin-top:4px"><span style="color:var(--gold)">${'★'.repeat(i.rating||0)}</span>${i.place?' / '+esc(i.place):''}${i.got?'':' / 🔜未入手'}</div>
       ${i.memo?`<div style="font-size:.88rem;white-space:pre-wrap;margin-top:4px">${esc(i.memo)}</div>`:''}</div>`;
@@ -1944,7 +1973,7 @@ async function openDiary(ds){
   // 番付
   for(const s of banzuke.filter(s=>s.onCal!==false && s.date===ds)){
     const top = (s.entries||[]).slice(0,4).map((e,i)=>{ const r=rankLabel(i); return r.side+r.name+' '+esc(e.name); }).join(' / ');
-    html += `<div class="card"><div class="sec-title" style="margin-top:0">🏆 ${esc(s.title||'(無題の番付)')}</div><div class="muted">${top}${(s.entries||[]).length>4?' …':''}</div></div>`;
+    html += `<div class="card dy-bz"><div class="sec-title" style="margin-top:0">🏆 ${esc(s.title||'(無題の番付)')}</div><div class="muted">${top}${(s.entries||[]).length>4?' …':''}</div></div>`;
   }
   if(!html) html = '<div class="empty">この日の記録はありません</div>';
   document.getElementById('dy-body').innerHTML = html;
@@ -1959,12 +1988,85 @@ function diaryMove(dir){
 function diaryInitSwipe(){
   const box = document.querySelector('#modal-diary .modal-box');
   let sx = null, sy = null;
-  box.addEventListener('touchstart', e=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+  box.addEventListener('touchstart', e=>{
+    if(e.target.closest('.dy-bz,.dy-mochi')){ sx=null; return; } // ギミック対象の上ではめくらない
+    sx=e.touches[0].clientX; sy=e.touches[0].clientY;
+  }, {passive:true});
   box.addEventListener('touchend', e=>{
     if(sx==null) return;
     const dx = e.changedTouches[0].clientX-sx, dy = e.changedTouches[0].clientY-sy;
     sx = null;
     if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.5) diaryMove(dx<0?1:-1); // 左へ払う=次の日
+  }, {passive:true});
+}
+/* 観覧モードギミック: 餅(図鑑写真を引っ張る)・剣(番付を素早く払う)・波紋(俳句をタップ) */
+function diaryInitGimmicks(){
+  const body = document.getElementById('dy-body');
+  // 波紋 + 餅つかみ
+  body.addEventListener('pointerdown', e=>{
+    const hk = e.target.closest('.dy-haiku');
+    if(hk){
+      const r = hk.getBoundingClientRect();
+      for(let i=0;i<2;i++){
+        const s = document.createElement('span');
+        s.className = 'dy-ripple';
+        s.style.left = (e.clientX-r.left)+'px';
+        s.style.top = (e.clientY-r.top)+'px';
+        s.style.animationDelay = (i*0.18)+'s';
+        hk.appendChild(s);
+        setTimeout(()=>s.remove(), 1700);
+      }
+    }
+    const mc = e.target.closest('.dy-mochi');
+    if(mc){
+      e.preventDefault();
+      try{ mc.setPointerCapture(e.pointerId); }catch(err){}
+      mc._mochi = {x:e.clientX, y:e.clientY};
+      mc.style.transition = 'none';
+    }
+  });
+  body.addEventListener('pointermove', e=>{
+    const mc = e.target.closest('.dy-mochi');
+    if(mc && mc._mochi){
+      const lim = v=>Math.max(-90, Math.min(90, v));
+      const lx = lim(e.clientX-mc._mochi.x), ly = lim(e.clientY-mc._mochi.y);
+      mc.style.transform = `translate(${lx*.45}px,${ly*.45}px) scaleX(${1+Math.abs(lx)/320}) scaleY(${1+Math.abs(ly)/320})`;
+    }
+  });
+  const mochiUp = e=>{
+    const mc = e.target.closest('.dy-mochi');
+    if(mc && mc._mochi){
+      mc._mochi = null;
+      mc.style.transition = 'transform .8s cubic-bezier(.2,2.8,.35,.55)'; // ぷるんと戻る
+      mc.style.transform = '';
+    }
+  };
+  body.addEventListener('pointerup', mochiUp);
+  body.addEventListener('pointercancel', mochiUp);
+  // 剣: 番付カードを素早く払うと斬撃
+  let bz = null;
+  body.addEventListener('touchstart', e=>{
+    const c = e.target.closest('.dy-bz');
+    bz = c ? {c, x:e.touches[0].clientX, y:e.touches[0].clientY, t:Date.now()} : null;
+  }, {passive:true});
+  body.addEventListener('touchend', e=>{
+    if(!bz) return;
+    const dx = e.changedTouches[0].clientX-bz.x, dy = e.changedTouches[0].clientY-bz.y, dt = Date.now()-bz.t;
+    if(Math.hypot(dx,dy)>70 && dt<350){
+      const r = bz.c.getBoundingClientRect();
+      const ang = Math.atan2(dy,dx);
+      const len = Math.hypot(r.width,r.height)+60;
+      const sl = document.createElement('span');
+      sl.className = 'dy-slash';
+      sl.style.width = len+'px';
+      sl.style.left = (r.width/2-Math.cos(ang)*len/2)+'px';
+      sl.style.top = (r.height/2-Math.sin(ang)*len/2)+'px';
+      sl.style.transform = `rotate(${ang*180/Math.PI}deg)`;
+      bz.c.appendChild(sl);
+      bz.c.classList.remove('cut'); void bz.c.offsetWidth; bz.c.classList.add('cut');
+      setTimeout(()=>sl.remove(), 700);
+    }
+    bz = null;
   }, {passive:true});
 }
 function calGoItem(bookId, itemId){ switchTab('zukan'); openBook(bookId).then(()=>openItemForm(itemId)); }
@@ -2060,6 +2162,7 @@ function initAdMob(){
   renderTabOrderList();
   decoInitPointer();
   diaryInitSwipe();
+  diaryInitGimmicks();
   await openDB();
   renderKigoCard();
   await renderBooks();

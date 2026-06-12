@@ -115,6 +115,14 @@ cd android; .\gradlew.bat assembleDebug
 - 2026-06-12: **手帳プレビューに観覧モード追加**(ユーザー要望「完成手帳をパラパラめくって眺めたい」)。
   「◀前の記録日/次の記録日▶」ボタン+左右スワイプで、記録のある日だけを順にめくれる(`diaryMove`/`diaryInitSwipe`)。
   位置表示「n/全ページ」、端で停止、めくると後ろのカレンダー選択日も追従。実機検証済み。
+- 2026-06-12: **観覧モードに3ギミック搭載**(ユーザー要望「斬新なものを」)。手帳プレビュー内で
+  ①餅モード=図鑑写真(`.dy-mochi`)を引っ張るとモチモチ伸びて離すとぷるんと戻る(pointer+バウンスbezier)
+  ②剣モード=番付カード(`.dy-bz`)を素早く払うと斬撃線+カードが揺れる(70px超&350ms内のスワイプで発動)
+  ③波紋モード=俳句カード(`.dy-haiku`)タップで水の波紋が2重に広がる。
+  ギミック対象上ではページめくりスワイプは発動しない(衝突回避)。実装は`diaryInitGimmicks()`+CSS`.dy-*`。
+- 2026-06-12: **カレンダー強化**: ヘッダーに「今日」ボタン(`calToday`)。日付パネルに「＋この日に: 一句/軌跡/番付」
+  ボタンで過去・未来の日付に直接新規作成可(`calNewHaiku/calNewDeco/calNewBz`、俳句はその日の季語を自動セット=`kigoOf`)。
+  図鑑アイテムは従来どおりフォーム内の日付欄で任意日付に変更可能。
 - 検証ツール: `tools/cdp.mjs`(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
   使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
 
