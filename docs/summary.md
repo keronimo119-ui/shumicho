@@ -1,6 +1,6 @@
 # 趣味帳(Shumicho) 引き継ぎ書
 
-最終更新: 2026-06-11 / 作成PC: s-mini2
+最終更新: 2026-06-12 / 作成PC: s-mini2（06-12にs-sigpcでも環境構築済み）
 
 ---
 
@@ -71,6 +71,11 @@ stores: books/items/banzuke/haiku/deco)。Capacitor 8 + @capacitor-community/adm
 - 記念日カウントダウン / 年間句集書き出し
 
 ## 6. 別PCでのセットアップ手順
+
+**s-sigpc は 2026-06-12 にセットアップ完了**: clone先 `C:\Users\s-sigpc\Desktop\AI\shumicho`、
+npm install・local.properties作成・デバッグビルド・実機(XQ-CC44, ワイヤレスadb)へのインストール起動まで確認済み。
+※実機の旧版(s-mini2署名)は署名不一致のためユーザー了承の上アンインストールして入れ替えた(テストデータは消去済み)。
+リリースビルドのみ署名鍵の持参が必要(下記)。
 
 ```powershell
 git clone https://github.com/keronimo119-ui/shumicho.git
