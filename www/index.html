@@ -148,17 +148,18 @@ img.ph{object-fit:cover;display:block}
 .dy-bz,.dy-haiku{position:relative;overflow:hidden}
 /* 剣: 中央が太い斬撃ビーム+閃光 */
 .dy-slash{position:absolute;height:20px;pointer-events:none;z-index:6;transform-origin:left center;
- background:radial-gradient(50% 50% at 50% 50%,#fff 0%,rgba(232,246,255,.96) 30%,rgba(170,220,255,.55) 60%,transparent 100%);
- filter:drop-shadow(0 0 5px #d7ecff) drop-shadow(0 0 16px #8fc9ff);
+ background:radial-gradient(50% 50% at 50% 50%,#fafafa 0%,rgba(228,228,232,.96) 30%,rgba(140,140,150,.55) 60%,transparent 100%);
+ filter:drop-shadow(0 0 5px #d4d4da) drop-shadow(0 0 14px #82828c);
  animation:dySlash .5s cubic-bezier(.15,.85,.25,1) forwards}
 @keyframes dySlash{0%{clip-path:inset(0 100% 0 0);opacity:1}28%{clip-path:inset(0 0 0 0);opacity:1}100%{clip-path:inset(0 0 0 0);opacity:0}}
-.dy-flash{position:absolute;inset:0;pointer-events:none;z-index:5;background:radial-gradient(circle at center,rgba(255,255,255,.9),rgba(220,240,255,.35) 55%,transparent 80%);animation:dyFlash .38s ease-out forwards}
+.dy-flash{position:absolute;inset:0;pointer-events:none;z-index:5;background:radial-gradient(circle at center,rgba(255,255,255,.85),rgba(225,225,230,.35) 55%,transparent 80%);animation:dyFlash .38s ease-out forwards}
 @keyframes dyFlash{0%{opacity:1}100%{opacity:0}}
 .dy-bz.cut{animation:dyCut .5s ease-out}
 @keyframes dyCut{0%{transform:none}18%{transform:translate(6px,-5px) rotate(1.6deg)}42%{transform:translate(-6px,5px) rotate(-1.6deg)}68%{transform:translate(3px,-2px) rotate(.8deg)}100%{transform:none}}
 /* 波紋: 自然な水。広がるほど減速し輪が細く淡くなる+中心のしぶき */
-.dy-ripple{position:absolute;border:1.5px solid rgba(150,205,255,.85);border-radius:50%;width:10px;height:10px;transform:translate(-50%,-50%);pointer-events:none;z-index:5;animation:dyRipple 1.4s cubic-bezier(.08,.6,.22,1) forwards}
-@keyframes dyRipple{0%{width:10px;height:10px;opacity:.95}55%{opacity:.5}100%{width:320px;height:320px;opacity:0;border-width:1px}}
+/* 波紋: 幅のある輪の部分だけ背景がふわっと薄明るくなる(白の半透明帯+淡い縁) */
+.dy-ripple{position:absolute;border:12px solid rgba(255,255,255,.32);box-shadow:0 0 0 1px rgba(160,210,255,.4),inset 0 0 0 1px rgba(160,210,255,.28);border-radius:50%;width:14px;height:14px;transform:translate(-50%,-50%);pointer-events:none;z-index:5;animation:dyRipple 1.5s cubic-bezier(.08,.6,.22,1) forwards}
+@keyframes dyRipple{0%{width:14px;height:14px;border-width:13px;opacity:.95}55%{opacity:.55;border-width:8px}100%{width:330px;height:330px;border-width:4px;opacity:0}}
 .dy-drop{position:absolute;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,rgba(205,232,255,.95),rgba(150,205,255,0) 70%);transform:translate(-50%,-50%) scale(.5);pointer-events:none;z-index:5;animation:dyDrop .55s ease-out forwards}
 @keyframes dyDrop{0%{opacity:.95;transform:translate(-50%,-50%) scale(.5)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.8)}}
 .deco-note{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-top:8px}
@@ -549,9 +550,9 @@ img.ph{object-fit:cover;display:block}
   <div class="modal-box">
     <h3 id="dy-title" class="serif"></h3>
     <div class="muted" id="dy-sub"></div>
-    <div class="mochi-ctl" style="display:flex;gap:10px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      🍡強さ<input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:12px;margin:0;padding:0">
-      範囲<input type="range" data-k="r" min="15" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:12px;margin:0;padding:0">
+    <div class="mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
+      <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:12px;margin:0;padding:0">
+      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="15" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:12px;margin:0;padding:0">
     </div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="dy-prev" onclick="diaryMove(-1)">◀ 前の記録日</button>
@@ -567,9 +568,10 @@ img.ph{object-fit:cover;display:block}
 <div class="modal" id="modal-gallery">
   <div class="modal-box">
     <h3 id="gl-title" class="serif"></h3>
-    <div class="mochi-ctl" style="display:flex;gap:10px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      🍡強さ<input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:12px;margin:0;padding:0">
-      範囲<input type="range" data-k="r" min="15" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:12px;margin:0;padding:0">
+    <div class="mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
+      <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
+      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="15" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
+      <button class="tool-btn mini" id="gl-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
     </div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="gl-prev" onclick="galleryMove(-1)">◀ 前の作品</button>
@@ -1981,10 +1983,11 @@ async function openDiary(ds){
   document.getElementById('dy-sub').textContent = (hol ? '🎌 '+hol+' / ' : '') + 'この日の季語: '+k.n+'('+k.s+')';
   diaryUrls.forEach(u=>URL.revokeObjectURL(u)); diaryUrls=[];
   let html = '';
+  const mochiMetas = []; // 餅画像ごとの範囲指定データ(DOM出現順に対応)
   // 軌跡ページ(デコ+書き込み枠)
   for(const p of deco.filter(p=>p.onCal!==false && p.date===ds)){
     let img = '';
-    if(p.thumb){ const u=URL.createObjectURL(p.thumb); diaryUrls.push(u); img=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px" alt="">`; }
+    if(p.thumb){ const u=URL.createObjectURL(p.thumb); diaryUrls.push(u); img=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px" alt="">`; mochiMetas.push({zones:(p.mochiZones||[]).slice(), save:null}); }
     const notes = (p.notes||[]).filter(n=>n.text).map(n=>
       `<div style="margin-top:8px"><span class="chip" style="color:var(--accent);background:var(--accent-light)">${esc(n.cat)}</span>
       <div class="serif" style="white-space:pre-wrap;font-size:.94rem;margin-top:4px;line-height:1.8">${esc(n.text)}</div></div>`).join('');
@@ -2002,7 +2005,7 @@ async function openDiary(ds){
   for(const i of items.filter(i=>i.onCal!==false && i.date===ds)){
     const b = bookMap[i.bookId];
     let ph='';
-    if(i.photo){ const u=URL.createObjectURL(i.photo); diaryUrls.push(u); ph=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px;margin-top:6px" alt="">`; }
+    if(i.photo){ const u=URL.createObjectURL(i.photo); diaryUrls.push(u); ph=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px;margin-top:6px" alt="">`; mochiMetas.push({zones:(i.mochiZones||[]).slice(), save:null}); }
     html += `<div class="card"><div class="sec-title" style="margin-top:0">${b?b.emoji:'📚'} ${esc(i.name)} <span class="muted">${esc(b?b.name:'')}</span></div>${ph}
       <div class="muted" style="margin-top:4px"><span style="color:var(--gold)">${'★'.repeat(i.rating||0)}</span>${i.place?' / '+esc(i.place):''}${i.got?'':' / 🔜未入手'}</div>
       ${i.memo?`<div style="font-size:.88rem;white-space:pre-wrap;margin-top:4px">${esc(i.memo)}</div>`:''}</div>`;
@@ -2015,7 +2018,10 @@ async function openDiary(ds){
   if(!html) html = '<div class="empty">この日の記録はありません</div>';
   document.getElementById('dy-body').innerHTML = html;
   openModal('modal-diary');
-  requestAnimationFrame(()=>document.querySelectorAll('#dy-body img.dy-mochi').forEach(mochify));
+  requestAnimationFrame(()=>document.querySelectorAll('#dy-body img.dy-mochi').forEach((img,ix)=>{
+    img._mochiMeta = mochiMetas[ix] || {zones:[], save:null};
+    mochify(img);
+  }));
 }
 function diaryMove(dir){
   const target = dir>0 ? diaryDates.find(d=>d>diaryDs) : [...diaryDates].reverse().find(d=>d<diaryDs);
@@ -2087,10 +2093,50 @@ function initGimmicks(body){
       fl.className = 'dy-flash';
       bz.c.appendChild(fl);
       bz.c.classList.remove('cut'); void bz.c.offsetWidth; bz.c.classList.add('cut');
+      slashSplit(bz.c, midX, midY, ang); // 切り口の両側がずれて戻る
       setTimeout(()=>{ sl.remove(); fl.remove(); }, 700);
     }
     bz = null;
   }, {passive:true});
+}
+/* 斬撃後の演出: 切り口を境に両側の画像が逆方向にスライドして少しずれ、元に戻る */
+function slashSplit(card, midX, midY, ang){
+  const d = {x:Math.cos(ang), y:Math.sin(ang)};   // 切った方向
+  const L = 4000;
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:4';
+  const pad = getComputedStyle(card).padding;
+  const mk = side=>{
+    const el = document.createElement('div');
+    el.style.cssText = 'position:absolute;inset:0;padding:'+pad;
+    const n = {x:-d.y*side, y:d.x*side};
+    const p1 = {x:midX-d.x*L, y:midY-d.y*L};
+    const p2 = {x:midX+d.x*L, y:midY+d.y*L};
+    el.style.clipPath = `polygon(${p1.x}px ${p1.y}px,${p2.x}px ${p2.y}px,${p2.x+n.x*L}px ${p2.y+n.y*L}px,${p1.x+n.x*L}px ${p1.y+n.y*L}px)`;
+    for(const ch of card.children){
+      if(ch.classList && (ch.classList.contains('dy-slash')||ch.classList.contains('dy-flash'))) continue;
+      el.appendChild(ch.cloneNode(true));
+    }
+    // canvasはcloneすると中身が空になるので描き写す
+    const sCv = card.querySelectorAll('canvas'), dCv = el.querySelectorAll('canvas');
+    sCv.forEach((s,i)=>{ if(dCv[i]){ dCv[i].width=s.width; dCv[i].height=s.height; dCv[i].getContext('2d').drawImage(s,0,0); } });
+    wrap.appendChild(el);
+    return el;
+  };
+  const hidden = [...card.children].filter(ch=>!(ch.classList && (ch.classList.contains('dy-slash')||ch.classList.contains('dy-flash'))));
+  const a = mk(1), b = mk(-1);
+  hidden.forEach(ch=>ch.style.visibility='hidden'); // クローンと二重に見えないよう本体は一時非表示
+  card.appendChild(wrap);
+  const off = 14;
+  const kf = s=>[
+    {transform:'translate(0,0)'},
+    {transform:`translate(${d.x*off*s}px,${d.y*off*s}px)`, offset:.3},
+    {transform:`translate(${d.x*off*s}px,${d.y*off*s}px)`, offset:.55},
+    {transform:'translate(0,0)'}
+  ];
+  a.animate(kf(1), {duration:700, easing:'cubic-bezier(.25,1.2,.35,1)'});
+  b.animate(kf(-1), {duration:700, easing:'cubic-bezier(.25,1.2,.35,1)'});
+  setTimeout(()=>{ wrap.remove(); hidden.forEach(ch=>ch.style.visibility=''); }, 720);
 }
 /* 餅の好み設定(強さ=バネ・範囲=指を中心とした円の半径)。スライダーで変更し保存 */
 const mochiCfg = (()=>{ try{ const o = JSON.parse(localStorage.getItem('sc_mochi')||'{}'); return {k:+o.k||90, r:+o.r||100}; }catch(e){ return {k:90, r:100}; } })();
@@ -2101,6 +2147,23 @@ function mochiSet(key, v){
 }
 function mochiCtlSync(){
   document.querySelectorAll('.mochi-ctl input').forEach(i=>{ i.value = mochiCfg[i.dataset.k]; });
+}
+/* 範囲指定モード: 円を複数描き、円の中だけ餅にする(作品ごとに保存) */
+let mochiZoneEdit = false;
+function mochiZoneToggle(){
+  const cv = document.querySelector('#gl-body canvas.dy-mochi');
+  if(!cv){ toast('この作品に餅対応の画像がありません'); return; }
+  mochiZoneEdit = !mochiZoneEdit;
+  const btn = document.getElementById('gl-zone-btn');
+  btn.textContent = mochiZoneEdit ? '✅完了' : '✏️範囲指定';
+  btn.classList.toggle('on', mochiZoneEdit);
+  if(mochiZoneEdit){
+    toast('画像を指でなぞって円を描く(複数OK)。円をタップで削除');
+  } else if(cv._meta && cv._meta.save){
+    cv._meta.save(cv._meta.zones);
+    toast(cv._meta.zones.length ? '保存しました。円の中だけが餅になります' : '保存しました。全体が餅になります');
+  }
+  if(cv._redraw) cv._redraw();
 }
 /* 餅: 触った部分が指にくっついて伸び、離すとぷるんと戻る(canvas局所変形・なでモミ対応) */
 function mochify(img){
@@ -2120,23 +2183,41 @@ function mochify(img){
     const src = document.createElement('canvas');
     src.width = cv.width; src.height = cv.height;
     src.getContext('2d').drawImage(img, 0, 0, src.width, src.height);
+    cv._meta = img._mochiMeta || {zones:[], save:null};
     img.replaceWith(cv);
     initMochiCanvas(cv, src);
   });
   if(img.complete) apply(); else img.onload = apply;
 }
 function initMochiCanvas(cv, src){
-  const ctx = cv.getContext('2d', {desynchronized:true}); // 低遅延描画
+  const ctx = cv.getContext('2d'); // 注意: desynchronized:true はAndroid WebViewで画面に映らない(2026-06-13実機確認)
   const W = cv.width, H = cv.height;
   const COLS = 32, ROWS = Math.max(22, Math.round(32*H/W)); // マス数は速度と両立する範囲で増量
   const Rbase = Math.max(W,H)/3;        // 範囲100%のときの影響半径
   const R = ()=>Rbase*mochiCfg.r/100;   // 指を中心とした円の半径(範囲スライダー連動)
   const ptrs = new Map();     // 指ごとの状態(マルチタッチ): id -> {gx,gy,dx,dy,vx,vy,up,px,py}
-  let anim = 0, cumX = 0, flipDone = false, dirty = false;
+  let anim = 0, cumX = 0, flipDone = false, dirty = false, zoneTemp = null;
+  const meta = cv._meta || (cv._meta = {zones:[], save:null});
   function requestDraw(){ // 1フレーム1回だけ描く(無駄な多重描画をなくし反応を安定させる)
     if(dirty) return;
     dirty = true;
     requestAnimationFrame(()=>{ dirty = false; draw(); });
+  }
+  cv._redraw = requestDraw;
+  function drawZones(){ // 範囲指定モード中の円の表示
+    if(!mochiZoneEdit) return;
+    ctx.setTransform(1,0,0,1,0,0);
+    const mWH = Math.max(W,H);
+    ctx.lineWidth = 3; ctx.setLineDash([10,8]);
+    for(const z of meta.zones){
+      ctx.strokeStyle = 'rgba(232,67,147,.9)';
+      ctx.beginPath(); ctx.arc(z.x*W, z.y*H, z.r*mWH, 0, 7); ctx.stroke();
+    }
+    if(zoneTemp && zoneTemp.r>2){
+      ctx.strokeStyle = 'rgba(120,120,130,.9)';
+      ctx.beginPath(); ctx.arc(zoneTemp.x, zoneTemp.y, zoneTemp.r, 0, 7); ctx.stroke();
+    }
+    ctx.setLineDash([]);
   }
   // 格子線の位置: 指(複数可)の近くほどマスを細かく
   function nodesAxis(n, size, gs){
@@ -2165,7 +2246,7 @@ function initMochiCanvas(cv, src){
     ctx.clearRect(0,0,W,H);
     // 注意: 土台に元画像を敷くと、引っ張りで縁が動いたとき下から二重に見えるため全マスを描く
     const ps = [...ptrs.values()].filter(p=>!p.up || Math.hypot(p.dx,p.dy)>0.01);
-    if(!ps.length){ ctx.drawImage(src,0,0); return; }
+    if(!ps.length){ ctx.drawImage(src,0,0); drawZones(); return; }
     const xs = nodesAxis(COLS, W, ps.map(p=>p.gx));
     const ys = nodesAxis(ROWS, H, ps.map(p=>p.gy));
     const Rc = R();
@@ -2177,6 +2258,16 @@ function initMochiCanvas(cv, src){
         for(const p of ps){ // 全部の指の変形を合成(左右から引っ張り合いも可)
           const f = Math.exp(-((xs[c]-p.gx)**2 + (ys[r]-p.gy)**2)/(Rc*Rc));
           X += p.dx*f; Y += p.dy*f;
+        }
+        if(meta.zones.length){ // 範囲指定があれば円の中だけ餅(縁はなだらかに減衰)
+          const mWH = Math.max(W,H);
+          let w = 0;
+          for(const z of meta.zones){
+            const rad = z.r*mWH;
+            const s = 1 - Math.min(1, Math.max(0, (Math.hypot(xs[c]-z.x*W, ys[r]-z.y*H)-rad*0.7)/(rad*0.3+1)));
+            if(s>w) w = s;
+          }
+          X *= w; Y *= w;
         }
         ox[c][r] = X; oy[c][r] = Y;
       }
@@ -2193,6 +2284,7 @@ function initMochiCanvas(cv, src){
       ctx.drawImage(src, xs[c], ys[r], sw, sh, -0.5, -0.5, sw+1, sh+1);
     }
     ctx.setTransform(1,0,0,1,0,0);
+    drawZones();
   }
   function pos(e){
     const r = cv.getBoundingClientRect();
@@ -2202,16 +2294,25 @@ function initMochiCanvas(cv, src){
     e.preventDefault();
     try{ cv.setPointerCapture(e.pointerId); }catch(err){}
     const p = pos(e);
+    if(mochiZoneEdit){ // 範囲指定モード: 円を描き始める
+      zoneTemp = {x:p.x, y:p.y, r:0};
+      requestDraw();
+      return;
+    }
     if(![...ptrs.values()].some(z=>!z.up)){ cumX = 0; flipDone = false; } // 新しいジェスチャー開始
     ptrs.set(e.pointerId, {gx:p.x, gy:p.y, dx:0, dy:0, vx:0, vy:0, up:false, px:e.clientX, py:e.clientY});
     requestDraw();
   });
   cv.addEventListener('pointermove', e=>{
+    if(mochiZoneEdit){
+      if(zoneTemp){ const q2 = pos(e); zoneTemp.r = Math.hypot(q2.x-zoneTemp.x, q2.y-zoneTemp.y); requestDraw(); }
+      return;
+    }
     const p = ptrs.get(e.pointerId);
     if(!p || p.up) return;
     const q = pos(e);
     let ndx = q.x-p.gx, ndy = q.y-p.gy;
-    const m = Math.hypot(ndx, ndy), lim = R()*0.6; // 引っ張り限界(範囲スライダー連動)
+    const m = Math.hypot(ndx, ndy), lim = R()*1.0; // 引っ張り限界(餅らしくぐーっと伸びる長さ・範囲スライダー連動)
     if(m>lim){
       // 限界到達: 超過した指の動きで全体をスライド(指1本のときだけ。2本なら引っ張り合い優先)
       const act = [...ptrs.values()].filter(z=>!z.up);
@@ -2234,6 +2335,20 @@ function initMochiCanvas(cv, src){
     requestDraw();
   });
   const up = e=>{
+    if(mochiZoneEdit){ // 範囲指定モード: 円を確定(小さすぎる=タップは既存の円を削除)
+      if(zoneTemp){
+        const mWH = Math.max(W,H);
+        if(zoneTemp.r < 14){
+          const i = meta.zones.findIndex(z=>Math.hypot(z.x*W-zoneTemp.x, z.y*H-zoneTemp.y) < z.r*mWH);
+          if(i>=0) meta.zones.splice(i,1);
+        } else {
+          meta.zones.push({x:zoneTemp.x/W, y:zoneTemp.y/H, r:zoneTemp.r/mWH});
+        }
+        zoneTemp = null;
+        requestDraw();
+      }
+      return;
+    }
     const p = ptrs.get(e.pointerId);
     if(!p) return;
     p.up = true; // この指の分だけばねでぷるんと戻す(他の指は触り続けられる)
@@ -2281,6 +2396,11 @@ async function galleryOpen(kind){
 }
 function galleryShow(){
   const o = glList[glIdx];
+  if(mochiZoneEdit){ // 作品を移動したら範囲指定モードは解除(保存せず)
+    mochiZoneEdit = false;
+    const zb = document.getElementById('gl-zone-btn');
+    zb.textContent = '✏️範囲指定'; zb.classList.remove('on');
+  }
   glUrls.forEach(u=>URL.revokeObjectURL(u)); glUrls = [];
   document.getElementById('gl-prev').disabled = glIdx<=0;
   document.getElementById('gl-next').disabled = glIdx>=glList.length-1;
@@ -2314,7 +2434,11 @@ function galleryShow(){
   }
   body.innerHTML = html;
   if(glKind==='banzuke') bzCompose(glList[glIdx], document.getElementById('gl-bz-canvas'));
-  requestAnimationFrame(()=>body.querySelectorAll('img.dy-mochi').forEach(mochify));
+  const store = glKind==='zukan' ? 'items' : (glKind==='deco' ? 'deco' : null);
+  requestAnimationFrame(()=>body.querySelectorAll('img.dy-mochi').forEach(img=>{
+    if(store) img._mochiMeta = {zones:(o.mochiZones||[]).slice(), save:async zs=>{ o.mochiZones = zs; await dbPut(store, o); }};
+    mochify(img);
+  }));
 }
 function galleryMove(dir){
   const j = glIdx+dir;

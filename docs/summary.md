@@ -156,6 +156,16 @@ cd android; .\gradlew.bat assembleDebug
   ③斬撃線がカード中央固定→**実際になぞった場所(始点終点の中間)を通る**ように
   ④波紋の輪を太い縁取り→**細い単線**(1.5px、transform scaleをやめwidth/heightアニメに=拡大で線が太らない)。
   ※波紋に餅技術で水面屈折を入れるアイデアはユーザーから出ており未実装(今後の候補)。
+- 2026-06-13(朝2): **観覧モード真っ白バグ修正+範囲指定+演出改良**。
+  ①重大バグ: canvasの`desynchronized:true`はAndroid WebViewで**画面に映らない**(toDataURLは正常=データ検証では
+  見逃す)→撤去。今後canvasで低遅延化したくなっても使わないこと
+  ②餅の**範囲指定**: 観覧モードの「✏️範囲指定」→画像に円を複数なぞり描き(タップで円削除)→「✅完了」で
+  作品ごとに保存(`mochiZones`正規化座標、items/decoレコード)。円の中だけ餅になる(縁0.7R→1.0Rでなだらか減衰)。
+  手帳プレビューにも適用される(編集は観覧モードのみ)。作品移動で編集モード自動解除(保存なし)
+  ③引っ張り限界R*0.6→R*1.0(もっと餅らしく伸びる) ④スライダー: 🍡削除・nowrapで文字崩れ解消・width:0で1行に収納
+  ⑤波紋: 細線→**幅のある白半透明の帯**(輪の部分だけ背景が薄明るく見える)+淡い縁線
+  ⑥斬撃: 水色→灰色。**切断スライド演出**追加=`slashSplit()`が切り口でclip-pathを2分割したクローンを作り
+  両側が逆方向に14pxずれて戻る(canvasは描き写し・本体は一時visibility:hidden・720msで原状復帰)。全て実機検証済み。
 - 検証ツール: `tools/cdp.mjs`(`@ファイルパス` で式をファイルから読める。PSサンドボックス誤検知対策)(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
   使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
 
