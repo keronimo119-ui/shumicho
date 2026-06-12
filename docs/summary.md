@@ -102,6 +102,15 @@ cd android; .\gradlew.bat assembleDebug
 
 ## 7. 経緯ダイジェスト
 
+- 2026-06-12: **軌跡の重大バグ修正**(ユーザー実機報告「文字が打てない・背景が選べない」)。
+  原因=sticky固定ステージ(z-index30)が下の操作パネルを覆いタップを吸っていた。
+  対策=パネルを開いている間はステージを52%幅に縮小表示(`#deco-stage-wrap.compact`、`decoUpdateCompact()`)。
+  あわせてユーザー要望の**「✅決定/✏️編集」ボタン**を追加: 決定でレイアウト固定(タップ・ドラッグ無効、
+  touch-action:pan-yでスクロール可、編集系ボタン非表示=`.edit-only`)。固定状態はページごとに保存(`decoObj.locked`)。
+  実機(CDP)で 文字入力反映・背景色変更・固定/解除・永続化 まで検証済み。
+- 検証ツール: `tools/cdp.mjs`(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
+  使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
+
 - 2026-06-11: 企画決定(ユーザー要望「毎日開く・審査安全・個人出品の強み・ライバルが出にくい・斬新」→俳句手帳+マイ図鑑+マイ番付の3機能合体で「趣味帳」)→実装→署名済みAAB→GitHub登録→実機検証
 - 同日: 広告がモーダルの保存ボタンに重なる問題→モーダル中自動非表示で解決
 - 同日: 大型アップデート(デコ帳・趣味ごよみ・タブ並び替え・俳句写真)

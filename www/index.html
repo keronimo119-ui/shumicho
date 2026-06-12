@@ -140,6 +140,9 @@ img.ph{object-fit:cover;display:block}
 
 /* ===== デコ帳 ===== */
 #deco-stage-wrap{position:sticky;top:calc(54px + env(safe-area-inset-top));z-index:30;background:var(--bg);border-radius:12px;padding:8px;box-shadow:0 6px 14px rgba(40,25,15,.18)}
+#deco-stage-wrap.compact #deco-stage{width:52%;margin:0 auto}
+#deco-stage.locked{touch-action:pan-y}
+#deco-edit-view.locked .edit-only{display:none}
 .deco-note{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-top:8px}
 .deco-note textarea{margin-top:6px;min-height:64px}
 #deco-stage{position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;border-radius:8px;touch-action:none;background:#fff}
@@ -232,10 +235,11 @@ img.ph{object-fit:cover;display:block}
         <div id="deco-stage"><canvas id="deco-ink"></canvas></div>
       </div>
       <div class="deco-tools">
-        <button class="tool-btn" onclick="document.getElementById('deco-img-in').click()">🖼️ 写真</button>
-        <button class="tool-btn" onclick="decoAddText()">🅰️ 文字</button>
-        <button class="tool-btn" id="deco-pen-btn" onclick="decoTogglePen()">🖊️ ペン</button>
-        <button class="tool-btn" onclick="decoTogglePanel('deco-bg-panel')">🎨 背景</button>
+        <button class="tool-btn edit-only" onclick="document.getElementById('deco-img-in').click()">🖼️ 写真</button>
+        <button class="tool-btn edit-only" onclick="decoAddText()">🅰️ 文字</button>
+        <button class="tool-btn edit-only" id="deco-pen-btn" onclick="decoTogglePen()">🖊️ ペン</button>
+        <button class="tool-btn edit-only" onclick="decoTogglePanel('deco-bg-panel')">🎨 背景</button>
+        <button class="tool-btn" id="deco-lock-btn" onclick="decoToggleLock()">✅ 決定</button>
         <button class="tool-btn" onclick="decoExport()">📤 画像に</button>
       </div>
       <input type="file" id="deco-img-in" accept="image/*" style="display:none" onchange="decoPickImg(this)">
@@ -911,6 +915,8 @@ async function decoOpen(id){
   document.getElementById('deco-oncal').checked = decoObj.onCal!==false;
   document.getElementById('deco-pen-btn').classList.remove('on');
   ['deco-bg-panel','deco-pen-panel','deco-sel-panel'].forEach(i=>document.getElementById(i).style.display='none');
+  document.getElementById('deco-stage-wrap').classList.remove('compact');
+  decoApplyLock();
   showSub('page-zukan','deco-edit-view');
   // inkキャンバス初期化
   const ink = document.getElementById('deco-ink');
@@ -960,6 +966,36 @@ function renderColorDots(elId, onPick, withPicker){
 function decoTogglePanel(id){
   const el = document.getElementById(id);
   el.style.display = el.style.display==='none' ? '' : 'none';
+  decoUpdateCompact();
+}
+/* パネルを開いている間はステージを縮小表示(パネルがsticky下に隠れて押せなくなる対策) */
+function decoUpdateCompact(){
+  if(decoPtrs.size>0) return; // ドラッグ中は切り替えない(指を離した時に反映)
+  const open = ['deco-sel-panel','deco-bg-panel','deco-pen-panel'].some(i=>document.getElementById(i).style.display!=='none');
+  const wrap = document.getElementById('deco-stage-wrap');
+  if(wrap.classList.contains('compact') !== open){
+    wrap.classList.toggle('compact', open);
+    renderDecoStage();
+  }
+}
+/* 決定(固定)/編集の切り替え: 固定中はタップ・ドラッグ無効でスクロールしても崩れない */
+function decoApplyLock(){
+  const locked = !!(decoObj && decoObj.locked);
+  document.getElementById('deco-edit-view').classList.toggle('locked', locked);
+  document.getElementById('deco-stage').classList.toggle('locked', locked);
+  document.getElementById('deco-lock-btn').textContent = locked ? '✏️ 編集' : '✅ 決定';
+  if(locked){
+    if(decoPen) decoTogglePen();
+    ['deco-bg-panel','deco-pen-panel','deco-sel-panel'].forEach(i=>document.getElementById(i).style.display='none');
+    decoSelect(-1);
+  }
+}
+function decoToggleLock(){
+  if(!decoObj) return;
+  decoObj.locked = !decoObj.locked;
+  decoApplyLock();
+  decoTouchSave();
+  toast(decoObj.locked ? 'レイアウトを固定しました(✏️編集で解除)' : '編集モードに戻りました');
 }
 function decoTouchSave(){
   if(!decoObj) return;
@@ -1015,8 +1051,9 @@ function decoSelect(i){
   decoSel = i;
   document.querySelectorAll('#deco-stage .deco-layer').forEach(n=>n.classList.toggle('sel', +n.dataset.idx===i));
   const panel = document.getElementById('deco-sel-panel');
-  if(i<0){ panel.style.display='none'; return; }
+  if(i<0){ panel.style.display='none'; decoUpdateCompact(); return; }
   panel.style.display='';
+  decoUpdateCompact();
   const L = decoObj.layers[i];
   document.getElementById('deco-text-row').style.display = L.type==='text' ? '' : 'none';
   document.getElementById('deco-mask-row').style.display = L.type==='img' ? '' : 'none';
@@ -1137,7 +1174,7 @@ function decoTogglePen(){
   document.getElementById('deco-pen-btn').classList.toggle('on', decoPen);
   document.getElementById('deco-ink').classList.toggle('inkmode', decoPen);
   document.getElementById('deco-pen-panel').style.display = decoPen ? '' : 'none';
-  if(decoPen) decoSelect(-1);
+  if(decoPen) decoSelect(-1); else decoUpdateCompact();
 }
 function decoToggleEraser(){
   decoEraser = !decoEraser;
@@ -1157,6 +1194,7 @@ function decoInitPointer(){
   const ink = document.getElementById('deco-ink');
   st.addEventListener('pointerdown', e=>{
     if(decoPen) return;
+    if(decoObj && decoObj.locked) return; // 固定中は操作不可(スクロール優先)
     e.preventDefault();
     st.setPointerCapture(e.pointerId);
     decoPtrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
