@@ -112,6 +112,9 @@ cd android; .\gradlew.bat assembleDebug
   ①文字入力欄(`#deco-text-row`)を sticky の `#deco-stage-wrap` 内・ステージ直下へ移動=キーボードが出ても
   画像と入力欄が常にセットで見える ②「🅰️文字」で即フォーカス+全選択(すぐ打ち替え可、初期文字は「文字」)
   ③AndroidManifestに `android:windowSoftInputMode="adjustResize"` を明示(画面を縮める方式に固定)。
+- 2026-06-12: **手帳プレビューに観覧モード追加**(ユーザー要望「完成手帳をパラパラめくって眺めたい」)。
+  「◀前の記録日/次の記録日▶」ボタン+左右スワイプで、記録のある日だけを順にめくれる(`diaryMove`/`diaryInitSwipe`)。
+  位置表示「n/全ページ」、端で停止、めくると後ろのカレンダー選択日も追従。実機検証済み。
 - 検証ツール: `tools/cdp.mjs`(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
   使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
 

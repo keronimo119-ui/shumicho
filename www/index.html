@@ -526,6 +526,11 @@ img.ph{object-fit:cover;display:block}
   <div class="modal-box">
     <h3 id="dy-title" class="serif"></h3>
     <div class="muted" id="dy-sub"></div>
+    <div class="row between" style="margin-top:8px">
+      <button class="tool-btn" id="dy-prev" onclick="diaryMove(-1)">◀ 前の記録日</button>
+      <span class="muted" id="dy-pos" style="font-size:.78rem"></span>
+      <button class="tool-btn" id="dy-next" onclick="diaryMove(1)">次の記録日 ▶</button>
+    </div>
     <div id="dy-body" style="margin-top:10px"></div>
     <div class="modal-actions"><button class="btn sub" onclick="closeModal('modal-diary')">閉じる</button></div>
   </div>
@@ -1884,11 +1889,23 @@ function renderCalDay(ev){
     : '<div class="empty" style="padding:14px">この日の記録はありません</div>';
 }
 
-/* --- 完成手帳プレビュー(閲覧専用) --- */
-let diaryUrls = [];
+/* --- 完成手帳プレビュー(閲覧専用・記録日をパラパラめくれる) --- */
+let diaryUrls = [], diaryDates = [], diaryDs = null;
 async function openDiary(ds){
   const [items, haiku, deco, banzuke, books] = await Promise.all([dbAll('items'), dbAll('haiku'), dbAll('deco'), dbAll('banzuke'), dbAll('books')]);
   const bookMap = {}; books.forEach(b=>bookMap[b.id]=b);
+  // 記録のある日付一覧(めくり用・空の日は飛ばす)
+  const dset = new Set();
+  items.filter(i=>i.onCal!==false && i.date).forEach(i=>dset.add(i.date));
+  haiku.filter(h=>h.onCal!==false && h.date).forEach(h=>dset.add(h.date));
+  deco.filter(p=>p.onCal!==false && p.date).forEach(p=>dset.add(p.date));
+  banzuke.filter(s=>s.onCal!==false && s.date).forEach(s=>dset.add(s.date));
+  diaryDates = [...dset].sort();
+  diaryDs = ds;
+  const idx = diaryDates.indexOf(ds);
+  document.getElementById('dy-prev').disabled = !diaryDates.some(d=>d<ds);
+  document.getElementById('dy-next').disabled = !diaryDates.some(d=>d>ds);
+  document.getElementById('dy-pos').textContent = idx>=0 ? `${idx+1}/${diaryDates.length}ページ` : '';
   const d = new Date(ds+'T00:00:00');
   const W = ['日','月','火','水','木','金','土'];
   const hol = holidaysOf(d.getFullYear())[(d.getMonth()+1)+'-'+d.getDate()];
@@ -1932,6 +1949,23 @@ async function openDiary(ds){
   if(!html) html = '<div class="empty">この日の記録はありません</div>';
   document.getElementById('dy-body').innerHTML = html;
   openModal('modal-diary');
+}
+function diaryMove(dir){
+  const target = dir>0 ? diaryDates.find(d=>d>diaryDs) : [...diaryDates].reverse().find(d=>d<diaryDs);
+  if(!target) return;
+  calSelDate = target; renderCal(); // 後ろのカレンダーも追従
+  openDiary(target);
+}
+function diaryInitSwipe(){
+  const box = document.querySelector('#modal-diary .modal-box');
+  let sx = null, sy = null;
+  box.addEventListener('touchstart', e=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+  box.addEventListener('touchend', e=>{
+    if(sx==null) return;
+    const dx = e.changedTouches[0].clientX-sx, dy = e.changedTouches[0].clientY-sy;
+    sx = null;
+    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.5) diaryMove(dx<0?1:-1); // 左へ払う=次の日
+  }, {passive:true});
 }
 function calGoItem(bookId, itemId){ switchTab('zukan'); openBook(bookId).then(()=>openItemForm(itemId)); }
 function calGoHaiku(id){ switchTab('haiku'); viewHaiku(id); }
@@ -2025,6 +2059,7 @@ function initAdMob(){
   applyTabOrder();
   renderTabOrderList();
   decoInitPointer();
+  diaryInitSwipe();
   await openDB();
   renderKigoCard();
   await renderBooks();
