@@ -2110,27 +2110,53 @@ function initMochiCanvas(cv, src){
   const COLS = 24, ROWS = Math.max(16, Math.round(24*H/W));
   const R = Math.max(W,H)/3; // 指の影響半径
   let grab = null, dx = 0, dy = 0, vx = 0, vy = 0, anim = 0;
+  // 格子線の位置: 指の近くほどマスを細かく(変形が激しい場所に細かさを集める)
+  function nodesAxis(n, size, g){
+    const pts = [];
+    if(g==null){ for(let i=0;i<=n;i++) pts.push(i*size/n); return pts; }
+    const S = 160, sig = R*0.8;
+    let acc = 0; const cum = [0];
+    for(let i=1;i<=S;i++){
+      const x = (i-.5)*size/S;
+      acc += 1 + 2.2*Math.exp(-((x-g)**2)/(2*sig*sig)); // 密度: 指の近くほど高い
+      cum.push(acc);
+    }
+    let j = 0;
+    for(let i=0;i<=n;i++){
+      const target = acc*i/n;
+      while(j<S-1 && cum[j+1]<target) j++;
+      const t = cum[j+1]>cum[j] ? (target-cum[j])/(cum[j+1]-cum[j]) : 0;
+      pts.push(Math.max(0, Math.min(size, (j+t)*size/S)));
+    }
+    pts[0] = 0; pts[n] = size;
+    return pts;
+  }
   function draw(){
+    ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0,0,W,H);
     if(!grab || (dx===0 && dy===0)){ ctx.drawImage(src,0,0); return; }
-    const cw = W/COLS, ch = H/ROWS;
-    // 格子点ごとの変位を計算し、隣のマスと辺を共有して描く(隙間が出ない網目変形)
+    const xs = nodesAxis(COLS, W, grab.gx);
+    const ys = nodesAxis(ROWS, H, grab.gy);
     const ox = [], oy = [];
     for(let c=0;c<=COLS;c++){
       ox[c]=[]; oy[c]=[];
       for(let r=0;r<=ROWS;r++){
-        const f = Math.exp(-((c*cw-grab.gx)**2 + (r*ch-grab.gy)**2)/(R*R));
+        const f = Math.exp(-((xs[c]-grab.gx)**2 + (ys[r]-grab.gy)**2)/(R*R));
         ox[c][r] = dx*f; oy[c][r] = dy*f;
       }
     }
+    // 各マスを平行四辺形として描く(斜めの変形でも辺がつながり隙間が出ない)
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-      const x0 = c*cw     + (ox[c][r]+ox[c][r+1])/2;
-      const x1 = (c+1)*cw + (ox[c+1][r]+ox[c+1][r+1])/2;
-      const y0 = r*ch     + (oy[c][r]+oy[c+1][r])/2;
-      const y1 = (r+1)*ch + (oy[c][r+1]+oy[c+1][r+1])/2;
-      // +0.6は描画の継ぎ目消し(隣の色とわずかに重ねて埋める)
-      ctx.drawImage(src, c*cw, r*ch, cw, ch, x0, y0, x1-x0+0.6, y1-y0+0.6);
+      const sw = xs[c+1]-xs[c], sh = ys[r+1]-ys[r];
+      if(sw<=0 || sh<=0) continue;
+      const x00 = xs[c]+ox[c][r],     y00 = ys[r]+oy[c][r];
+      const x10 = xs[c+1]+ox[c+1][r], y10 = ys[r]+oy[c+1][r];
+      const x01 = xs[c]+ox[c][r+1],   y01 = ys[r+1]+oy[c][r+1];
+      ctx.setTransform((x10-x00)/sw, (y10-y00)/sw, (x01-x00)/sh, (y01-y00)/sh, x00, y00);
+      // -0.5/+1は継ぎ目消し(隣のマスの対応色をわずかに重ねて埋める)
+      ctx.drawImage(src, xs[c], ys[r], sw, sh, -0.5, -0.5, sw+1, sh+1);
     }
+    ctx.setTransform(1,0,0,1,0,0);
   }
   function pos(e){
     const r = cv.getBoundingClientRect();
