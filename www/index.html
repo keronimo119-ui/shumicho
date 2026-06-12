@@ -2108,18 +2108,21 @@ function initMochiCanvas(cv, src){
   const ctx = cv.getContext('2d');
   const W = cv.width, H = cv.height;
   const COLS = 24, ROWS = Math.max(16, Math.round(24*H/W));
-  const R = Math.max(W,H)/3; // 指の影響半径
-  let grab = null, dx = 0, dy = 0, vx = 0, vy = 0, anim = 0;
-  // 格子線の位置: 指の近くほどマスを細かく(変形が激しい場所に細かさを集める)
-  function nodesAxis(n, size, g){
+  const R = Math.max(W,H)/3;  // 指の影響半径
+  const LIM = R*0.6;          // 引っ張り限界
+  const ptrs = new Map();     // 指ごとの状態(マルチタッチ): id -> {gx,gy,dx,dy,vx,vy,up,px,py}
+  let anim = 0, cumX = 0, flipDone = false;
+  // 格子線の位置: 指(複数可)の近くほどマスを細かく
+  function nodesAxis(n, size, gs){
     const pts = [];
-    if(g==null){ for(let i=0;i<=n;i++) pts.push(i*size/n); return pts; }
+    if(!gs.length){ for(let i=0;i<=n;i++) pts.push(i*size/n); return pts; }
     const S = 160, sig = R*0.8;
     let acc = 0; const cum = [0];
     for(let i=1;i<=S;i++){
       const x = (i-.5)*size/S;
-      acc += 1 + 2.2*Math.exp(-((x-g)**2)/(2*sig*sig)); // 密度: 指の近くほど高い
-      cum.push(acc);
+      let d = 1;
+      for(const g of gs) d += 2.2*Math.exp(-((x-g)**2)/(2*sig*sig));
+      acc += d; cum.push(acc);
     }
     let j = 0;
     for(let i=0;i<=n;i++){
@@ -2134,15 +2137,20 @@ function initMochiCanvas(cv, src){
   function draw(){
     ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0,0,W,H);
-    if(!grab || (dx===0 && dy===0)){ ctx.drawImage(src,0,0); return; }
-    const xs = nodesAxis(COLS, W, grab.gx);
-    const ys = nodesAxis(ROWS, H, grab.gy);
+    const ps = [...ptrs.values()].filter(p=>!p.up || Math.hypot(p.dx,p.dy)>0.01);
+    if(!ps.length){ ctx.drawImage(src,0,0); return; }
+    const xs = nodesAxis(COLS, W, ps.map(p=>p.gx));
+    const ys = nodesAxis(ROWS, H, ps.map(p=>p.gy));
     const ox = [], oy = [];
     for(let c=0;c<=COLS;c++){
       ox[c]=[]; oy[c]=[];
       for(let r=0;r<=ROWS;r++){
-        const f = Math.exp(-((xs[c]-grab.gx)**2 + (ys[r]-grab.gy)**2)/(R*R));
-        ox[c][r] = dx*f; oy[c][r] = dy*f;
+        let X = 0, Y = 0;
+        for(const p of ps){ // 全部の指の変形を合成(左右から引っ張り合いも可)
+          const f = Math.exp(-((xs[c]-p.gx)**2 + (ys[r]-p.gy)**2)/(R*R));
+          X += p.dx*f; Y += p.dy*f;
+        }
+        ox[c][r] = X; oy[c][r] = Y;
       }
     }
     // 各マスを平行四辺形として描く(斜めの変形でも辺がつながり隙間が出ない)
@@ -2165,31 +2173,54 @@ function initMochiCanvas(cv, src){
   cv.addEventListener('pointerdown', e=>{
     e.preventDefault();
     try{ cv.setPointerCapture(e.pointerId); }catch(err){}
-    cancelAnimationFrame(anim);
     const p = pos(e);
-    grab = {gx:p.x, gy:p.y};
-    dx = dy = vx = vy = 0;
+    if(![...ptrs.values()].some(z=>!z.up)){ cumX = 0; flipDone = false; } // 新しいジェスチャー開始
+    ptrs.set(e.pointerId, {gx:p.x, gy:p.y, dx:0, dy:0, vx:0, vy:0, up:false, px:e.clientX, py:e.clientY});
     draw();
   });
   cv.addEventListener('pointermove', e=>{
-    if(!grab) return;
-    const p = pos(e);
-    dx = p.x-grab.gx; dy = p.y-grab.gy;
-    const lim = R*0.6, m = Math.hypot(dx,dy);
-    if(m>lim){ // 限界を超えたらつかみ位置が指に遅れてついてくる(なでる動き)
-      grab.gx += dx*(1-lim/m); grab.gy += dy*(1-lim/m);
-      dx *= lim/m; dy *= lim/m;
+    const p = ptrs.get(e.pointerId);
+    if(!p || p.up) return;
+    const q = pos(e);
+    let ndx = q.x-p.gx, ndy = q.y-p.gy;
+    const m = Math.hypot(ndx, ndy);
+    if(m>LIM){
+      // 限界到達: 超過した指の動きで全体をスライド(指1本のときだけ。2本なら引っ張り合い優先)
+      const act = [...ptrs.values()].filter(z=>!z.up);
+      if(act.length===1){
+        const sc = cv.closest('.modal-box');
+        if(sc) sc.scrollTop -= (e.clientY-p.py); // 縦: 画面スクロール
+        cumX += (e.clientX-p.px);                 // 横: たまったら前後の作品へ
+        if(!flipDone && Math.abs(cumX)>90){
+          flipDone = true;
+          const dir = cumX<0 ? 1 : -1;
+          if(document.getElementById('modal-gallery').classList.contains('open')) galleryMove(dir);
+          else if(document.getElementById('modal-diary').classList.contains('open')) diaryMove(dir);
+        }
+      }
+      ndx *= LIM/m; ndy *= LIM/m;
+      p.gx = q.x-ndx; p.gy = q.y-ndy; // つかみ位置が指に追従(くっつき感を維持)
     }
+    p.dx = ndx; p.dy = ndy;
+    p.px = e.clientX; p.py = e.clientY;
     draw();
   });
-  const up = ()=>{
-    if(!grab) return;
-    const spring = ()=>{ // ばねでぷるんと戻る
-      vx += -dx*0.22; vy += -dy*0.22; vx *= 0.84; vy *= 0.84;
-      dx += vx; dy += vy;
-      if(Math.hypot(dx,dy)<.5 && Math.hypot(vx,vy)<.5){ dx=dy=0; grab=null; draw(); return; }
+  const up = e=>{
+    const p = ptrs.get(e.pointerId);
+    if(!p) return;
+    p.up = true; // この指の分だけばねでぷるんと戻す(他の指は触り続けられる)
+    cancelAnimationFrame(anim);
+    const spring = ()=>{
+      let alive = false;
+      for(const [id, z] of ptrs){
+        if(!z.up) continue;
+        z.vx += -z.dx*0.22; z.vy += -z.dy*0.22; z.vx *= 0.84; z.vy *= 0.84;
+        z.dx += z.vx; z.dy += z.vy;
+        if(Math.hypot(z.dx,z.dy)<.5 && Math.hypot(z.vx,z.vy)<.5) ptrs.delete(id);
+        else alive = true;
+      }
       draw();
-      anim = requestAnimationFrame(spring);
+      if(alive) anim = requestAnimationFrame(spring);
     };
     anim = requestAnimationFrame(spring);
   };
