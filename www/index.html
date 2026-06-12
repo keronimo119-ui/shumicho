@@ -233,6 +233,11 @@ img.ph{object-fit:cover;display:block}
       </details>
       <div id="deco-stage-wrap">
         <div id="deco-stage"><canvas id="deco-ink"></canvas></div>
+        <div class="row" id="deco-text-row" style="display:none;margin-top:8px">
+          <input type="text" id="deco-text-in" maxlength="100" placeholder="文字を入力" oninput="decoTextChange()">
+          <input type="color" id="deco-text-color" onchange="decoTextChange()" style="width:38px;height:38px;border:none;background:none;padding:0">
+          <button class="tool-btn mini" id="deco-font-btn" onclick="decoToggleFont()">明朝</button>
+        </div>
       </div>
       <div class="deco-tools">
         <button class="tool-btn edit-only" onclick="document.getElementById('deco-img-in').click()">🖼️ 写真</button>
@@ -258,12 +263,7 @@ img.ph{object-fit:cover;display:block}
         </div>
       </div>
       <div class="deco-panel" id="deco-sel-panel" style="display:none">
-        <div class="row" id="deco-text-row" style="display:none">
-          <input type="text" id="deco-text-in" maxlength="100" placeholder="文字を入力" oninput="decoTextChange()">
-          <input type="color" id="deco-text-color" onchange="decoTextChange()" style="width:38px;height:38px;border:none;background:none;padding:0">
-          <button class="tool-btn mini" id="deco-font-btn" onclick="decoToggleFont()">明朝</button>
-        </div>
-        <div class="slider-row">大きさ <input type="range" id="deco-sl-size" min="4" max="160" value="50" oninput="decoSlide()"></div>
+        <div class="slider-row" style="margin-top:0">大きさ <input type="range" id="deco-sl-size" min="4" max="160" value="50" oninput="decoSlide()"></div>
         <div class="slider-row">回転 <input type="range" id="deco-sl-rot" min="-180" max="180" value="0" oninput="decoSlide()"></div>
         <div class="slider-row">透明度 <input type="range" id="deco-sl-op" min="10" max="100" value="100" oninput="decoSlide()"></div>
         <div class="deco-tools" style="margin-top:6px" id="deco-mask-row">
@@ -1091,8 +1091,11 @@ function decoToggleFont(){
   renderDecoStage(); decoTouchSave();
 }
 function decoAddText(){
-  decoObj.layers.push({type:'text', text:'タップして文字パネルで編集', color:'#e84393', size:6, font:'', x:50, y:50, rot:0, opacity:1});
+  decoObj.layers.push({type:'text', text:'文字', color:'#e84393', size:6, font:'', x:50, y:50, rot:0, opacity:1});
   renderDecoStage(); decoSelect(decoObj.layers.length-1); decoTouchSave();
+  // すぐ打ち始められるように入力欄へフォーカス(全選択で打てば置き換わる)
+  const inEl = document.getElementById('deco-text-in');
+  inEl.focus(); inEl.select();
 }
 function decoPickImg(input){
   const f = input.files && input.files[0];

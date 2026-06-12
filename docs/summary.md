@@ -108,6 +108,10 @@ cd android; .\gradlew.bat assembleDebug
   あわせてユーザー要望の**「✅決定/✏️編集」ボタン**を追加: 決定でレイアウト固定(タップ・ドラッグ無効、
   touch-action:pan-yでスクロール可、編集系ボタン非表示=`.edit-only`)。固定状態はページごとに保存(`decoObj.locked`)。
   実機(CDP)で 文字入力反映・背景色変更・固定/解除・永続化 まで検証済み。
+- 2026-06-12: **文字編集の操作感改善**(ユーザー報告「キーボードで入力欄が押し上げられ画像の裏に隠れる」)。
+  ①文字入力欄(`#deco-text-row`)を sticky の `#deco-stage-wrap` 内・ステージ直下へ移動=キーボードが出ても
+  画像と入力欄が常にセットで見える ②「🅰️文字」で即フォーカス+全選択(すぐ打ち替え可、初期文字は「文字」)
+  ③AndroidManifestに `android:windowSoftInputMode="adjustResize"` を明示(画面を縮める方式に固定)。
 - 検証ツール: `tools/cdp.mjs`(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
   使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
 
