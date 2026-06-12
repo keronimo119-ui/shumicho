@@ -157,8 +157,8 @@ img.ph{object-fit:cover;display:block}
 .dy-bz.cut{animation:dyCut .5s ease-out}
 @keyframes dyCut{0%{transform:none}18%{transform:translate(6px,-5px) rotate(1.6deg)}42%{transform:translate(-6px,5px) rotate(-1.6deg)}68%{transform:translate(3px,-2px) rotate(.8deg)}100%{transform:none}}
 /* 波紋: 自然な水。広がるほど減速し輪が細く淡くなる+中心のしぶき */
-.dy-ripple{position:absolute;border:4px solid rgba(150,205,255,.85);border-radius:50%;width:16px;height:16px;transform:translate(-50%,-50%) scale(0);pointer-events:none;z-index:5;animation:dyRipple 1.4s cubic-bezier(.08,.6,.22,1) forwards}
-@keyframes dyRipple{0%{transform:translate(-50%,-50%) scale(0);opacity:.95;border-width:5px}55%{opacity:.5;border-width:2px}100%{transform:translate(-50%,-50%) scale(17);opacity:0;border-width:1px}}
+.dy-ripple{position:absolute;border:1.5px solid rgba(150,205,255,.85);border-radius:50%;width:10px;height:10px;transform:translate(-50%,-50%);pointer-events:none;z-index:5;animation:dyRipple 1.4s cubic-bezier(.08,.6,.22,1) forwards}
+@keyframes dyRipple{0%{width:10px;height:10px;opacity:.95}55%{opacity:.5}100%{width:320px;height:320px;opacity:0;border-width:1px}}
 .dy-drop{position:absolute;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,rgba(205,232,255,.95),rgba(150,205,255,0) 70%);transform:translate(-50%,-50%) scale(.5);pointer-events:none;z-index:5;animation:dyDrop .55s ease-out forwards}
 @keyframes dyDrop{0%{opacity:.95;transform:translate(-50%,-50%) scale(.5)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.8)}}
 .deco-note{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-top:8px}
@@ -549,6 +549,10 @@ img.ph{object-fit:cover;display:block}
   <div class="modal-box">
     <h3 id="dy-title" class="serif"></h3>
     <div class="muted" id="dy-sub"></div>
+    <div class="mochi-ctl" style="display:flex;gap:10px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
+      🍡強さ<input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:12px;margin:0;padding:0">
+      範囲<input type="range" data-k="r" min="15" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:12px;margin:0;padding:0">
+    </div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="dy-prev" onclick="diaryMove(-1)">◀ 前の記録日</button>
       <span class="muted" id="dy-pos" style="font-size:.78rem"></span>
@@ -563,6 +567,10 @@ img.ph{object-fit:cover;display:block}
 <div class="modal" id="modal-gallery">
   <div class="modal-box">
     <h3 id="gl-title" class="serif"></h3>
+    <div class="mochi-ctl" style="display:flex;gap:10px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
+      🍡強さ<input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:12px;margin:0;padding:0">
+      範囲<input type="range" data-k="r" min="15" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:12px;margin:0;padding:0">
+    </div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="gl-prev" onclick="galleryMove(-1)">◀ 前の作品</button>
       <span class="muted" id="gl-pos" style="font-size:.78rem"></span>
@@ -2065,11 +2073,14 @@ function initGimmicks(body){
       const r = bz.c.getBoundingClientRect();
       const ang = Math.atan2(dy,dx);
       const len = Math.hypot(r.width,r.height)+60;
+      // 実際になぞった場所(始点と終点の中間)を斬撃線が通る
+      const midX = (bz.x + e.changedTouches[0].clientX)/2 - r.left;
+      const midY = (bz.y + e.changedTouches[0].clientY)/2 - r.top;
       const sl = document.createElement('span');
       sl.className = 'dy-slash';
       sl.style.width = len+'px';
-      sl.style.left = (r.width/2-Math.cos(ang)*len/2)+'px';
-      sl.style.top = (r.height/2-Math.sin(ang)*len/2)+'px';
+      sl.style.left = (midX-Math.cos(ang)*len/2)+'px';
+      sl.style.top = (midY-Math.sin(ang)*len/2)+'px';
       sl.style.transform = `rotate(${ang*180/Math.PI}deg)`;
       bz.c.appendChild(sl);
       const fl = document.createElement('span');
@@ -2080,6 +2091,16 @@ function initGimmicks(body){
     }
     bz = null;
   }, {passive:true});
+}
+/* 餅の好み設定(強さ=バネ・範囲=指を中心とした円の半径)。スライダーで変更し保存 */
+const mochiCfg = (()=>{ try{ const o = JSON.parse(localStorage.getItem('sc_mochi')||'{}'); return {k:+o.k||90, r:+o.r||100}; }catch(e){ return {k:90, r:100}; } })();
+function mochiSet(key, v){
+  mochiCfg[key] = +v;
+  localStorage.setItem('sc_mochi', JSON.stringify(mochiCfg));
+  document.querySelectorAll(`.mochi-ctl input[data-k="${key}"]`).forEach(i=>{ if(+i.value !== +v) i.value = v; });
+}
+function mochiCtlSync(){
+  document.querySelectorAll('.mochi-ctl input').forEach(i=>{ i.value = mochiCfg[i.dataset.k]; });
 }
 /* 餅: 触った部分が指にくっついて伸び、離すとぷるんと戻る(canvas局所変形・なでモミ対応) */
 function mochify(img){
@@ -2108,8 +2129,8 @@ function initMochiCanvas(cv, src){
   const ctx = cv.getContext('2d', {desynchronized:true}); // 低遅延描画
   const W = cv.width, H = cv.height;
   const COLS = 32, ROWS = Math.max(22, Math.round(32*H/W)); // マス数は速度と両立する範囲で増量
-  const R = Math.max(W,H)/3;  // 指の影響半径
-  const LIM = R*0.6;          // 引っ張り限界
+  const Rbase = Math.max(W,H)/3;        // 範囲100%のときの影響半径
+  const R = ()=>Rbase*mochiCfg.r/100;   // 指を中心とした円の半径(範囲スライダー連動)
   const ptrs = new Map();     // 指ごとの状態(マルチタッチ): id -> {gx,gy,dx,dy,vx,vy,up,px,py}
   let anim = 0, cumX = 0, flipDone = false, dirty = false;
   function requestDraw(){ // 1フレーム1回だけ描く(無駄な多重描画をなくし反応を安定させる)
@@ -2121,7 +2142,7 @@ function initMochiCanvas(cv, src){
   function nodesAxis(n, size, gs){
     const pts = [];
     if(!gs.length){ for(let i=0;i<=n;i++) pts.push(i*size/n); return pts; }
-    const S = 160, sig = R*0.55;
+    const S = 160, sig = R()*0.55;
     let acc = 0; const cum = [0];
     for(let i=1;i<=S;i++){
       const x = (i-.5)*size/S;
@@ -2142,30 +2163,26 @@ function initMochiCanvas(cv, src){
   function draw(){
     ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0,0,W,H);
-    ctx.drawImage(src,0,0); // まず土台(変形ゼロの全体)を敷く
+    // 注意: 土台に元画像を敷くと、引っ張りで縁が動いたとき下から二重に見えるため全マスを描く
     const ps = [...ptrs.values()].filter(p=>!p.up || Math.hypot(p.dx,p.dy)>0.01);
-    if(!ps.length) return;
+    if(!ps.length){ ctx.drawImage(src,0,0); return; }
     const xs = nodesAxis(COLS, W, ps.map(p=>p.gx));
     const ys = nodesAxis(ROWS, H, ps.map(p=>p.gy));
+    const Rc = R();
     const ox = [], oy = [];
     for(let c=0;c<=COLS;c++){
       ox[c]=[]; oy[c]=[];
       for(let r=0;r<=ROWS;r++){
         let X = 0, Y = 0;
         for(const p of ps){ // 全部の指の変形を合成(左右から引っ張り合いも可)
-          const f = Math.exp(-((xs[c]-p.gx)**2 + (ys[r]-p.gy)**2)/(R*R));
+          const f = Math.exp(-((xs[c]-p.gx)**2 + (ys[r]-p.gy)**2)/(Rc*Rc));
           X += p.dx*f; Y += p.dy*f;
         }
         ox[c][r] = X; oy[c][r] = Y;
       }
     }
-    // 変形しているマスだけ平行四辺形として描き直す(動かないマスは土台のままでOK=高速化)
-    const EPS = 0.5;
+    // 各マスを平行四辺形として描く(斜めの変形でも辺がつながり隙間が出ない)
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-      if(Math.abs(ox[c][r])<EPS && Math.abs(oy[c][r])<EPS &&
-         Math.abs(ox[c+1][r])<EPS && Math.abs(oy[c+1][r])<EPS &&
-         Math.abs(ox[c][r+1])<EPS && Math.abs(oy[c][r+1])<EPS &&
-         Math.abs(ox[c+1][r+1])<EPS && Math.abs(oy[c+1][r+1])<EPS) continue;
       const sw = xs[c+1]-xs[c], sh = ys[r+1]-ys[r];
       if(sw<=0 || sh<=0) continue;
       const x00 = xs[c]+ox[c][r],     y00 = ys[r]+oy[c][r];
@@ -2194,8 +2211,8 @@ function initMochiCanvas(cv, src){
     if(!p || p.up) return;
     const q = pos(e);
     let ndx = q.x-p.gx, ndy = q.y-p.gy;
-    const m = Math.hypot(ndx, ndy);
-    if(m>LIM){
+    const m = Math.hypot(ndx, ndy), lim = R()*0.6; // 引っ張り限界(範囲スライダー連動)
+    if(m>lim){
       // 限界到達: 超過した指の動きで全体をスライド(指1本のときだけ。2本なら引っ張り合い優先)
       const act = [...ptrs.values()].filter(z=>!z.up);
       if(act.length===1){
@@ -2209,7 +2226,7 @@ function initMochiCanvas(cv, src){
           else if(document.getElementById('modal-diary').classList.contains('open')) diaryMove(dir);
         }
       }
-      ndx *= LIM/m; ndy *= LIM/m;
+      ndx *= lim/m; ndy *= lim/m;
       p.gx = q.x-ndx; p.gy = q.y-ndy; // つかみ位置が指に追従(くっつき感を維持)
     }
     p.dx = ndx; p.dy = ndy;
@@ -2223,9 +2240,10 @@ function initMochiCanvas(cv, src){
     cancelAnimationFrame(anim);
     const spring = ()=>{
       let alive = false;
+      const K = 0.389*mochiCfg.k/100; // バネ強さ(スライダー連動。90%=従来の0.35)
       for(const [id, z] of ptrs){
         if(!z.up) continue;
-        z.vx += -z.dx*0.35; z.vy += -z.dy*0.35; z.vx *= 0.80; z.vy *= 0.80; // 強め&軽めのバネ=速くプルン
+        z.vx += -z.dx*K; z.vy += -z.dy*K; z.vx *= 0.80; z.vy *= 0.80;
         z.dx += z.vx; z.dy += z.vy;
         if(Math.hypot(z.dx,z.dy)<.5 && Math.hypot(z.vx,z.vy)<.5) ptrs.delete(id);
         else alive = true;
@@ -2414,6 +2432,7 @@ function initAdMob(){
   galleryInitSwipe();
   initGimmicks(document.getElementById('dy-body'));
   initGimmicks(document.getElementById('gl-body'));
+  mochiCtlSync();
   await openDB();
   renderKigoCard();
   await renderBooks();

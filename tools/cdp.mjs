@@ -1,5 +1,7 @@
-// CDP検証用ヘルパー(検証後に削除する): node _cdp.mjs "<JS式>"
-const expr = process.argv[2];
+// CDP検証用ヘルパー: node cdp.mjs "<JS式>" または node cdp.mjs @ファイルパス
+import { readFileSync } from 'node:fs';
+const arg = process.argv[2];
+const expr = arg.startsWith('@') ? readFileSync(arg.slice(1), 'utf8') : arg;
 const list = await (await fetch('http://localhost:9222/json')).json();
 const page = list.find(t => t.title.includes('趣味帳'));
 if (!page) { console.error('趣味帳ページが見つからない'); process.exit(1); }
