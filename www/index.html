@@ -146,12 +146,21 @@ img.ph{object-fit:cover;display:block}
 /* ===== 観覧モードギミック(餅・剣・波紋) ===== */
 .dy-mochi{touch-action:none;will-change:transform;display:block}
 .dy-bz,.dy-haiku{position:relative;overflow:hidden}
-.dy-slash{position:absolute;height:3px;background:linear-gradient(90deg,transparent,#fff 15%,#dceeff 50%,#fff 85%,transparent);box-shadow:0 0 14px 3px rgba(150,205,255,.9);transform-origin:left center;pointer-events:none;z-index:5;animation:dySlash .5s ease-out forwards}
-@keyframes dySlash{0%{clip-path:inset(0 100% 0 0);opacity:1}35%{clip-path:inset(0 0 0 0);opacity:1}100%{clip-path:inset(0 0 0 0);opacity:0}}
-.dy-bz.cut{animation:dyCut .45s ease-out}
-@keyframes dyCut{0%{transform:none}25%{transform:translate(3px,-2px) rotate(.7deg)}55%{transform:translate(-3px,2px) rotate(-.7deg)}100%{transform:none}}
-.dy-ripple{position:absolute;border:2px solid rgba(120,190,255,.8);border-radius:50%;width:14px;height:14px;transform:translate(-50%,-50%) scale(0);pointer-events:none;z-index:5;animation:dyRipple 1.2s ease-out forwards}
-@keyframes dyRipple{60%{opacity:.55}100%{transform:translate(-50%,-50%) scale(15);opacity:0}}
+/* 剣: 中央が太い斬撃ビーム+閃光 */
+.dy-slash{position:absolute;height:20px;pointer-events:none;z-index:6;transform-origin:left center;
+ background:radial-gradient(50% 50% at 50% 50%,#fff 0%,rgba(232,246,255,.96) 30%,rgba(170,220,255,.55) 60%,transparent 100%);
+ filter:drop-shadow(0 0 5px #d7ecff) drop-shadow(0 0 16px #8fc9ff);
+ animation:dySlash .5s cubic-bezier(.15,.85,.25,1) forwards}
+@keyframes dySlash{0%{clip-path:inset(0 100% 0 0);opacity:1}28%{clip-path:inset(0 0 0 0);opacity:1}100%{clip-path:inset(0 0 0 0);opacity:0}}
+.dy-flash{position:absolute;inset:0;pointer-events:none;z-index:5;background:radial-gradient(circle at center,rgba(255,255,255,.9),rgba(220,240,255,.35) 55%,transparent 80%);animation:dyFlash .38s ease-out forwards}
+@keyframes dyFlash{0%{opacity:1}100%{opacity:0}}
+.dy-bz.cut{animation:dyCut .5s ease-out}
+@keyframes dyCut{0%{transform:none}18%{transform:translate(6px,-5px) rotate(1.6deg)}42%{transform:translate(-6px,5px) rotate(-1.6deg)}68%{transform:translate(3px,-2px) rotate(.8deg)}100%{transform:none}}
+/* 波紋: 自然な水。広がるほど減速し輪が細く淡くなる+中心のしぶき */
+.dy-ripple{position:absolute;border:4px solid rgba(150,205,255,.85);border-radius:50%;width:16px;height:16px;transform:translate(-50%,-50%) scale(0);pointer-events:none;z-index:5;animation:dyRipple 1.4s cubic-bezier(.08,.6,.22,1) forwards}
+@keyframes dyRipple{0%{transform:translate(-50%,-50%) scale(0);opacity:.95;border-width:5px}55%{opacity:.5;border-width:2px}100%{transform:translate(-50%,-50%) scale(17);opacity:0;border-width:1px}}
+.dy-drop{position:absolute;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,rgba(205,232,255,.95),rgba(150,205,255,0) 70%);transform:translate(-50%,-50%) scale(.5);pointer-events:none;z-index:5;animation:dyDrop .55s ease-out forwards}
+@keyframes dyDrop{0%{opacity:.95;transform:translate(-50%,-50%) scale(.5)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.8)}}
 .deco-note{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-top:8px}
 .deco-note textarea{margin-top:6px;min-height:64px}
 #deco-stage{position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;border-radius:8px;touch-action:none;background:#fff}
@@ -213,6 +222,7 @@ img.ph{object-fit:cover;display:block}
   <section id="page-zukan" class="page active">
     <div id="zukan-list-view" class="subview active">
       <div class="hero"><h2>📚 マイ図鑑</h2><p>グッズ・カード・昆虫・なんでも。写真とメモで自分だけの図鑑を作ろう</p></div>
+      <button class="btn sub wide" style="margin-bottom:10px" onclick="galleryOpen('zukan')">👀 観覧モード(集めた写真をめくって眺める)</button>
       <div class="card book-card" onclick="showDecoList()">
         <div class="book-emoji">📖</div>
         <div class="book-info">
@@ -225,6 +235,7 @@ img.ph{object-fit:cover;display:block}
     <div id="deco-list-view" class="subview">
       <button class="back-link" onclick="showZukanList()">← 図鑑一覧へ</button>
       <div class="hero"><h2>📖 軌跡</h2><p>写真・ステッカー風切り抜き・2色カラー・手描きペンで自由にデコる記録ページ</p></div>
+      <button class="btn sub wide" style="margin-bottom:10px" onclick="galleryOpen('deco')">👀 観覧モード(完成ページをめくって眺める)</button>
       <div id="deco-pages" class="deco-grid"></div>
     </div>
     <div id="deco-edit-view" class="subview">
@@ -319,6 +330,7 @@ img.ph{object-fit:cover;display:block}
   <section id="page-banzuke" class="page">
     <div id="bz-list-view" class="subview active">
       <div class="hero"><h2>🏆 なんでも番付</h2><p>好きなもの何でも大相撲の番付風にランキング。画像にしてシェアもできる</p></div>
+      <button class="btn sub wide" style="margin-bottom:10px" onclick="galleryOpen('banzuke')">👀 観覧モード(番付表をめくって眺める)</button>
       <div id="bz-sheets"></div>
     </div>
     <div id="bz-edit-view" class="subview">
@@ -356,6 +368,7 @@ img.ph{object-fit:cover;display:block}
     <div class="chips" id="hk-filter">
       <span class="chip on" data-s="">すべて</span><span class="chip" data-s="春">春</span><span class="chip" data-s="夏">夏</span><span class="chip" data-s="秋">秋</span><span class="chip" data-s="冬">冬</span><span class="chip" data-s="新年">新年</span><span class="chip" data-s="fav">♥</span>
     </div>
+    <button class="btn sub wide" style="margin-bottom:10px" onclick="galleryOpen('haiku')">👀 観覧モード(句をめくって眺める)</button>
     <div id="hk-list" class="haiku-list"></div>
   </section>
 
@@ -543,6 +556,20 @@ img.ph{object-fit:cover;display:block}
     </div>
     <div id="dy-body" style="margin-top:10px"></div>
     <div class="modal-actions"><button class="btn sub" onclick="closeModal('modal-diary')">閉じる</button></div>
+  </div>
+</div>
+
+<!-- 単独観覧モーダル(図鑑/軌跡/俳句/番付の完成品を1点ずつ作成日順にめくる) -->
+<div class="modal" id="modal-gallery">
+  <div class="modal-box">
+    <h3 id="gl-title" class="serif"></h3>
+    <div class="row between" style="margin-top:8px">
+      <button class="tool-btn" id="gl-prev" onclick="galleryMove(-1)">◀ 前の作品</button>
+      <span class="muted" id="gl-pos" style="font-size:.78rem"></span>
+      <button class="tool-btn" id="gl-next" onclick="galleryMove(1)">次の作品 ▶</button>
+    </div>
+    <div id="gl-body" style="margin-top:10px"></div>
+    <div class="modal-actions"><button class="btn sub" onclick="closeModal('modal-gallery')">閉じる</button></div>
   </div>
 </div>
 
@@ -1500,9 +1527,13 @@ function drawTate(ctx, text, x, y, size, opt){
 
 async function bzPreview(){
   const s = await dbGet('banzuke', currentBzId);
+  if(!(s.entries||[]).length){ toast('まず名前を追加してください'); return; }
+  bzCompose(s, document.getElementById('bz-canvas'));
+  document.getElementById('bzp-title').textContent = s.title || 'マイ番付';
+  openModal('modal-bz-preview');
+}
+function bzCompose(s, cv){
   const es = s.entries||[];
-  if(!es.length){ toast('まず名前を追加してください'); return; }
-  const cv = document.getElementById('bz-canvas');
   const W = 1080, H = 1440;
   cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d');
@@ -1564,10 +1595,8 @@ async function bzPreview(){
   // 下部に日付と落款
   ctx.fillStyle = '#8a6a3a';
   ctx.font = '700 26px "Hiragino Mincho ProN","Yu Mincho",serif';
-  const d = new Date();
+  const d = s.date ? new Date(s.date+'T00:00:00') : new Date();
   ctx.fillText(`${d.getFullYear()}年${d.getMonth()+1}月場所`, cx, H-58);
-  document.getElementById('bzp-title').textContent = title;
-  openModal('modal-bz-preview');
 }
 
 /* --- canvas共有/保存 --- */
@@ -1947,7 +1976,7 @@ async function openDiary(ds){
   // 軌跡ページ(デコ+書き込み枠)
   for(const p of deco.filter(p=>p.onCal!==false && p.date===ds)){
     let img = '';
-    if(p.thumb){ const u=URL.createObjectURL(p.thumb); diaryUrls.push(u); img=`<img src="${u}" style="width:100%;border-radius:10px" alt="">`; }
+    if(p.thumb){ const u=URL.createObjectURL(p.thumb); diaryUrls.push(u); img=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px" alt="">`; }
     const notes = (p.notes||[]).filter(n=>n.text).map(n=>
       `<div style="margin-top:8px"><span class="chip" style="color:var(--accent);background:var(--accent-light)">${esc(n.cat)}</span>
       <div class="serif" style="white-space:pre-wrap;font-size:.94rem;margin-top:4px;line-height:1.8">${esc(n.text)}</div></div>`).join('');
@@ -1965,7 +1994,7 @@ async function openDiary(ds){
   for(const i of items.filter(i=>i.onCal!==false && i.date===ds)){
     const b = bookMap[i.bookId];
     let ph='';
-    if(i.photo){ const u=URL.createObjectURL(i.photo); diaryUrls.push(u); ph=`<img src="${u}" class="dy-mochi" style="width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin-top:6px" alt="">`; }
+    if(i.photo){ const u=URL.createObjectURL(i.photo); diaryUrls.push(u); ph=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px;margin-top:6px" alt="">`; }
     html += `<div class="card"><div class="sec-title" style="margin-top:0">${b?b.emoji:'📚'} ${esc(i.name)} <span class="muted">${esc(b?b.name:'')}</span></div>${ph}
       <div class="muted" style="margin-top:4px"><span style="color:var(--gold)">${'★'.repeat(i.rating||0)}</span>${i.place?' / '+esc(i.place):''}${i.got?'':' / 🔜未入手'}</div>
       ${i.memo?`<div style="font-size:.88rem;white-space:pre-wrap;margin-top:4px">${esc(i.memo)}</div>`:''}</div>`;
@@ -1978,6 +2007,7 @@ async function openDiary(ds){
   if(!html) html = '<div class="empty">この日の記録はありません</div>';
   document.getElementById('dy-body').innerHTML = html;
   openModal('modal-diary');
+  requestAnimationFrame(()=>document.querySelectorAll('#dy-body img.dy-mochi').forEach(mochify));
 }
 function diaryMove(dir){
   const target = dir>0 ? diaryDates.find(d=>d>diaryDs) : [...diaryDates].reverse().find(d=>d<diaryDs);
@@ -1999,51 +2029,30 @@ function diaryInitSwipe(){
     if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.5) diaryMove(dx<0?1:-1); // 左へ払う=次の日
   }, {passive:true});
 }
-/* 観覧モードギミック: 餅(図鑑写真を引っ張る)・剣(番付を素早く払う)・波紋(俳句をタップ) */
-function diaryInitGimmicks(){
-  const body = document.getElementById('dy-body');
-  // 波紋 + 餅つかみ
+/* 観覧モードギミック: 剣(番付を素早く払う)・波紋(俳句をタップ)。餅はmochify()でcanvas化 */
+function initGimmicks(body){
+  // 波紋: タップ点から自然な水の輪が3重に広がる+中心のしぶき
   body.addEventListener('pointerdown', e=>{
     const hk = e.target.closest('.dy-haiku');
-    if(hk){
-      const r = hk.getBoundingClientRect();
-      for(let i=0;i<2;i++){
-        const s = document.createElement('span');
-        s.className = 'dy-ripple';
-        s.style.left = (e.clientX-r.left)+'px';
-        s.style.top = (e.clientY-r.top)+'px';
-        s.style.animationDelay = (i*0.18)+'s';
-        hk.appendChild(s);
-        setTimeout(()=>s.remove(), 1700);
-      }
-    }
-    const mc = e.target.closest('.dy-mochi');
-    if(mc){
-      e.preventDefault();
-      try{ mc.setPointerCapture(e.pointerId); }catch(err){}
-      mc._mochi = {x:e.clientX, y:e.clientY};
-      mc.style.transition = 'none';
-    }
+    if(!hk) return;
+    const r = hk.getBoundingClientRect();
+    const x = e.clientX-r.left, y = e.clientY-r.top;
+    const drop = document.createElement('span');
+    drop.className = 'dy-drop';
+    drop.style.left = x+'px'; drop.style.top = y+'px';
+    hk.appendChild(drop);
+    setTimeout(()=>drop.remove(), 700);
+    [[0,1.1],[0.15,1.4],[0.34,1.8]].forEach(([dl,dur])=>{
+      const s = document.createElement('span');
+      s.className = 'dy-ripple';
+      s.style.left = x+'px'; s.style.top = y+'px';
+      s.style.animationDelay = dl+'s';
+      s.style.animationDuration = dur+'s';
+      hk.appendChild(s);
+      setTimeout(()=>s.remove(), (dl+dur)*1000+250);
+    });
   });
-  body.addEventListener('pointermove', e=>{
-    const mc = e.target.closest('.dy-mochi');
-    if(mc && mc._mochi){
-      const lim = v=>Math.max(-90, Math.min(90, v));
-      const lx = lim(e.clientX-mc._mochi.x), ly = lim(e.clientY-mc._mochi.y);
-      mc.style.transform = `translate(${lx*.45}px,${ly*.45}px) scaleX(${1+Math.abs(lx)/320}) scaleY(${1+Math.abs(ly)/320})`;
-    }
-  });
-  const mochiUp = e=>{
-    const mc = e.target.closest('.dy-mochi');
-    if(mc && mc._mochi){
-      mc._mochi = null;
-      mc.style.transition = 'transform .8s cubic-bezier(.2,2.8,.35,.55)'; // ぷるんと戻る
-      mc.style.transform = '';
-    }
-  };
-  body.addEventListener('pointerup', mochiUp);
-  body.addEventListener('pointercancel', mochiUp);
-  // 剣: 番付カードを素早く払うと斬撃
+  // 剣: 番付カードを素早く払うと斬撃+閃光
   let bz = null;
   body.addEventListener('touchstart', e=>{
     const c = e.target.closest('.dy-bz');
@@ -2063,10 +2072,169 @@ function diaryInitGimmicks(){
       sl.style.top = (r.height/2-Math.sin(ang)*len/2)+'px';
       sl.style.transform = `rotate(${ang*180/Math.PI}deg)`;
       bz.c.appendChild(sl);
+      const fl = document.createElement('span');
+      fl.className = 'dy-flash';
+      bz.c.appendChild(fl);
       bz.c.classList.remove('cut'); void bz.c.offsetWidth; bz.c.classList.add('cut');
-      setTimeout(()=>sl.remove(), 700);
+      setTimeout(()=>{ sl.remove(); fl.remove(); }, 700);
     }
     bz = null;
+  }, {passive:true});
+}
+/* 餅: 触った部分が指にくっついて伸び、離すとぷるんと戻る(canvas局所変形・なでモミ対応) */
+function mochify(img){
+  if(img._mochified) return;
+  img._mochified = true;
+  const apply = ()=>requestAnimationFrame(()=>{
+    const w = img.clientWidth, h = img.clientHeight;
+    if(!w || !h || !img.naturalWidth) return;
+    const dpr = Math.min(2, window.devicePixelRatio||1);
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+    cv.className = img.className;
+    cv.style.cssText = img.style.cssText;
+    cv.style.width = '100%';
+    cv.style.height = 'auto';
+    cv.style.aspectRatio = w+' / '+h;
+    const src = document.createElement('canvas');
+    src.width = cv.width; src.height = cv.height;
+    src.getContext('2d').drawImage(img, 0, 0, src.width, src.height);
+    img.replaceWith(cv);
+    initMochiCanvas(cv, src);
+  });
+  if(img.complete) apply(); else img.onload = apply;
+}
+function initMochiCanvas(cv, src){
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const COLS = 16, ROWS = Math.max(10, Math.round(16*H/W));
+  const R = Math.max(W,H)/3; // 指の影響半径
+  let grab = null, dx = 0, dy = 0, vx = 0, vy = 0, anim = 0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    if(!grab || (dx===0 && dy===0)){ ctx.drawImage(src,0,0); return; }
+    const cw = W/COLS, ch = H/ROWS;
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      const f = Math.exp(-(((c+.5)*cw-grab.gx)**2 + ((r+.5)*ch-grab.gy)**2)/(R*R));
+      ctx.drawImage(src, c*cw, r*ch, cw, ch, c*cw+dx*f, r*ch+dy*f, cw+1.5, ch+1.5);
+    }
+  }
+  function pos(e){
+    const r = cv.getBoundingClientRect();
+    return {x:(e.clientX-r.left)*W/r.width, y:(e.clientY-r.top)*H/r.height};
+  }
+  cv.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    try{ cv.setPointerCapture(e.pointerId); }catch(err){}
+    cancelAnimationFrame(anim);
+    const p = pos(e);
+    grab = {gx:p.x, gy:p.y};
+    dx = dy = vx = vy = 0;
+    draw();
+  });
+  cv.addEventListener('pointermove', e=>{
+    if(!grab) return;
+    const p = pos(e);
+    dx = p.x-grab.gx; dy = p.y-grab.gy;
+    const lim = R*0.6, m = Math.hypot(dx,dy);
+    if(m>lim){ // 限界を超えたらつかみ位置が指に遅れてついてくる(なでる動き)
+      grab.gx += dx*(1-lim/m); grab.gy += dy*(1-lim/m);
+      dx *= lim/m; dy *= lim/m;
+    }
+    draw();
+  });
+  const up = ()=>{
+    if(!grab) return;
+    const spring = ()=>{ // ばねでぷるんと戻る
+      vx += -dx*0.22; vy += -dy*0.22; vx *= 0.84; vy *= 0.84;
+      dx += vx; dy += vy;
+      if(Math.hypot(dx,dy)<.5 && Math.hypot(vx,vy)<.5){ dx=dy=0; grab=null; draw(); return; }
+      draw();
+      anim = requestAnimationFrame(spring);
+    };
+    anim = requestAnimationFrame(spring);
+  };
+  cv.addEventListener('pointerup', up);
+  cv.addEventListener('pointercancel', up);
+  draw(); // 初期表示
+}
+/* ===== 単独観覧モード: 種類ごとの完成品を作成日順にめくる ===== */
+let glKind = null, glList = [], glIdx = 0, glUrls = [], glBooks = {};
+async function galleryOpen(kind){
+  glKind = kind;
+  if(kind==='zukan'){
+    const [items, books] = await Promise.all([dbAll('items'), dbAll('books')]);
+    glBooks = {}; books.forEach(b=>glBooks[b.id]=b);
+    glList = items.filter(i=>i.photo);
+    if(!glList.length){ toast('写真つきのアイテムがまだありません'); return; }
+  } else if(kind==='deco'){
+    glList = await dbAll('deco');
+  } else if(kind==='haiku'){
+    glList = await dbAll('haiku');
+  } else {
+    glList = (await dbAll('banzuke')).filter(s=>(s.entries||[]).length);
+  }
+  if(!glList.length){ toast('まだ作品がありません'); return; }
+  glList.sort((a,b)=>(a.date||'').localeCompare(b.date||'') || a.id-b.id);
+  glIdx = glList.length-1; // 最新の作品から
+  openModal('modal-gallery');
+  galleryShow();
+}
+function galleryShow(){
+  const o = glList[glIdx];
+  glUrls.forEach(u=>URL.revokeObjectURL(u)); glUrls = [];
+  document.getElementById('gl-prev').disabled = glIdx<=0;
+  document.getElementById('gl-next').disabled = glIdx>=glList.length-1;
+  document.getElementById('gl-pos').textContent = `${glIdx+1}/${glList.length}`;
+  const names = {zukan:'📚 図鑑', deco:'📖 軌跡', haiku:'🖌️ 俳句', banzuke:'🏆 番付'};
+  document.getElementById('gl-title').textContent = `${names[glKind]}　${o.date?fmtDate(o.date):''}`;
+  const body = document.getElementById('gl-body');
+  let html = '';
+  if(glKind==='zukan'){
+    const u = URL.createObjectURL(o.photo); glUrls.push(u);
+    const b = glBooks[o.bookId];
+    html = `<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px" alt="">
+      <div class="sec-title">${b?b.emoji:'📚'} ${esc(o.name||'')} <span class="muted">${esc(b?b.name:'')}</span></div>
+      <div class="muted"><span style="color:var(--gold)">${'★'.repeat(o.rating||0)}</span>${o.place?' / '+esc(o.place):''}${o.got?'':' / 🔜未入手'}</div>
+      ${o.memo?`<div style="font-size:.88rem;white-space:pre-wrap;margin-top:4px">${esc(o.memo)}</div>`:''}`;
+  } else if(glKind==='deco'){
+    if(o.thumb){ const u = URL.createObjectURL(o.thumb); glUrls.push(u); html = `<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px" alt="">`; }
+    else html = `<div style="width:100%;aspect-ratio:3/4;border-radius:10px;background:${decoBgCss(o)}"></div>`;
+    html += `<div class="sec-title">${esc(o.title||'(無題ページ)')}</div>`;
+    html += (o.notes||[]).filter(n=>n.text).map(n=>
+      `<div style="margin-top:8px"><span class="chip" style="color:var(--accent);background:var(--accent-light)">${esc(n.cat)}</span>
+      <div class="serif" style="white-space:pre-wrap;font-size:.94rem;margin-top:4px;line-height:1.8">${esc(n.text)}</div></div>`).join('');
+  } else if(glKind==='haiku'){
+    let st = '';
+    if(o.photo){ const u = URL.createObjectURL(o.photo); glUrls.push(u); st = `style="background:linear-gradient(rgba(20,12,8,.55),rgba(20,12,8,.55)),url('${u}') center/cover;border-color:transparent"`; }
+    html = `<div class="card dy-haiku" ${st}>
+      <div class="tate-view" style="background:transparent"><div class="ku serif" style="${o.photo?'color:#fff':''}">${esc(o.k1)}　${esc(o.k2)}　${esc(o.k3)}</div></div>
+      <div class="muted" style="text-align:center;${o.photo?'color:rgba(255,255,255,.85)':''}">${o.fav?'♥ ':''}${o.kigo?'季語: '+esc(o.kigo)+' ':''}${esc(o.season||'')}</div></div>`;
+  } else {
+    html = `<div class="card dy-bz" style="padding:6px"><canvas id="gl-bz-canvas" style="width:100%;border-radius:8px;display:block"></canvas></div>`;
+  }
+  body.innerHTML = html;
+  if(glKind==='banzuke') bzCompose(glList[glIdx], document.getElementById('gl-bz-canvas'));
+  requestAnimationFrame(()=>body.querySelectorAll('img.dy-mochi').forEach(mochify));
+}
+function galleryMove(dir){
+  const j = glIdx+dir;
+  if(j<0 || j>=glList.length) return;
+  glIdx = j;
+  galleryShow();
+}
+function galleryInitSwipe(){
+  const box = document.querySelector('#modal-gallery .modal-box');
+  let sx = null, sy = null;
+  box.addEventListener('touchstart', e=>{
+    if(e.target.closest('.dy-bz,.dy-mochi')){ sx=null; return; } // ギミック対象の上ではめくらない
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, {passive:true});
+  box.addEventListener('touchend', e=>{
+    if(sx==null) return;
+    const dx = e.changedTouches[0].clientX-sx, dy = e.changedTouches[0].clientY-sy;
+    sx = null;
+    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.5) galleryMove(dx<0?1:-1);
   }, {passive:true});
 }
 function calGoItem(bookId, itemId){ switchTab('zukan'); openBook(bookId).then(()=>openItemForm(itemId)); }
@@ -2162,7 +2330,9 @@ function initAdMob(){
   renderTabOrderList();
   decoInitPointer();
   diaryInitSwipe();
-  diaryInitGimmicks();
+  galleryInitSwipe();
+  initGimmicks(document.getElementById('dy-body'));
+  initGimmicks(document.getElementById('gl-body'));
   await openDB();
   renderKigoCard();
   await renderBooks();

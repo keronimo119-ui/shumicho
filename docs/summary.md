@@ -123,6 +123,15 @@ cd android; .\gradlew.bat assembleDebug
 - 2026-06-12: **カレンダー強化**: ヘッダーに「今日」ボタン(`calToday`)。日付パネルに「＋この日に: 一句/軌跡/番付」
   ボタンで過去・未来の日付に直接新規作成可(`calNewHaiku/calNewDeco/calNewBz`、俳句はその日の季語を自動セット=`kigoOf`)。
   図鑑アイテムは従来どおりフォーム内の日付欄で任意日付に変更可能。
+- 2026-06-12(夜): **単独観覧モード新設+ギミック大幅強化**(ユーザー要望)。
+  ①手帳プレビューの画像サイズ省略を廃止(max-height撤去・原寸表示)
+  ②単独観覧モード(`modal-gallery`/`galleryOpen(kind)`): 図鑑・軌跡・俳句・番付の各一覧に「👀観覧モード」ボタン。
+  完成品を1点ずつ作成日順に◀▶ボタン/左右スワイプでめくれる(最新から開始・n/全表示)
+  ③餅を作り直し: 全体伸縮→**canvas局所変形**(`mochify()`/`initMochiCanvas()`)。触った部分だけ指にくっつき、
+  限界を超えるとつかみ点が指を追従(なでモミ)、離すとばね振動でぷるんと戻る。図鑑写真+軌跡サムネに適用(手帳・単独両方)
+  ④剣強化: 中央が太い斬撃ビーム(radial-gradient)+閃光(.dy-flash)+揺れ増大 ⑤波紋強化: 3重の輪が減速しながら
+  広がり輪が細く淡くなる+中心しぶき(.dy-drop)。ギミック委譲は`initGimmicks(body)`でdy-body/gl-body共用。
+  番付画像生成は`bzCompose(s,cv)`に部品化(bzPreviewと観覧モードで共用・日付はs.date基準)。全て実機検証済み。
 - 検証ツール: `tools/cdp.mjs`(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
   使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
 
