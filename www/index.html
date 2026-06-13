@@ -415,8 +415,8 @@ img.ph{object-fit:cover;display:block}
       <div class="muted">毎日ひらく習慣づくりに。通知はこの端末だけで動きます(送信なし)</div>
     </div>
     <div class="card">
-      <div class="set-row" onclick="exportData()" style="cursor:pointer"><span>📤 データを書き出す</span><span class="muted">写真以外をJSON保存</span></div>
-      <div class="set-row" onclick="document.getElementById('import-file').click()" style="cursor:pointer"><span>📥 データを読み込む</span><span class="muted">書き出したJSONを復元</span></div>
+      <div class="set-row" onclick="exportData()" style="cursor:pointer"><span>📤 データを書き出す</span><span class="muted">写真・軌跡も含めて保存</span></div>
+      <div class="set-row" onclick="document.getElementById('import-file').click()" style="cursor:pointer"><span>📥 データを読み込む</span><span class="muted">機種変更・復元に</span></div>
       <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importData(this)">
     </div>
     <div class="card">
@@ -2773,20 +2773,36 @@ function saveHaigo(){
   localStorage.setItem('sc_haigo', document.getElementById('set-haigo').value.trim());
   toast('俳号を保存しました');
 }
+const BK_PREFS = ['sc_haigo','sc_anniv','sc_active_days','sc_streak_shown','sc_notif','sc_notif_time','sc_tab_order','sc_theme','sc_mochi'];
+function blobToDataURL(blob){ return new Promise(res=>{ if(!blob){ res(null); return; } const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>res(null); r.readAsDataURL(blob); }); }
+function dataURLToBlob(u){
+  if(!u || typeof u!=='string' || u.indexOf('data:')!==0) return null;
+  const c = u.indexOf(','); const meta = u.slice(0,c), b64 = u.slice(c+1);
+  const mime = (meta.match(/:(.*?);/)||[])[1] || 'image/png';
+  const bin = atob(b64); const arr = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], {type:mime});
+}
 async function exportData(){
+  toast('バックアップを準備中…');
   const books = await dbAll('books');
-  const items = (await dbAll('items')).map(i=>{ const c={...i}; delete c.photo; return c; });
+  const items = await Promise.all((await dbAll('items')).map(async i=>({...i, photo: await blobToDataURL(i.photo)})));
   const banzuke = await dbAll('banzuke');
-  const haiku = (await dbAll('haiku')).map(h=>{ const c={...h}; delete c.photo; return c; });
-  const data = {app:'shumicho', ver:1, exported: new Date().toISOString(), books, items, banzuke, haiku,
+  const haiku = await Promise.all((await dbAll('haiku')).map(async h=>({...h, photo: await blobToDataURL(h.photo)})));
+  const deco = await Promise.all((await dbAll('deco')).map(async d=>({
+    ...d, thumb: await blobToDataURL(d.thumb),
+    layers: await Promise.all((d.layers||[]).map(async L=>{ const c={...L}; delete c._url; if(c.blob) c.blob = await blobToDataURL(c.blob); return c; }))
+  })));
+  const prefs = {}; BK_PREFS.forEach(k=>{ const v=localStorage.getItem(k); if(v!=null) prefs[k]=v; });
+  const data = {app:'shumicho', ver:2, exported:new Date().toISOString(), books, items, banzuke, haiku, deco, prefs,
     haigo: localStorage.getItem('sc_haigo')||''};
-  const blob = new Blob([JSON.stringify(data, null, 1)], {type:'application/json'});
+  const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = '趣味帳バックアップ_'+todayStr()+'.json';
   a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
-  toast('書き出しました(写真とデコ帳は含まれません)');
+  setTimeout(()=>URL.revokeObjectURL(a.href), 8000);
+  toast('丸ごと書き出しました(写真・軌跡も含む)');
 }
 async function importData(input){
   const f = input.files && input.files[0];
@@ -2795,15 +2811,22 @@ async function importData(input){
     const data = JSON.parse(await f.text());
     if(data.app!=='shumicho') throw new Error('format');
     if(!confirm('読み込んだデータを追加します(今あるデータは消えません)。よろしいですか?')) { input.value=''; return; }
+    toast('読み込み中…');
     const idMap = {};
     for(const b of (data.books||[])){ const old=b.id; delete b.id; idMap[old] = await dbPut('books', b); }
-    for(const i of (data.items||[])){ delete i.id; i.bookId = idMap[i.bookId] ?? i.bookId; await dbPut('items', i); }
+    for(const i of (data.items||[])){ delete i.id; i.bookId = idMap[i.bookId] ?? i.bookId; if(typeof i.photo==='string') i.photo = dataURLToBlob(i.photo); await dbPut('items', i); }
     for(const s of (data.banzuke||[])){ delete s.id; await dbPut('banzuke', s); }
-    for(const h of (data.haiku||[])){ delete h.id; await dbPut('haiku', h); }
-    if(data.haigo && !localStorage.getItem('sc_haigo')) localStorage.setItem('sc_haigo', data.haigo);
+    for(const h of (data.haiku||[])){ delete h.id; if(typeof h.photo==='string') h.photo = dataURLToBlob(h.photo); await dbPut('haiku', h); }
+    for(const d of (data.deco||[])){ delete d.id; if(typeof d.thumb==='string') d.thumb = dataURLToBlob(d.thumb);
+      (d.layers||[]).forEach(L=>{ delete L._url; if(typeof L.blob==='string') L.blob = dataURLToBlob(L.blob); });
+      await dbPut('deco', d);
+    }
+    // 設定類は未設定の項目だけ復元(今の設定を上書きしない)
+    const prefs = data.prefs || (data.haigo ? {sc_haigo:data.haigo} : {});
+    Object.keys(prefs).forEach(k=>{ if(localStorage.getItem(k)==null) localStorage.setItem(k, prefs[k]); });
     toast('読み込みました');
     renderBooks(); renderBzSheets(); renderHaikuList();
-  }catch(e){ toast('読み込めませんでした。趣味帳のバックアップファイルを選んでください'); }
+  }catch(e){ console.error('import', e); toast('読み込めませんでした。趣味帳のバックアップファイルを選んでください'); }
   input.value='';
 }
 

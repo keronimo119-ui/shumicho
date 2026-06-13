@@ -121,6 +121,12 @@ cd android; .\gradlew.bat assembleDebug
   俳句=`haikuToImage`を`haikuCompose(h,cv)`に部品化、軌跡=`decoCompose(W,src,inkUrl)`に引数追加し保存データから高解像度再合成、
   番付=既存`bzCompose(s,cv)`。スライドショーは`setInterval`で3.5秒ごと自動めくり・末尾で先頭へループ・手動操作/閉じるで停止
   (`galleryPlay*`)。実機検証: 4種の画像合成成功・図鑑カード目視OK・自動0→1→2→0ループ/停止/閉停止OK。
+- **第3弾(済) 写真込み丸ごとバックアップ**: `exportData`/`importData`をver2に拡張。写真(items/haiku)・軌跡(deco:thumb+layers[].blob、
+  inkは元からdataURL)を`blobToDataURL`でbase64化してJSONに同梱。設定類(BK_PREFS=haigo/anniv/active_days/streak/notif/
+  tab_order/theme/mochi)も`prefs`に保存。importは`dataURLToBlob`で復元、設定は未設定項目のみ復元(現設定を上書きしない)、
+  記録は従来どおり追加マージ(機種変更=空端末で復元想定・非破壊)。ver1の旧バックアップも読める。
+  実機検証(読取のみ): 全blobがdataURL化・dataURL→Blob→dataURL完全一致・復元写真が549×1280で開ける。
+  ⚠️注意: dbのストア名は books/items/banzuke/haiku/deco。エクスポートは写真base64で大きくなる(個人利用なら許容)。
 - 次の候補: 
   第2弾(完成品の画像シェア書き出し・おまかせスライドショー)、第3弾(写真込みバックアップ=現状exportは写真/デコ非対応)、
   第4弾(餅技術でぷにぷに開封演出・コンプ祝福)。
