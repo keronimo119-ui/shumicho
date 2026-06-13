@@ -224,6 +224,7 @@ img.ph{object-fit:cover;display:block}
     <div id="zukan-list-view" class="subview active">
       <div class="hero"><h2>📚 マイ図鑑</h2><p>グッズ・カード・昆虫・なんでも。写真とメモで自分だけの図鑑を作ろう</p></div>
       <div id="streak-bar" style="display:none;text-align:center;font-size:.82rem;font-weight:900;color:var(--accent);background:var(--accent-light);border-radius:12px;padding:8px;margin-bottom:10px"></div>
+      <div id="anniv-home" style="margin-bottom:10px"></div>
       <button class="btn sub wide" style="margin-bottom:10px" onclick="galleryOpen('zukan')">👀 観覧モード(集めた写真をめくって眺める)</button>
       <div class="card book-card" onclick="showDecoList()">
         <div class="book-emoji">📖</div>
@@ -547,6 +548,24 @@ img.ph{object-fit:cover;display:block}
 </div>
 
 <!-- 手帳プレビューモーダル(その日の完成手帳) -->
+<!-- 記念日カウントダウン管理 -->
+<div class="modal" id="modal-anniv">
+  <div class="modal-box">
+    <h3>🎂 記念日カウントダウン</h3>
+    <div class="muted" style="font-size:.8rem">誕生日やイベントの日を登録すると、ホームで「あと○日」を表示します</div>
+    <div id="anniv-list" style="margin-top:10px"></div>
+    <div class="row" style="margin-top:12px">
+      <input type="text" id="anniv-name" maxlength="20" placeholder="名前(例: ○○の誕生日)" style="flex:1">
+    </div>
+    <div class="row" style="margin-top:8px;align-items:center">
+      <input type="date" id="anniv-date" style="flex:1">
+      <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:800;white-space:nowrap"><input type="checkbox" id="anniv-yearly" checked> 毎年</label>
+      <button class="btn small" onclick="annivAdd()">追加</button>
+    </div>
+    <div class="modal-actions"><button class="btn sub" onclick="closeModal('modal-anniv')">閉じる</button></div>
+  </div>
+</div>
+
 <div class="modal" id="modal-diary">
   <div class="modal-box">
     <h3 id="dy-title" class="serif"></h3>
@@ -661,6 +680,68 @@ function markActive(){ // 記録をしたら今日を活動日に追加し、節
   localStorage.setItem('sc_streak_shown', s);
   renderStreak();
 }
+/* ===== 記念日カウントダウン ===== */
+function annivList(){ try{ return JSON.parse(localStorage.getItem('sc_anniv')||'[]'); }catch(e){ return []; } }
+function annivSave(a){ localStorage.setItem('sc_anniv', JSON.stringify(a)); }
+function daysUntil(dateStr, yearly){
+  const t = new Date(); t.setHours(0,0,0,0);
+  const p = dateStr.split('-').map(Number);
+  let target;
+  if(yearly){
+    target = new Date(t.getFullYear(), p[1]-1, p[2]);
+    if(target < t) target = new Date(t.getFullYear()+1, p[1]-1, p[2]);
+  } else {
+    target = new Date(p[0], p[1]-1, p[2]);
+  }
+  return Math.round((target - t)/86400000);
+}
+function annivWithDays(){
+  return annivList().map(a=>({...a, d:daysUntil(a.date, a.yearly!==false)}))
+    .filter(a=> a.yearly!==false || a.d>=0) // 1回きりは過ぎたら隠す
+    .sort((x,y)=>x.d-y.d);
+}
+function annivLabel(d){ return d===0 ? '当日' : 'あと'+d+'日'; }
+function renderAnniv(){
+  const el = document.getElementById('anniv-home'); if(!el) return;
+  const list = annivWithDays();
+  const rows = list.slice(0,3).map(a=>
+    `<div class="cal-item" style="cursor:default"><span class="tag" style="background:var(--accent)">${annivLabel(a.d)}</span>
+     <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.name)}</span></div>`).join('');
+  el.innerHTML = `<div class="card"><div class="row between"><div class="sec-title" style="margin:0">🎂 記念日</div>
+    <button class="tool-btn mini" onclick="openAnnivModal()">＋編集</button></div>
+    ${rows || '<div class="muted" style="font-size:.8rem;margin-top:6px">誕生日やイベントを登録してカウントダウン</div>'}</div>`;
+}
+function renderAnnivModal(){
+  const list = annivWithDays();
+  document.getElementById('anniv-list').innerHTML = list.length
+    ? list.map(a=>`<div class="cal-item"><span class="tag" style="background:var(--accent)">${annivLabel(a.d)}</span>
+       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.name)}${a.yearly!==false?' <span class="muted" style="font-size:.7rem">毎年</span>':''}</span>
+       <button class="tool-btn mini" onclick="annivDel(${a.id})">✕</button></div>`).join('')
+    : '<div class="muted" style="font-size:.8rem">まだ登録がありません</div>';
+}
+function openAnnivModal(){
+  document.getElementById('anniv-name').value = '';
+  document.getElementById('anniv-date').value = todayStr();
+  document.getElementById('anniv-yearly').checked = true;
+  renderAnnivModal();
+  openModal('modal-anniv');
+}
+function annivAdd(){
+  const name = document.getElementById('anniv-name').value.trim();
+  const date = document.getElementById('anniv-date').value;
+  if(!name){ toast('名前を入れてください'); return; }
+  if(!date){ toast('日付を選んでください'); return; }
+  const a = annivList();
+  a.push({id:Date.now(), name, date, yearly:document.getElementById('anniv-yearly').checked});
+  annivSave(a);
+  document.getElementById('anniv-name').value = '';
+  renderAnnivModal(); renderAnniv();
+  toast('登録しました');
+}
+function annivDel(id){
+  annivSave(annivList().filter(a=>a.id!==id));
+  renderAnnivModal(); renderAnniv();
+}
 function fmtDate(s){ if(!s) return ''; const p=s.split('-'); return p.length===3 ? `${p[0]}年${+p[1]}月${+p[2]}日` : s; }
 
 /* ----- テーマ ----- */
@@ -760,6 +841,7 @@ let miPhotoBlob = undefined; // undefined=変更なし null=削除 Blob=新規
 
 async function renderBooks(){
   renderStreak();
+  renderAnniv();
   const books = await dbAll('books');
   const items = await dbAll('items');
   const wrap = document.getElementById('zukan-books');

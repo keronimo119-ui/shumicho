@@ -108,7 +108,10 @@ cd android; .\gradlew.bat assembleDebug
 - **第1弾(済) 連続記録バッジ**: 記録した日を`localStorage sc_active_days`に貯め`streakOf()`で連続日数算出。
   図鑑ホーム上部に「🔥○日連続記録中」(2日以上で表示)。`markActive()`をsaveItem/saveHaiku/bzAddEntry/decoTouchSaveに仕込み、
   節目(3/7/14/30/50/100/200/365日)で達成トースト。今日未記録でも昨日まで続いていれば維持。実機検証済み。
-- 次の候補: 第1弾の残り(今日の季語の通知=要@capacitor/local-notifications・季語の宗教語は通知から除外, 記念日カウントダウン)、
+- **第1弾2(済) 記念日カウントダウン**: `localStorage sc_anniv`に{id,name,date,yearly}を保存(DB変更なし)。
+  図鑑ホームに「🎂 記念日」カード(近い順に最大3件「あと○日/当日」)+「＋編集」で管理モーダル(追加/削除/毎年トグル)。
+  `daysUntil()`は毎年=翌年繰越・1回きりは過ぎたら非表示。`renderAnniv()`をrenderBooksで更新。実機検証済み。
+- 次の候補: 第1弾の残り(今日の季語の通知=要@capacitor/local-notifications・季語の宗教語は通知から除外)、
   第2弾(完成品の画像シェア書き出し・おまかせスライドショー)、第3弾(写真込みバックアップ=現状exportは写真/デコ非対応)、
   第4弾(餅技術でぷにぷに開封演出・コンプ祝福)。
 
