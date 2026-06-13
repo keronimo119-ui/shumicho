@@ -111,7 +111,12 @@ cd android; .\gradlew.bat assembleDebug
 - **第1弾2(済) 記念日カウントダウン**: `localStorage sc_anniv`に{id,name,date,yearly}を保存(DB変更なし)。
   図鑑ホームに「🎂 記念日」カード(近い順に最大3件「あと○日/当日」)+「＋編集」で管理モーダル(追加/削除/毎年トグル)。
   `daysUntil()`は毎年=翌年繰越・1回きりは過ぎたら非表示。`renderAnniv()`をrenderBooksで更新。実機検証済み。
-- 次の候補: 第1弾の残り(今日の季語の通知=要@capacitor/local-notifications・季語の宗教語は通知から除外)、
+- **第1弾3(済) 今日の季語の通知**: `@capacitor/local-notifications@8.2.0`を導入。設定タブに「🔔今日の季語を毎朝おしらせ」
+  トグル+時刻。ONで権限要求→`notifReschedule()`が**14日先まで**各日の季語で予約(id 7100〜7113)、起動毎に先送り更新。
+  宗教連想ワード(`KIGO_NOTIF_BLOCK`=詣/供養/彼岸/盆/墓/七五三/クリスマス)は`notifKigoOf()`で同月の別季語に置換
+  (アプリ内の季語カードkigoOfは従来どおり)。全月全日チェックで漏れ0件。送信なし・端末内のみ。
+  ⚠️Android13+はPOST_NOTIFICATIONS権限要(初回トグルで要求)。実機検証: 予約13件・本文・OFF取消・宗教語0件OK。
+- 次の候補: 
   第2弾(完成品の画像シェア書き出し・おまかせスライドショー)、第3弾(写真込みバックアップ=現状exportは写真/デコ非対応)、
   第4弾(餅技術でぷにぷに開封演出・コンプ祝福)。
 

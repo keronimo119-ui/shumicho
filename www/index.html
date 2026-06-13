@@ -406,6 +406,15 @@ img.ph{object-fit:cover;display:block}
       </div>
     </div>
     <div class="card">
+      <div class="set-row"><span>🔔 今日の季語を毎朝おしらせ</span>
+        <label class="switch-lite" style="display:flex;align-items:center"><input type="checkbox" id="set-notif" onchange="notifToggle(this.checked)"></label>
+      </div>
+      <div class="set-row" id="set-notif-time-row" style="display:none"><span>おしらせの時刻</span>
+        <input type="time" id="set-notif-time" value="08:00" onchange="notifReschedule()">
+      </div>
+      <div class="muted">毎日ひらく習慣づくりに。通知はこの端末だけで動きます(送信なし)</div>
+    </div>
+    <div class="card">
       <div class="set-row" onclick="exportData()" style="cursor:pointer"><span>📤 データを書き出す</span><span class="muted">写真以外をJSON保存</span></div>
       <div class="set-row" onclick="document.getElementById('import-file').click()" style="cursor:pointer"><span>📥 データを読み込む</span><span class="muted">書き出したJSONを復元</span></div>
       <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importData(this)">
@@ -1773,6 +1782,56 @@ function kigoOf(ds){
   return arr[(d.getDate()-1) % arr.length];
 }
 function todayKigo(){ return kigoOf(todayStr()); }
+/* 通知に出す季語は宗教を連想させる語を避ける(同月の別の季語に置き換え。アプリ内の季語カードは従来どおり) */
+const KIGO_NOTIF_BLOCK = ['詣','供養','彼岸','盆','墓','七五三','クリスマス'];
+function notifKigoOf(ds){
+  const d = new Date(ds+'T00:00:00');
+  const arr = KIGO[d.getMonth()+1];
+  const start = (d.getDate()-1) % arr.length;
+  for(let i=0;i<arr.length;i++){
+    const k = arr[(start+i)%arr.length];
+    if(!KIGO_NOTIF_BLOCK.some(w=>k.n.includes(w))) return k;
+  }
+  return arr[start];
+}
+/* ===== 今日の季語の通知(端末内ローカル通知・送信なし) ===== */
+function LN(){ return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications; }
+function notifEnabled(){ return localStorage.getItem('sc_notif')==='1'; }
+function notifTime(){ return localStorage.getItem('sc_notif_time') || '08:00'; }
+async function notifToggle(on){
+  const ln = LN();
+  if(on){
+    if(!ln){ toast('この端末では通知を使えません'); document.getElementById('set-notif').checked=false; return; }
+    const perm = await ln.requestPermissions();
+    if(perm.display!=='granted'){ toast('通知が許可されませんでした'); document.getElementById('set-notif').checked=false; return; }
+    localStorage.setItem('sc_notif','1');
+    document.getElementById('set-notif-time-row').style.display='';
+    await notifReschedule();
+    toast('毎朝おしらせします');
+  } else {
+    localStorage.setItem('sc_notif','0');
+    document.getElementById('set-notif-time-row').style.display='none';
+    if(ln) try{ await ln.cancel({notifications: notifIds()}); }catch(e){}
+    toast('おしらせを止めました');
+  }
+}
+function notifIds(){ const a=[]; for(let i=0;i<14;i++) a.push({id:7100+i}); return a; }
+async function notifReschedule(){
+  const ln = LN();
+  if(!ln || !notifEnabled()) return;
+  localStorage.setItem('sc_notif_time', document.getElementById('set-notif-time').value || '08:00');
+  const [hh,mm] = notifTime().split(':').map(Number);
+  try{ await ln.cancel({notifications: notifIds()}); }catch(e){}
+  const items = [];
+  for(let i=0;i<14;i++){ // 14日分を先まで予約(開くたびに先送りで更新)
+    const at = new Date(); at.setHours(hh, mm, 0, 0); at.setDate(at.getDate()+i);
+    if(at <= new Date()) continue; // 今より前は飛ばす
+    const ds = at.getFullYear()+'-'+String(at.getMonth()+1).padStart(2,'0')+'-'+String(at.getDate()).padStart(2,'0');
+    const k = notifKigoOf(ds);
+    items.push({ id:7100+i, title:'今日の季語', body:`「${k.n}」— ${k.d}　一句どうぞ`, schedule:{at} });
+  }
+  if(items.length) try{ await ln.schedule({notifications: items}); }catch(e){ console.error('notif schedule', e); }
+}
 function renderKigoCard(){
   const d = new Date();
   const W = ['日','月','火','水','木','金','土'];
@@ -2746,6 +2805,11 @@ function initAdMob(){
   await renderBzSheets();
   await renderHaikuList();
   document.getElementById('bz-new-name').addEventListener('keydown', e=>{ if(e.key==='Enter') bzAddEntry(); });
+  // 通知設定を反映し、開くたびに先の予約を更新(テキストが当日の季語に保たれる)
+  document.getElementById('set-notif').checked = notifEnabled();
+  document.getElementById('set-notif-time').value = notifTime();
+  document.getElementById('set-notif-time-row').style.display = notifEnabled() ? '' : 'none';
+  if(notifEnabled()) notifReschedule();
   initAdMob();
 })();
 </script>
