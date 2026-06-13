@@ -611,8 +611,11 @@ img.ph{object-fit:cover;display:block}
       <span class="muted" id="gl-pos" style="font-size:.78rem"></span>
       <button class="tool-btn" id="gl-next" onclick="galleryMove(1)">次の作品 ▶</button>
     </div>
+    <div class="row" style="margin-top:6px;justify-content:center">
+      <button class="tool-btn mini" id="gl-play-btn" onclick="galleryPlayToggle()">▶ おまかせスライドショー</button>
+    </div>
     <div id="gl-body" style="margin-top:10px"></div>
-    <div class="modal-actions"><button class="btn sub" onclick="closeModal('modal-gallery')">閉じる</button></div>
+    <div class="modal-actions"><button class="btn" onclick="galleryShare()">📤 画像でシェア</button><button class="btn sub" onclick="closeModal('modal-gallery')">閉じる</button></div>
   </div>
 </div>
 
@@ -650,7 +653,7 @@ function dbByIndex(store,idx,val){ return new Promise((res,rej)=>{ const r=tx(st
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove('show'),2200); }
 function openModal(id){ document.getElementById(id).classList.add('open'); adOnModalChange(); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); adOnModalChange(); }
+function closeModal(id){ if(id==='modal-gallery' && typeof galleryPlayStop==='function') galleryPlayStop(); document.getElementById(id).classList.remove('open'); adOnModalChange(); }
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click', e=>{ if(e.target===m) closeModal(m.id); }));
 // 入力モーダル中は広告を隠して操作のじゃまをしない(閉じたら戻す=収益は維持)
 function adOnModalChange(){
@@ -1469,17 +1472,18 @@ function roundClip(ctx, w, h, r){
   ctx.arcTo(-w/2,h/2,-w/2,-h/2,r); ctx.arcTo(-w/2,-h/2,w/2,-h/2,r);
   ctx.closePath(); ctx.clip();
 }
-async function decoCompose(W){
+async function decoCompose(W, src, inkUrl){
+  src = src || decoObj; // 編集中はdecoObj、観覧モードなど保存データからはsrcを渡す
   const H = Math.round(W*4/3);
   const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
   const ctx = cv.getContext('2d');
-  if(decoObj.bgB){
+  if(src.bgB){
     const g = ctx.createLinearGradient(0,0,W,H);
-    g.addColorStop(0, decoObj.bg||'#ffffff'); g.addColorStop(1, decoObj.bgB);
+    g.addColorStop(0, src.bg||'#ffffff'); g.addColorStop(1, src.bgB);
     ctx.fillStyle = g;
-  } else ctx.fillStyle = decoObj.bg||'#ffffff';
+  } else ctx.fillStyle = src.bg||'#ffffff';
   ctx.fillRect(0,0,W,H);
-  for(const L of decoObj.layers){
+  for(const L of src.layers){
     ctx.save();
     ctx.globalAlpha = L.opacity==null?1:L.opacity;
     ctx.translate(L.x/100*W, L.y/100*H);
@@ -1502,9 +1506,8 @@ async function decoCompose(W){
     }
     ctx.restore();
   }
-  const inkUrl = document.getElementById('deco-ink').toDataURL();
-  const inkImg = await urlToImg(inkUrl);
-  ctx.drawImage(inkImg, 0, 0, W, H);
+  const url = inkUrl!==undefined ? inkUrl : document.getElementById('deco-ink').toDataURL();
+  if(url){ const inkImg = await urlToImg(url); ctx.drawImage(inkImg, 0, 0, W, H); }
   return cv;
 }
 async function decoExport(){
@@ -1985,7 +1988,10 @@ function editHaikuFromView(){
 }
 async function haikuToImage(){
   const h = await dbGet('haiku', viewingHaikuId);
-  const cv = document.getElementById('hv-canvas');
+  await haikuCompose(h, document.getElementById('hv-canvas'));
+  document.getElementById('hv-canvas-wrap').style.display = 'block';
+}
+async function haikuCompose(h, cv){
   const W = 1080, H = 1440;
   cv.width=W; cv.height=H;
   const ctx = cv.getContext('2d');
@@ -2027,7 +2033,6 @@ async function haikuToImage(){
   ctx.fillRect(W-150, H-180, 64, 100);
   ctx.fillStyle = '#f6f1e3';
   drawTate(ctx, haigo ? haigo.slice(0,2) : '一句', W-118, H-168, 36, {lineHeight:1.1});
-  document.getElementById('hv-canvas-wrap').style.display = 'block';
 }
 
 /* ================= カレンダー(趣味ごよみ) ================= */
@@ -2668,10 +2673,66 @@ function galleryShow(){
   }));
 }
 function galleryMove(dir){
+  galleryPlayStop(); // 手動でめくったら自動再生は止める
   const j = glIdx+dir;
   if(j<0 || j>=glList.length) return;
   glIdx = j;
   galleryShow();
+}
+/* 図鑑アイテムを1枚のカード画像に合成(写真+名前+評価+メモ) */
+async function zukanCompose(o){
+  const W = 1080;
+  const img = await blobToImg(o.photo);
+  const photoH = Math.round(W * img.height / img.width);
+  const b = glBooks[o.bookId];
+  // 説明文の行を準備
+  const cap = [];
+  cap.push({t:`${b?b.emoji+' ':''}${o.name||''}`, f:'900 52px system-ui,sans-serif', c:'#2e2218'});
+  const sub = [b?b.name:'', o.place, o.got?'':'未入手'].filter(Boolean).join(' / ');
+  if(sub) cap.push({t:sub, f:'700 32px system-ui,sans-serif', c:'#7a6248'});
+  if(o.rating) cap.push({t:'★'.repeat(o.rating), f:'900 40px system-ui,sans-serif', c:'#d9a300'});
+  if(o.memo) String(o.memo).split('\n').forEach(ln=>cap.push({t:ln, f:'400 32px system-ui,sans-serif', c:'#2e2218'}));
+  const pad=48, lh=52;
+  const capH = pad*2 + cap.length*lh + (o.memo?10:0);
+  const H = photoH + capH;
+  const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle='#f6f1e3'; ctx.fillRect(0,0,W,H);
+  ctx.drawImage(img,0,0,W,photoH); URL.revokeObjectURL(img.src);
+  let y = photoH + pad + 30;
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  for(const line of cap){ ctx.font=line.f; ctx.fillStyle=line.c; ctx.fillText(line.t, pad, y, W-pad*2); y+=lh; }
+  return cv;
+}
+/* おまかせスライドショー: 一定間隔で自動めくり(端まで行ったら先頭へループ) */
+let glPlayTimer = null;
+function galleryPlayToggle(){
+  if(glPlayTimer) galleryPlayStop();
+  else galleryPlayStart();
+}
+function galleryPlayStart(){
+  if(glList.length<2){ toast('作品が1つなので再生できません'); return; }
+  document.getElementById('gl-play-btn').textContent = '⏸ 停止';
+  glPlayTimer = setInterval(()=>{
+    glIdx = (glIdx+1) % glList.length; // 最後まで来たら先頭へ
+    galleryShow();
+  }, 3500);
+}
+function galleryPlayStop(){
+  clearInterval(glPlayTimer); glPlayTimer = null;
+  const b = document.getElementById('gl-play-btn');
+  if(b) b.textContent = '▶ おまかせスライドショー';
+}
+/* 観覧モード: 今見ている作品を画像にしてシェア/保存 */
+async function galleryShare(){
+  const o = glList[glIdx];
+  if(!o){ return; }
+  try{
+    if(glKind==='banzuke'){ const cv=document.createElement('canvas'); bzCompose(o,cv); shareCanvas(cv,'banzuke'); }
+    else if(glKind==='haiku'){ const cv=document.createElement('canvas'); await haikuCompose(o,cv); shareCanvas(cv,'haiku'); }
+    else if(glKind==='deco'){ const cv=await decoCompose(1080, o, o.ink||''); shareCanvas(cv,'deco'); }
+    else if(glKind==='zukan'){ if(!o.photo){ toast('写真がありません'); return; } const cv=await zukanCompose(o); shareCanvas(cv,'zukan'); }
+  }catch(e){ console.error('share', e); toast('画像の作成に失敗しました'); }
 }
 /* 画像全体ズーム(観覧モード)。100%超では餅は止めて、つまんでスクロール可能にする */
 let glZoom = 100;
