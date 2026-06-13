@@ -2276,20 +2276,23 @@ function initMochiCanvas(cv, src){
         ox[c][r] = X; oy[c][r] = Y;
       }
     }
-    // 1枚の画像を、変形した三角形に貼る(クリップ+アフィン変換)。隙間が出ない
-    function drawTri(sx0,sy0,sx1,sy1,sx2,sy2, dx0,dy0,dx1,dy1,dx2,dy2){
-      const ccx=(dx0+dx1+dx2)/3, ccy=(dy0+dy1+dy2)/3, k=1.07; // 重心から少し広げて継ぎ目を消す
-      const X0=ccx+(dx0-ccx)*k, Y0=ccy+(dy0-ccy)*k, X1=ccx+(dx1-ccx)*k, Y1=ccy+(dy1-ccy)*k, X2=ccx+(dx2-ccx)*k, Y2=ccy+(dy2-ccy)*k;
+    // 変形した三角形に画像のそのマス部分だけを貼る(クリップ+アフィン)。隙間が出ない・高速
+    function drawTri(bx,by,bw,bh, sx0,sy0,sx1,sy1,sx2,sy2, dx0,dy0,dx1,dy1,dx2,dy2){
+      const ccx=(dx0+dx1+dx2)/3, ccy=(dy0+dy1+dy2)/3, k=1.08; // 重心から少し広げて継ぎ目を消す
       ctx.save();
-      ctx.setTransform(1,0,0,1,0,0);
-      ctx.beginPath(); ctx.moveTo(X0,Y0); ctx.lineTo(X1,Y1); ctx.lineTo(X2,Y2); ctx.closePath(); ctx.clip();
+      ctx.setTransform(1,0,0,1,0,0); // クリップは画面座標で(前のマスの変換を引きずらない)
+      ctx.beginPath();
+      ctx.moveTo(ccx+(dx0-ccx)*k, ccy+(dy0-ccy)*k);
+      ctx.lineTo(ccx+(dx1-ccx)*k, ccy+(dy1-ccy)*k);
+      ctx.lineTo(ccx+(dx2-ccx)*k, ccy+(dy2-ccy)*k);
+      ctx.closePath(); ctx.clip();
       const den=(sx1-sx0)*(sy2-sy0)-(sx2-sx0)*(sy1-sy0);
       const a=((dx1-dx0)*(sy2-sy0)-(dx2-dx0)*(sy1-sy0))/den;
       const b=((dy1-dy0)*(sy2-sy0)-(dy2-dy0)*(sy1-sy0))/den;
       const cc=((dx2-dx0)*(sx1-sx0)-(dx1-dx0)*(sx2-sx0))/den;
       const d=((dy2-dy0)*(sx1-sx0)-(dy1-dy0)*(sx2-sx0))/den;
       ctx.setTransform(a,b,cc,d, dx0-a*sx0-cc*sy0, dy0-b*sx0-d*sy0);
-      ctx.drawImage(src,0,0);
+      ctx.drawImage(src, bx,by,bw,bh, bx,by,bw,bh); // そのマス部分だけ(全体を描かない=高速)
       ctx.restore();
     }
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
@@ -2301,12 +2304,14 @@ function initMochiCanvas(cv, src){
       const x11 = xs[c+1]+ox[c+1][r+1], y11 = ys[r+1]+oy[c+1][r+1];
       // 4隅のズレ(=平行四辺形では埋められない亀裂の量)を測る
       const gpx = x11-(x10+x01-x00), gpy = y11-(y10+y01-y00);
-      if(gpx*gpx+gpy*gpy < 0.5){ // ズレ小=平行四辺形1枚で十分(高速)
+      if(gpx*gpx+gpy*gpy < 1.0){ // ズレ小=平行四辺形1枚で十分(高速)
         ctx.setTransform((x10-x00)/sw, (y10-y00)/sw, (x01-x00)/sh, (y01-y00)/sh, x00, y00);
         ctx.drawImage(src, xs[c], ys[r], sw, sh, -0.5, -0.5, sw+1, sh+1);
       } else { // ズレ大(主に横画面の強い引っ張り)=2枚の三角形で隙間なく描く
-        drawTri(xs[c],ys[r], xs[c+1],ys[r], xs[c],ys[r+1],   x00,y00, x10,y10, x01,y01);
-        drawTri(xs[c+1],ys[r+1], xs[c+1],ys[r], xs[c],ys[r+1], x11,y11, x10,y10, x01,y01);
+        const bx=xs[c], by=ys[r];
+        drawTri(bx,by,sw,sh, bx,by, xs[c+1],by, bx,ys[r+1],     x00,y00, x10,y10, x01,y01);
+        drawTri(bx,by,sw,sh, xs[c+1],ys[r+1], xs[c+1],by, bx,ys[r+1], x11,y11, x10,y10, x01,y01);
+        ctx.setTransform(1,0,0,1,0,0);
       }
     }
     ctx.setTransform(1,0,0,1,0,0);

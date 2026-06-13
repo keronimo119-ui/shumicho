@@ -174,10 +174,10 @@ cd android; .\gradlew.bat assembleDebug
   **ズレ(gpx,gpy)が大きいマスだけ2枚の三角形で描く**(`drawTri`=クリップ+3点アフィン、重心から7%拡大で継ぎ目消し)。
   ズレ小のマスは従来の平行四辺形のまま(高速)。
   ⑤波紋: 水色全廃→**白(光)/黒(影)の立体リング**(border白+box-shadow黒影+inset白ハイライト)。しぶきも白に
-  ⚠️**未検証(要実機)**: 実機がPINロックに入りWebViewのrAF/timerが凍結し、ライブのジェスチャー検証(実速度・
-  亀裂が消えたかの目視・波紋の見え方・バネの戻り)ができていない。同期確認では canvasShown=true/pullError=null/
-  ズーム全項目OK/範囲min=4 は取れた。三角形分割は数学的に隙間が出ない方式なので亀裂は解消の見込みだが要目視。
-  次回ユーザーがロック解除した状態で `node tools/cdp.mjs` で実速度(msPerFrame)とスクショ確認すること。
+- 2026-06-13(昼2): **三角形描画の性能修正+実機検証完了**。初版は三角形ごとに`drawImage(src,0,0)`で画像全体を
+  描いており53ms/フレーム(カクつき)→**そのマス部分だけ`drawImage(src,bx,by,bw,bh,...)`に限定**して16.6ms(60fps)に。
+  ⚠️drawTriのクリップは必ず`setTransform(identity)`してから張る(前マスの変換を引きずる初版バグを修正)。
+  実機検証済み: 60fps・バネ戻りOK・強い斜め引っ張りで白い亀裂なし(スクショ確認)・波紋3重リング+しぶき白黒で表示。
 - 検証ツール: `tools/cdp.mjs`(`@ファイルパス` で式をファイルから読める。PSサンドボックス誤検知対策)(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
   使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
 
