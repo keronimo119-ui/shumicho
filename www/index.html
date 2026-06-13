@@ -224,7 +224,7 @@ img.ph{object-fit:cover;display:block}
 <header id="topbar">
   <span class="app-title">趣味帳<span style="color:var(--accent)">Fav</span></span>
   <span class="row" style="gap:8px">
-    <button id="cal-btn" onclick="showCal()" aria-label="カレンダー">📅 こよみ</button>
+    <button id="cal-btn" onclick="showCal()" aria-label="カレンダー">📅 カレンダー</button>
     <button id="theme-btn" onclick="toggleTheme()" aria-label="テーマ切替">🌓</button>
   </span>
 </header>
@@ -256,7 +256,7 @@ img.ph{object-fit:cover;display:block}
       <button class="back-link" onclick="decoBack()">← 軌跡一覧へ(自動保存)</button>
       <input type="text" id="deco-title" maxlength="20" placeholder="ページ名(例: 年表2026)" style="margin-bottom:8px" oninput="decoTouchSave()">
       <details id="deco-notes-box" style="margin-bottom:8px">
-        <summary style="font-size:.85rem;font-weight:900;cursor:pointer;padding:6px 2px">📝 書き込み枠(日記・名言・プロフィールなど)</summary>
+        <summary style="font-size:.85rem;font-weight:900;cursor:pointer;padding:8px 12px;border:1.5px solid var(--border);background:var(--card);border-radius:10px;box-shadow:var(--shadow);list-style:none">📝 書き込み枠(日記・名言・プロフィールなど)</summary>
         <div id="deco-notes"></div>
         <div class="row" style="margin:8px 0 4px">
           <select id="deco-note-cat" style="flex:1">
@@ -592,8 +592,8 @@ img.ph{object-fit:cover;display:block}
     <h3 id="dy-title" class="serif"></h3>
     <div class="muted" id="dy-sub"></div>
     <div class="mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:12px;margin:0;padding:0">
-      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:12px;margin:0;padding:0">
+      <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:26px;margin:0;padding:0;touch-action:none">
+      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:26px;margin:0;padding:0;touch-action:none">
     </div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="dy-prev" onclick="diaryMove(-1)">◀ 前の記録日</button>
@@ -610,12 +610,12 @@ img.ph{object-fit:cover;display:block}
   <div class="modal-box">
     <h3 id="gl-title" class="serif"></h3>
     <div class="mochi-ctl" id="gl-mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">餅 強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
-      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
+      <span style="white-space:nowrap">餅 強さ<b id="mval-k" style="color:var(--accent)"></b></span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:none">
+      <span style="white-space:nowrap">範囲<b id="mval-r" style="color:var(--accent)"></b></span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:none">
       <button class="tool-btn mini" id="gl-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
     </div>
     <div id="gl-zoom-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">🔍ズーム</span><input type="range" id="gl-zoom" min="100" max="300" value="100" oninput="galleryZoom(this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
+      <span style="white-space:nowrap">🔍ズーム</span><input type="range" id="gl-zoom" min="100" max="300" value="100" oninput="galleryZoom(this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:none">
       <span id="gl-zoom-val" style="white-space:nowrap;min-width:34px;text-align:right">100%</span>
     </div>
     <div class="row between" style="margin-top:8px">
@@ -676,9 +676,15 @@ function adOnModalChange(){
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 /* ===== 連続記録(毎日の活動日を記録し連続日数を出す) ===== */
 const MILESTONES = [3,7,14,30,50,100,200,365];
-function activeDays(){ try{ return JSON.parse(localStorage.getItem('sc_active_days')||'[]'); }catch(e){ return []; } }
-function streakOf(){
-  const set = new Set(activeDays());
+// 連続記録はカレンダーの記録(各機能の date)に基づく。カレンダーのマークと必ず一致する
+async function recordDateSet(){
+  const [items, haiku, deco, banzuke] = await Promise.all([dbAll('items'), dbAll('haiku'), dbAll('deco'), dbAll('banzuke')]);
+  const set = new Set();
+  const add = arr=>arr.filter(x=>x.onCal!==false && x.date).forEach(x=>set.add(x.date));
+  add(items); add(haiku); add(deco); add(banzuke);
+  return set;
+}
+function streakFromSet(set){
   if(!set.size) return 0;
   const fmt = x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
   const d = new Date();
@@ -687,22 +693,19 @@ function streakOf(){
   while(set.has(fmt(d))){ n++; d.setDate(d.getDate()-1); }
   return n;
 }
-function renderStreak(){
-  const s = streakOf();
+async function renderStreak(){
+  const s = streakFromSet(await recordDateSet());
   document.querySelectorAll('.streak-bar').forEach(el=>{
     if(s>=2){ el.style.display='block'; el.textContent = `🔥 ${s}日連続記録中`; }
     else { el.style.display='none'; }
   });
+  return s;
 }
-function markActive(){ // 記録をしたら今日を活動日に追加し、節目はお祝い
-  const t = todayStr();
-  let a = activeDays();
-  if(!a.includes(t)){ a.push(t); localStorage.setItem('sc_active_days', JSON.stringify(a.slice(-400))); }
-  const s = streakOf();
+async function markActive(){ // 記録したら表示更新し、節目はお祝い
+  const s = await renderStreak();
   const shown = +(localStorage.getItem('sc_streak_shown')||0);
   if(s>shown && MILESTONES.includes(s)) setTimeout(()=>toast(`🎉 ${s}日連続記録を達成しました！`), 700);
   localStorage.setItem('sc_streak_shown', s);
-  renderStreak();
 }
 /* ===== 記念日カウントダウン ===== */
 function annivList(){ try{ return JSON.parse(localStorage.getItem('sc_anniv')||'[]'); }catch(e){ return []; } }
@@ -2416,13 +2419,19 @@ function slashSplit(card, midX, midY, ang){
 }
 /* 餅の好み設定(強さ=バネ・範囲=指を中心とした円の半径)。スライダーで変更し保存 */
 const mochiCfg = (()=>{ try{ const o = JSON.parse(localStorage.getItem('sc_mochi')||'{}'); return {k:+o.k||90, r:+o.r||100}; }catch(e){ return {k:90, r:100}; } })();
+function mochiValShow(){
+  const k=document.getElementById('mval-k'), r=document.getElementById('mval-r');
+  if(k) k.textContent = ' '+mochiCfg.k; if(r) r.textContent = ' '+mochiCfg.r;
+}
 function mochiSet(key, v){
   mochiCfg[key] = +v;
   localStorage.setItem('sc_mochi', JSON.stringify(mochiCfg));
   document.querySelectorAll(`.mochi-ctl input[data-k="${key}"]`).forEach(i=>{ if(+i.value !== +v) i.value = v; });
+  mochiValShow();
 }
 function mochiCtlSync(){
   document.querySelectorAll('.mochi-ctl input').forEach(i=>{ i.value = mochiCfg[i.dataset.k]; });
+  mochiValShow();
 }
 /* 範囲指定モード: 円を複数描き、円の中だけ餅にする(作品ごとに保存) */
 let mochiZoneEdit = false;
@@ -2713,8 +2722,9 @@ function galleryShow(){
   document.getElementById('gl-zoom-val').textContent = '100%';
   document.getElementById('gl-body').style.overflowX = '';
   glUrls.forEach(u=>URL.revokeObjectURL(u)); glUrls = [];
-  document.getElementById('gl-prev').disabled = glIdx<=0;
-  document.getElementById('gl-next').disabled = glIdx>=glList.length-1;
+  const single = glList.length<2; // 1作品だけのときは送りボタン無効、それ以外はループ可
+  document.getElementById('gl-prev').disabled = single;
+  document.getElementById('gl-next').disabled = single;
   document.getElementById('gl-pos').textContent = `${glIdx+1}/${glList.length}`;
   const names = {zukan:'📚 図鑑', deco:'📖 軌跡', haiku:'🖌️ 俳句', banzuke:'🏆 番付'};
   document.getElementById('gl-title').textContent = `${names[glKind]}　${o.date?fmtDate(o.date):''}`;
@@ -2757,9 +2767,8 @@ function galleryShow(){
 }
 function galleryMove(dir){
   galleryPlayStop(); // 手動でめくったら自動再生は止める
-  const j = glIdx+dir;
-  if(j<0 || j>=glList.length) return;
-  glIdx = j;
+  if(glList.length<1) return;
+  glIdx = (glIdx + dir + glList.length) % glList.length; // 末尾の次は先頭へ・先頭の前は末尾へ(ループ)
   galleryShow();
 }
 /* 図鑑アイテムを1枚のカード画像に合成(写真+名前+評価+メモ) */

@@ -115,6 +115,17 @@ cd android; .\gradlew.bat assembleDebug
   `@capacitor/share@8`+`@capacitor/filesystem@8`導入。`shareCanvas()`はネイティブ時に Filesystem.writeFile(CACHE,base64)→getUri→Share.share(files)で**端末標準の共有シート**を開く。Web時は従来のnavigator.share/DLにフォールバック。実機で共有シート表示確認。
 - 全項目 実機検証・スクショ確認済み。
 
+### 微調整(2026-06-13 追補)
+- **連続記録をカレンダー基準に修正**(バグ: 表示2日なのにカレンダー4連続)。旧`sc_active_days`(アプリ操作日)→
+  **各機能のrecord date(onCal!==false)から算出**(`recordDateSet()`/`streakFromSet()`)。renderStreak/markActiveをasync化。カレンダーのマークと必ず一致。
+- 観覧モードの送りを**ループ化**(`galleryMove`= `(glIdx+dir+len)%len`、末尾の次は先頭/先頭の前は末尾。端でもボタン有効、1作品時のみ無効)。
+- 「📅こよみ」→**「📅カレンダー」**表記。
+- 餅スライダーを使いやすく: 当たり判定を厚く(height26px)+`touch-action:none`(スクロールに奪われない)+**現在値表示**(`mval-k`/`mval-r`、mochiSet/mochiCtlSyncで更新)。図鑑/軌跡のみ表示は維持(番付/俳句は非対象)。
+- 軌跡の「📝書き込み枠」summaryを**ボタン風**(枠+カード背景+角丸)に。
+- 餅ギミック本体は不変(図鑑/軌跡で従来通り)。
+- カレンダー寿命: 月送り・曜日・固定祝日・ハッピーマンデーは**任意の年で正常**。春分/秋分の近似式(`vernalDay`/`autumnDay`)は
+  **1980〜2099年で正確**(数十年は問題なし)。2100年以降は1日ずれる可能性→必要なら係数追加で拡張可。
+
 
 
 ### 「ユーザー目線の改善」シリーズ(2026-06-13〜、毎日開く=広告収益を狙う)
