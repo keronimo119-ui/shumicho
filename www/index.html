@@ -592,8 +592,8 @@ img.ph{object-fit:cover;display:block}
     <h3 id="dy-title" class="serif"></h3>
     <div class="muted" id="dy-sub"></div>
     <div class="mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:26px;margin:0;padding:0;touch-action:none">
-      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:26px;margin:0;padding:0;touch-action:none">
+      <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:26px;margin:0;padding:0;touch-action:pan-y">
+      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:26px;margin:0;padding:0;touch-action:pan-y">
     </div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="dy-prev" onclick="diaryMove(-1)">◀ 前の記録日</button>
@@ -610,12 +610,12 @@ img.ph{object-fit:cover;display:block}
   <div class="modal-box">
     <h3 id="gl-title" class="serif"></h3>
     <div class="mochi-ctl" id="gl-mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">餅 強さ<b id="mval-k" style="color:var(--accent)"></b></span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:none">
-      <span style="white-space:nowrap">範囲<b id="mval-r" style="color:var(--accent)"></b></span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:none">
+      <span style="white-space:nowrap">餅 強さ<b id="mval-k" style="color:var(--accent)"></b></span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
+      <span style="white-space:nowrap">範囲<b id="mval-r" style="color:var(--accent)"></b></span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
       <button class="tool-btn mini" id="gl-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
     </div>
     <div id="gl-zoom-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">🔍ズーム</span><input type="range" id="gl-zoom" min="100" max="300" value="100" oninput="galleryZoom(this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:none">
+      <span style="white-space:nowrap">🔍ズーム</span><input type="range" id="gl-zoom" min="100" max="300" value="100" oninput="galleryZoom(this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
       <span id="gl-zoom-val" style="white-space:nowrap;min-width:34px;text-align:right">100%</span>
     </div>
     <div class="row between" style="margin-top:8px">
@@ -2730,8 +2730,8 @@ function galleryShow(){
   document.getElementById('gl-title').textContent = `${names[glKind]}　${o.date?fmtDate(o.date):''}`;
   // 餅スライダー・範囲指定・ズームは餅で遊べる図鑑/軌跡だけ表示(番付/俳句では隠す)
   const playable = (glKind==='zukan' || glKind==='deco');
-  document.getElementById('gl-mochi-ctl').style.display = playable ? '' : 'none';
-  document.getElementById('gl-zoom-row').style.display = playable ? '' : 'none';
+  document.getElementById('gl-mochi-ctl').style.display = playable ? 'flex' : 'none'; // flexに戻す('']だとblockになりwidth:0のバーが消える)
+  document.getElementById('gl-zoom-row').style.display = playable ? 'flex' : 'none';
   const body = document.getElementById('gl-body');
   let html = '';
   if(glKind==='zukan'){
