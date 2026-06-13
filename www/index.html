@@ -2162,7 +2162,7 @@ function mochiZoneToggle(){
   btn.textContent = mochiZoneEdit ? '✅完了' : '✏️範囲指定';
   btn.classList.toggle('on', mochiZoneEdit);
   if(mochiZoneEdit){
-    toast('画像を指でなぞって円を描く(複数OK)。円をタップで削除');
+    toast('範囲丸タップで削除');
   } else if(cv._meta && cv._meta.save){
     cv._meta.save(cv._meta.zones);
     toast(cv._meta.zones.length ? '保存しました。円の中だけが餅になります' : '保存しました。全体が餅になります');
@@ -2200,7 +2200,7 @@ function initMochiCanvas(cv, src){
   const Rbase = Math.max(W,H)/3;        // 範囲100%のときの影響半径
   const R = ()=>Rbase*mochiCfg.r/100;   // 指を中心とした円の半径(範囲スライダー連動)
   const ptrs = new Map();     // 指ごとの状態(マルチタッチ): id -> {gx,gy,dx,dy,vx,vy,up,px,py}
-  let anim = 0, cumX = 0, flipDone = false, dirty = false, zoneTemp = null;
+  let anim = 0, cumX = 0, flipDone = false, dirty = false, zoneTemp = null, zoneDrag = null;
   const meta = cv._meta || (cv._meta = {zones:[], save:null});
   function requestDraw(){ // 1フレーム1回だけ描く(無駄な多重描画をなくし反応を安定させる)
     if(dirty) return;
@@ -2322,12 +2322,15 @@ function initMochiCanvas(cv, src){
     return {x:(e.clientX-r.left)*W/r.width, y:(e.clientY-r.top)*H/r.height};
   }
   cv.addEventListener('pointerdown', e=>{
-    if(typeof glZoomActive==='function' && glZoomActive(cv)) return; // ズーム中はスクロール優先(餅しない)
     e.preventDefault();
     try{ cv.setPointerCapture(e.pointerId); }catch(err){}
     const p = pos(e);
-    if(mochiZoneEdit){ // 範囲指定モード: 円を描き始める
-      zoneTemp = {x:p.x, y:p.y, r:0};
+    if(mochiZoneEdit){ // 範囲指定モード: 既存の丸の上なら移動、空白なら新規作成
+      const mWH = Math.max(W,H);
+      let hit = -1;
+      for(let i=meta.zones.length-1;i>=0;i--){ const z=meta.zones[i]; if(Math.hypot(z.x*W-p.x, z.y*H-p.y) < z.r*mWH){ hit=i; break; } }
+      if(hit>=0){ const z=meta.zones[hit]; zoneDrag = {i:hit, ox:z.x*W-p.x, oy:z.y*H-p.y, downx:p.x, downy:p.y, moved:0}; }
+      else { zoneTemp = {x:p.x, y:p.y, r:0}; }
       requestDraw();
       return;
     }
@@ -2337,7 +2340,14 @@ function initMochiCanvas(cv, src){
   });
   cv.addEventListener('pointermove', e=>{
     if(mochiZoneEdit){
-      if(zoneTemp){ const q2 = pos(e); zoneTemp.r = Math.hypot(q2.x-zoneTemp.x, q2.y-zoneTemp.y); requestDraw(); }
+      const q2 = pos(e);
+      if(zoneDrag){ // 丸をドラッグで配置移動
+        const z = meta.zones[zoneDrag.i];
+        z.x = Math.max(0, Math.min(1, (q2.x+zoneDrag.ox)/W));
+        z.y = Math.max(0, Math.min(1, (q2.y+zoneDrag.oy)/H));
+        zoneDrag.moved = Math.hypot(q2.x-zoneDrag.downx, q2.y-zoneDrag.downy);
+        requestDraw();
+      } else if(zoneTemp){ zoneTemp.r = Math.hypot(q2.x-zoneTemp.x, q2.y-zoneTemp.y); requestDraw(); }
       return;
     }
     const p = ptrs.get(e.pointerId);
@@ -2350,13 +2360,20 @@ function initMochiCanvas(cv, src){
       const act = [...ptrs.values()].filter(z=>!z.up);
       if(act.length===1){
         const sc = cv.closest('.modal-box');
-        if(sc) sc.scrollTop -= (e.clientY-p.py); // 縦: 画面スクロール
-        cumX += (e.clientX-p.px);                 // 横: たまったら前後の作品へ
-        if(!flipDone && Math.abs(cumX)>90){
-          flipDone = true;
-          const dir = cumX<0 ? 1 : -1;
-          if(document.getElementById('modal-gallery').classList.contains('open')) galleryMove(dir);
-          else if(document.getElementById('modal-diary').classList.contains('open')) diaryMove(dir);
+        if(typeof glZoomActive==='function' && glZoomActive(cv)){
+          // ズーム中: 前後の作品送りではなく、拡大画像のパン(縦横スクロール)
+          const body = document.getElementById('gl-body');
+          if(body) body.scrollLeft -= (e.clientX-p.px);
+          if(sc) sc.scrollTop -= (e.clientY-p.py);
+        } else {
+          if(sc) sc.scrollTop -= (e.clientY-p.py); // 縦: 画面スクロール
+          cumX += (e.clientX-p.px);                 // 横: たまったら前後の作品へ
+          if(!flipDone && Math.abs(cumX)>90){
+            flipDone = true;
+            const dir = cumX<0 ? 1 : -1;
+            if(document.getElementById('modal-gallery').classList.contains('open')) galleryMove(dir);
+            else if(document.getElementById('modal-diary').classList.contains('open')) diaryMove(dir);
+          }
         }
       }
       ndx *= lim/m; ndy *= lim/m;
@@ -2367,17 +2384,14 @@ function initMochiCanvas(cv, src){
     requestDraw();
   });
   const up = e=>{
-    if(mochiZoneEdit){ // 範囲指定モード: 円を確定(小さすぎる=タップは既存の円を削除)
-      if(zoneTemp){
+    if(mochiZoneEdit){ // 範囲指定モード: ドラッグ=移動 / 動かさずに離す(タップ)=削除 / 空白でなぞる=新規
+      if(zoneDrag){
+        if(zoneDrag.moved < 14) meta.zones.splice(zoneDrag.i, 1); // ほぼ動かなかった=タップ削除
+        zoneDrag = null; requestDraw();
+      } else if(zoneTemp){
         const mWH = Math.max(W,H);
-        if(zoneTemp.r < 14){
-          const i = meta.zones.findIndex(z=>Math.hypot(z.x*W-zoneTemp.x, z.y*H-zoneTemp.y) < z.r*mWH);
-          if(i>=0) meta.zones.splice(i,1);
-        } else {
-          meta.zones.push({x:zoneTemp.x/W, y:zoneTemp.y/H, r:zoneTemp.r/mWH});
-        }
-        zoneTemp = null;
-        requestDraw();
+        if(zoneTemp.r >= 14) meta.zones.push({x:zoneTemp.x/W, y:zoneTemp.y/H, r:zoneTemp.r/mWH});
+        zoneTemp = null; requestDraw();
       }
       return;
     }
@@ -2493,7 +2507,7 @@ function galleryZoom(v){
   if(main){
     main.style.width = glZoom+'%';
     main.style.maxWidth = 'none';
-    if(main.classList.contains('dy-mochi')) main.style.touchAction = glZoom>100 ? 'auto' : 'none';
+    // touch-actionはnoneのまま(餅を有効に保つ)。パンは餅の引っ張り限界スライドで行う
   }
 }
 function glZoomActive(cv){ return glZoom>100 && cv && cv.closest && !!cv.closest('#gl-body'); }

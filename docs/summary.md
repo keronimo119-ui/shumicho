@@ -178,6 +178,13 @@ cd android; .\gradlew.bat assembleDebug
   描いており53ms/フレーム(カクつき)→**そのマス部分だけ`drawImage(src,bx,by,bw,bh,...)`に限定**して16.6ms(60fps)に。
   ⚠️drawTriのクリップは必ず`setTransform(identity)`してから張る(前マスの変換を引きずる初版バグを修正)。
   実機検証済み: 60fps・バネ戻りOK・強い斜め引っ張りで白い亀裂なし(スクショ確認)・波紋3重リング+しぶき白黒で表示。
+- 2026-06-13(昼3): **ズーム中も餅有効化+範囲丸のドラッグ移動**。
+  ①ズーム中に餅を無効化していた(touch-action:auto+pointerdown早期return)のを撤去→**ズームしても餅が効く**。
+  ズーム中(>100%)のパンは「引っ張り限界スライド」を流用: 縦=modal-boxスクロール/横=gl-bodyのscrollLeft
+  (通常時の横=前後作品送りは据え置き、`glZoomActive(cv)`で分岐)
+  ②範囲指定の説明toastを「範囲丸タップで削除」に短縮
+  ③範囲丸を**ドラッグで配置移動**可能に(`zoneDrag`: 既存丸の上でpointerdown→中心を指に追従、moved<14pxで離す=タップ削除)。
+  実機検証済み: ズーム200%で餅変形OK・丸ドラッグ移動OK・タップ削除OK。
 - 検証ツール: `tools/cdp.mjs`(`@ファイルパス` で式をファイルから読める。PSサンドボックス誤検知対策)(デバッグビルドのWebViewへChrome DevTools Protocolで接続しJS実行。
   使い方: adb forward tcp:9222 localabstract:webview_devtools_remote_<pid> → `node tools/cdp.mjs "<JS式>"`)
 
