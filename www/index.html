@@ -157,10 +157,10 @@ img.ph{object-fit:cover;display:block}
 .dy-bz.cut{animation:dyCut .5s ease-out}
 @keyframes dyCut{0%{transform:none}18%{transform:translate(6px,-5px) rotate(1.6deg)}42%{transform:translate(-6px,5px) rotate(-1.6deg)}68%{transform:translate(3px,-2px) rotate(.8deg)}100%{transform:none}}
 /* 波紋: 自然な水。広がるほど減速し輪が細く淡くなる+中心のしぶき */
-/* 波紋: 幅のある輪の部分だけ背景がふわっと薄明るくなる(白の半透明帯+淡い縁) */
-.dy-ripple{position:absolute;border:12px solid rgba(255,255,255,.32);box-shadow:0 0 0 1px rgba(160,210,255,.4),inset 0 0 0 1px rgba(160,210,255,.28);border-radius:50%;width:14px;height:14px;transform:translate(-50%,-50%);pointer-events:none;z-index:5;animation:dyRipple 1.5s cubic-bezier(.08,.6,.22,1) forwards}
-@keyframes dyRipple{0%{width:14px;height:14px;border-width:13px;opacity:.95}55%{opacity:.55;border-width:8px}100%{width:330px;height:330px;border-width:4px;opacity:0}}
-.dy-drop{position:absolute;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,rgba(205,232,255,.95),rgba(150,205,255,0) 70%);transform:translate(-50%,-50%) scale(.5);pointer-events:none;z-index:5;animation:dyDrop .55s ease-out forwards}
+/* 波紋: 水の輪を光(白)と影(黒)で立体的に表現(水色は使わない) */
+.dy-ripple{position:absolute;border:7px solid rgba(255,255,255,.32);box-shadow:0 2px 5px rgba(0,0,0,.42),inset 0 2px 3px rgba(255,255,255,.55),inset 0 -3px 5px rgba(0,0,0,.34);border-radius:50%;width:14px;height:14px;transform:translate(-50%,-50%);pointer-events:none;z-index:5;animation:dyRipple 1.5s cubic-bezier(.08,.6,.22,1) forwards}
+@keyframes dyRipple{0%{width:14px;height:14px;border-width:8px;opacity:.95}55%{opacity:.5;border-width:5px}100%{width:330px;height:330px;border-width:2px;opacity:0}}
+.dy-drop{position:absolute;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);transform:translate(-50%,-50%) scale(.5);pointer-events:none;z-index:5;animation:dyDrop .55s ease-out forwards}
 @keyframes dyDrop{0%{opacity:.95;transform:translate(-50%,-50%) scale(.5)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.8)}}
 .deco-note{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin-top:8px}
 .deco-note textarea{margin-top:6px;min-height:64px}
@@ -552,7 +552,7 @@ img.ph{object-fit:cover;display:block}
     <div class="muted" id="dy-sub"></div>
     <div class="mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
       <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:12px;margin:0;padding:0">
-      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="15" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:12px;margin:0;padding:0">
+      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:12px;margin:0;padding:0">
     </div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="dy-prev" onclick="diaryMove(-1)">◀ 前の記録日</button>
@@ -570,8 +570,12 @@ img.ph{object-fit:cover;display:block}
     <h3 id="gl-title" class="serif"></h3>
     <div class="mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
       <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
-      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="15" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
+      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
       <button class="tool-btn mini" id="gl-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.68rem;font-weight:800;color:var(--text2)">
+      <span style="white-space:nowrap">🔍ズーム</span><input type="range" id="gl-zoom" min="100" max="300" value="100" oninput="galleryZoom(this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
+      <span id="gl-zoom-val" style="white-space:nowrap;min-width:34px;text-align:right">100%</span>
     </div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="gl-prev" onclick="galleryMove(-1)">◀ 前の作品</button>
@@ -2272,16 +2276,38 @@ function initMochiCanvas(cv, src){
         ox[c][r] = X; oy[c][r] = Y;
       }
     }
-    // 各マスを平行四辺形として描く(斜めの変形でも辺がつながり隙間が出ない)
+    // 1枚の画像を、変形した三角形に貼る(クリップ+アフィン変換)。隙間が出ない
+    function drawTri(sx0,sy0,sx1,sy1,sx2,sy2, dx0,dy0,dx1,dy1,dx2,dy2){
+      const ccx=(dx0+dx1+dx2)/3, ccy=(dy0+dy1+dy2)/3, k=1.07; // 重心から少し広げて継ぎ目を消す
+      const X0=ccx+(dx0-ccx)*k, Y0=ccy+(dy0-ccy)*k, X1=ccx+(dx1-ccx)*k, Y1=ccy+(dy1-ccy)*k, X2=ccx+(dx2-ccx)*k, Y2=ccy+(dy2-ccy)*k;
+      ctx.save();
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.beginPath(); ctx.moveTo(X0,Y0); ctx.lineTo(X1,Y1); ctx.lineTo(X2,Y2); ctx.closePath(); ctx.clip();
+      const den=(sx1-sx0)*(sy2-sy0)-(sx2-sx0)*(sy1-sy0);
+      const a=((dx1-dx0)*(sy2-sy0)-(dx2-dx0)*(sy1-sy0))/den;
+      const b=((dy1-dy0)*(sy2-sy0)-(dy2-dy0)*(sy1-sy0))/den;
+      const cc=((dx2-dx0)*(sx1-sx0)-(dx1-dx0)*(sx2-sx0))/den;
+      const d=((dy2-dy0)*(sx1-sx0)-(dy1-dy0)*(sx2-sx0))/den;
+      ctx.setTransform(a,b,cc,d, dx0-a*sx0-cc*sy0, dy0-b*sx0-d*sy0);
+      ctx.drawImage(src,0,0);
+      ctx.restore();
+    }
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
       const sw = xs[c+1]-xs[c], sh = ys[r+1]-ys[r];
       if(sw<=0 || sh<=0) continue;
-      const x00 = xs[c]+ox[c][r],     y00 = ys[r]+oy[c][r];
-      const x10 = xs[c+1]+ox[c+1][r], y10 = ys[r]+oy[c+1][r];
-      const x01 = xs[c]+ox[c][r+1],   y01 = ys[r+1]+oy[c][r+1];
-      ctx.setTransform((x10-x00)/sw, (y10-y00)/sw, (x01-x00)/sh, (y01-y00)/sh, x00, y00);
-      // -0.5/+1は継ぎ目消し(隣のマスの対応色をわずかに重ねて埋める)
-      ctx.drawImage(src, xs[c], ys[r], sw, sh, -0.5, -0.5, sw+1, sh+1);
+      const x00 = xs[c]+ox[c][r],       y00 = ys[r]+oy[c][r];
+      const x10 = xs[c+1]+ox[c+1][r],   y10 = ys[r]+oy[c+1][r];
+      const x01 = xs[c]+ox[c][r+1],     y01 = ys[r+1]+oy[c][r+1];
+      const x11 = xs[c+1]+ox[c+1][r+1], y11 = ys[r+1]+oy[c+1][r+1];
+      // 4隅のズレ(=平行四辺形では埋められない亀裂の量)を測る
+      const gpx = x11-(x10+x01-x00), gpy = y11-(y10+y01-y00);
+      if(gpx*gpx+gpy*gpy < 0.5){ // ズレ小=平行四辺形1枚で十分(高速)
+        ctx.setTransform((x10-x00)/sw, (y10-y00)/sw, (x01-x00)/sh, (y01-y00)/sh, x00, y00);
+        ctx.drawImage(src, xs[c], ys[r], sw, sh, -0.5, -0.5, sw+1, sh+1);
+      } else { // ズレ大(主に横画面の強い引っ張り)=2枚の三角形で隙間なく描く
+        drawTri(xs[c],ys[r], xs[c+1],ys[r], xs[c],ys[r+1],   x00,y00, x10,y10, x01,y01);
+        drawTri(xs[c+1],ys[r+1], xs[c+1],ys[r], xs[c],ys[r+1], x11,y11, x10,y10, x01,y01);
+      }
     }
     ctx.setTransform(1,0,0,1,0,0);
     drawZones();
@@ -2291,6 +2317,7 @@ function initMochiCanvas(cv, src){
     return {x:(e.clientX-r.left)*W/r.width, y:(e.clientY-r.top)*H/r.height};
   }
   cv.addEventListener('pointerdown', e=>{
+    if(typeof glZoomActive==='function' && glZoomActive(cv)) return; // ズーム中はスクロール優先(餅しない)
     e.preventDefault();
     try{ cv.setPointerCapture(e.pointerId); }catch(err){}
     const p = pos(e);
@@ -2355,7 +2382,7 @@ function initMochiCanvas(cv, src){
     cancelAnimationFrame(anim);
     const spring = ()=>{
       let alive = false;
-      const K = 0.389*mochiCfg.k/100; // バネ強さ(スライダー連動。90%=従来の0.35)
+      const K = 0.55*mochiCfg.k/100; // バネ強さ(スライダー連動。引っ張り限界を伸ばした分しっかり強めに)
       for(const [id, z] of ptrs){
         if(!z.up) continue;
         z.vx += -z.dx*K; z.vy += -z.dy*K; z.vx *= 0.80; z.vy *= 0.80;
@@ -2401,6 +2428,10 @@ function galleryShow(){
     const zb = document.getElementById('gl-zone-btn');
     zb.textContent = '✏️範囲指定'; zb.classList.remove('on');
   }
+  glZoom = 100; // 作品を変えたらズームは戻す
+  document.getElementById('gl-zoom').value = 100;
+  document.getElementById('gl-zoom-val').textContent = '100%';
+  document.getElementById('gl-body').style.overflowX = '';
   glUrls.forEach(u=>URL.revokeObjectURL(u)); glUrls = [];
   document.getElementById('gl-prev').disabled = glIdx<=0;
   document.getElementById('gl-next').disabled = glIdx>=glList.length-1;
@@ -2446,6 +2477,21 @@ function galleryMove(dir){
   glIdx = j;
   galleryShow();
 }
+/* 画像全体ズーム(観覧モード)。100%超では餅は止めて、つまんでスクロール可能にする */
+let glZoom = 100;
+function galleryZoom(v){
+  glZoom = +v;
+  document.getElementById('gl-zoom-val').textContent = glZoom+'%';
+  const body = document.getElementById('gl-body');
+  body.style.overflowX = glZoom>100 ? 'auto' : '';
+  const main = body.querySelector('canvas.dy-mochi') || body.querySelector('.dy-bz') || body.querySelector('.dy-haiku') || body.querySelector('img.dy-mochi') || body.firstElementChild;
+  if(main){
+    main.style.width = glZoom+'%';
+    main.style.maxWidth = 'none';
+    if(main.classList.contains('dy-mochi')) main.style.touchAction = glZoom>100 ? 'auto' : 'none';
+  }
+}
+function glZoomActive(cv){ return glZoom>100 && cv && cv.closest && !!cv.closest('#gl-body'); }
 function galleryInitSwipe(){
   const box = document.querySelector('#modal-gallery .modal-box');
   let sx = null, sy = null;
