@@ -223,6 +223,7 @@ img.ph{object-fit:cover;display:block}
   <section id="page-zukan" class="page active">
     <div id="zukan-list-view" class="subview active">
       <div class="hero"><h2>📚 マイ図鑑</h2><p>グッズ・カード・昆虫・なんでも。写真とメモで自分だけの図鑑を作ろう</p></div>
+      <div id="streak-bar" style="display:none;text-align:center;font-size:.82rem;font-weight:900;color:var(--accent);background:var(--accent-light);border-radius:12px;padding:8px;margin-bottom:10px"></div>
       <button class="btn sub wide" style="margin-bottom:10px" onclick="galleryOpen('zukan')">👀 観覧モード(集めた写真をめくって眺める)</button>
       <div class="card book-card" onclick="showDecoList()">
         <div class="book-emoji">📖</div>
@@ -630,6 +631,36 @@ function adOnModalChange(){
   else { if(window.shumichoShowAd) window.shumichoShowAd(); }
 }
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+/* ===== 連続記録(毎日の活動日を記録し連続日数を出す) ===== */
+const MILESTONES = [3,7,14,30,50,100,200,365];
+function activeDays(){ try{ return JSON.parse(localStorage.getItem('sc_active_days')||'[]'); }catch(e){ return []; } }
+function streakOf(){
+  const set = new Set(activeDays());
+  if(!set.size) return 0;
+  const fmt = x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+  const d = new Date();
+  if(!set.has(fmt(d))){ d.setDate(d.getDate()-1); if(!set.has(fmt(d))) return 0; } // 今日未記録でも昨日まで続いていれば維持
+  let n = 0;
+  while(set.has(fmt(d))){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+function renderStreak(){
+  const el = document.getElementById('streak-bar');
+  if(!el) return;
+  const s = streakOf();
+  if(s>=2){ el.style.display='block'; el.textContent = `🔥 ${s}日連続記録中`; }
+  else { el.style.display='none'; }
+}
+function markActive(){ // 記録をしたら今日を活動日に追加し、節目はお祝い
+  const t = todayStr();
+  let a = activeDays();
+  if(!a.includes(t)){ a.push(t); localStorage.setItem('sc_active_days', JSON.stringify(a.slice(-400))); }
+  const s = streakOf();
+  const shown = +(localStorage.getItem('sc_streak_shown')||0);
+  if(s>shown && MILESTONES.includes(s)) setTimeout(()=>toast(`🎉 ${s}日連続記録を達成しました！`), 700);
+  localStorage.setItem('sc_streak_shown', s);
+  renderStreak();
+}
 function fmtDate(s){ if(!s) return ''; const p=s.split('-'); return p.length===3 ? `${p[0]}年${+p[1]}月${+p[2]}日` : s; }
 
 /* ----- テーマ ----- */
@@ -728,6 +759,7 @@ let miRating = 0;
 let miPhotoBlob = undefined; // undefined=変更なし null=削除 Blob=新規
 
 async function renderBooks(){
+  renderStreak();
   const books = await dbAll('books');
   const items = await dbAll('items');
   const wrap = document.getElementById('zukan-books');
@@ -915,6 +947,7 @@ async function saveItem(){
   obj.onCal = document.getElementById('mi-oncal').checked;
   if(miPhotoBlob!==undefined) obj.photo = miPhotoBlob;
   await dbPut('items', obj);
+  markActive();
   closeModal('modal-item');
   toast('保存しました');
   await renderItems();
@@ -1063,6 +1096,7 @@ function decoTouchSave(){
     const save = {...decoObj};
     save.layers = decoObj.layers.map(L=>{ const c={...L}; delete c._url; return c; });
     await dbPut('deco', save);
+    markActive();
   }, 700);
 }
 
@@ -1488,6 +1522,7 @@ async function bzAddEntry(){
   if(s.entries.length>=40){ toast('番付は40名までです'); return; }
   s.entries.push({name});
   await dbPut('banzuke', s);
+  markActive();
   inp.value=''; inp.focus();
   renderBzEntries(s);
 }
@@ -1737,6 +1772,7 @@ async function saveHaiku(){
   obj.onCal = document.getElementById('mh-oncal').checked;
   if(mhPhotoBlob!==undefined) obj.photo = mhPhotoBlob;
   await dbPut('haiku', obj);
+  markActive();
   closeModal('modal-haiku');
   toast(editingHaikuId ? '保存しました' : '一句、句帳に収めました');
   renderHaikuList();
