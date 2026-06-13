@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">趣味帳</string>
-    <string name="title_activity_main">趣味帳</string>
+    <string name="app_name">趣味帳Fav</string>
+    <string name="title_activity_main">趣味帳Fav</string>
     <string name="package_name">io.github.keronimo119ui.shumicho</string>
     <string name="custom_url_scheme">io.github.keronimo119ui.shumicho</string>
 </resources>

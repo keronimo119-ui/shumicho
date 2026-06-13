@@ -59,7 +59,11 @@ main{padding:calc(58px + env(safe-area-inset-top)) 14px calc(var(--tab-h) + var(
 .row.between{justify-content:space-between}
 .muted{color:var(--text2);font-size:.8rem}
 .sec-title{font-size:.95rem;font-weight:900;margin:16px 0 8px;display:flex;align-items:center;gap:6px}
-.back-link{display:inline-flex;align-items:center;gap:4px;border:none;background:none;font-family:inherit;color:var(--text2);font-weight:800;font-size:.85rem;cursor:pointer;padding:4px 0;margin-bottom:8px}
+.back-link{display:inline-flex;align-items:center;gap:4px;border:1.5px solid var(--border);background:var(--card);font-family:inherit;color:var(--text);font-weight:800;font-size:.85rem;cursor:pointer;padding:8px 14px;border-radius:10px;margin-bottom:10px;box-shadow:var(--shadow)}
+.back-link:active{transform:translateY(1px)}
+/* カレンダー(こよみ)ボタンを目立たせる */
+#cal-btn{border:none;background:linear-gradient(135deg,var(--accent),#ff7f50);color:#fff;font-weight:900;font-size:.84rem;border-radius:20px;padding:7px 14px;cursor:pointer;box-shadow:0 3px 10px rgba(232,67,147,.45);animation:calPulse 2s ease-in-out infinite;white-space:nowrap}
+@keyframes calPulse{0%,100%{box-shadow:0 3px 10px rgba(232,67,147,.45)}50%{box-shadow:0 3px 18px 3px rgba(232,67,147,.75)}}
 input[type=text],input[type=number],input[type=date],textarea,select{width:100%;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-family:inherit;font-size:1rem;padding:10px 12px}
 textarea{resize:vertical;min-height:70px}
 label.fld{display:block;font-size:.78rem;font-weight:800;color:var(--text2);margin:12px 0 4px}
@@ -218,9 +222,9 @@ img.ph{object-fit:cover;display:block}
 <body>
 
 <header id="topbar">
-  <span class="app-title">趣味帳<small id="topbar-sub">あなたの「好き」をしまう帳面</small></span>
-  <span class="row" style="gap:6px">
-    <button id="cal-btn" style="border:none;background:var(--card2);border-radius:50%;width:36px;height:36px;font-size:1.02rem;cursor:pointer" onclick="showCal()" aria-label="カレンダー">📅</button>
+  <span class="app-title">趣味帳<span style="color:var(--accent)">Fav</span></span>
+  <span class="row" style="gap:8px">
+    <button id="cal-btn" onclick="showCal()" aria-label="カレンダー">📅 こよみ</button>
     <button id="theme-btn" onclick="toggleTheme()" aria-label="テーマ切替">🌓</button>
   </span>
 </header>
@@ -230,7 +234,7 @@ img.ph{object-fit:cover;display:block}
   <section id="page-zukan" class="page active">
     <div id="zukan-list-view" class="subview active">
       <div class="hero"><h2>📚 マイ図鑑</h2><p>グッズ・カード・昆虫・なんでも。写真とメモで自分だけの図鑑を作ろう</p></div>
-      <div id="streak-bar" style="display:none;text-align:center;font-size:.82rem;font-weight:900;color:var(--accent);background:var(--accent-light);border-radius:12px;padding:8px;margin-bottom:10px"></div>
+      <div class="streak-bar" style="display:none;text-align:center;font-size:.82rem;font-weight:900;color:var(--accent);background:var(--accent-light);border-radius:12px;padding:8px;margin-bottom:10px"></div>
       <div id="anniv-home" style="margin-bottom:10px"></div>
       <button class="btn sub wide" style="margin-bottom:10px" onclick="galleryOpen('zukan')">👀 観覧モード(集めた写真をめくって眺める)</button>
       <div class="card book-card" onclick="showDecoList()">
@@ -384,6 +388,7 @@ img.ph{object-fit:cover;display:block}
 
   <!-- ============ カレンダー ============ -->
   <section id="page-cal" class="page">
+    <div class="streak-bar" style="display:none;text-align:center;font-size:.82rem;font-weight:900;color:var(--accent);background:var(--accent-light);border-radius:12px;padding:8px;margin-bottom:10px"></div>
     <div class="cal-head">
       <button onclick="calMove(-1)">◀</button>
       <span class="ttl" id="cal-title"></span>
@@ -567,8 +572,8 @@ img.ph{object-fit:cover;display:block}
 <!-- 記念日カウントダウン管理 -->
 <div class="modal" id="modal-anniv">
   <div class="modal-box">
-    <h3>🎂 記念日カウントダウン</h3>
-    <div class="muted" style="font-size:.8rem">誕生日やイベントの日を登録すると、ホームで「あと○日」を表示します</div>
+    <h3>🎂 イベント・記念日</h3>
+    <div class="muted" style="font-size:.8rem">誕生日やイベントの日を登録すると、ホームとカレンダーに「あと○日」を表示します</div>
     <div id="anniv-list" style="margin-top:10px"></div>
     <div class="row" style="margin-top:12px">
       <input type="text" id="anniv-name" maxlength="20" placeholder="名前(例: ○○の誕生日)" style="flex:1">
@@ -604,12 +609,12 @@ img.ph{object-fit:cover;display:block}
 <div class="modal" id="modal-gallery">
   <div class="modal-box">
     <h3 id="gl-title" class="serif"></h3>
-    <div class="mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
+    <div class="mochi-ctl" id="gl-mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
+      <span style="white-space:nowrap">餅 強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
       <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
       <button class="tool-btn mini" id="gl-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.68rem;font-weight:800;color:var(--text2)">
+    <div id="gl-zoom-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.68rem;font-weight:800;color:var(--text2)">
       <span style="white-space:nowrap">🔍ズーム</span><input type="range" id="gl-zoom" min="100" max="300" value="100" oninput="galleryZoom(this.value)" style="flex:1;width:0;min-width:0;height:12px;margin:0;padding:0">
       <span id="gl-zoom-val" style="white-space:nowrap;min-width:34px;text-align:right">100%</span>
     </div>
@@ -683,11 +688,11 @@ function streakOf(){
   return n;
 }
 function renderStreak(){
-  const el = document.getElementById('streak-bar');
-  if(!el) return;
   const s = streakOf();
-  if(s>=2){ el.style.display='block'; el.textContent = `🔥 ${s}日連続記録中`; }
-  else { el.style.display='none'; }
+  document.querySelectorAll('.streak-bar').forEach(el=>{
+    if(s>=2){ el.style.display='block'; el.textContent = `🔥 ${s}日連続記録中`; }
+    else { el.style.display='none'; }
+  });
 }
 function markActive(){ // 記録をしたら今日を活動日に追加し、節目はお祝い
   const t = todayStr();
@@ -726,7 +731,7 @@ function renderAnniv(){
   const rows = list.slice(0,3).map(a=>
     `<div class="cal-item" style="cursor:default"><span class="tag" style="background:var(--accent)">${annivLabel(a.d)}</span>
      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.name)}</span></div>`).join('');
-  el.innerHTML = `<div class="card"><div class="row between"><div class="sec-title" style="margin:0">🎂 記念日</div>
+  el.innerHTML = `<div class="card"><div class="row between"><div class="sec-title" style="margin:0">🎂 イベント・記念日</div>
     <button class="tool-btn mini" onclick="openAnnivModal()">＋編集</button></div>
     ${rows || '<div class="muted" style="font-size:.8rem;margin-top:6px">誕生日やイベントを登録してカウントダウン</div>'}</div>`;
 }
@@ -754,12 +759,12 @@ function annivAdd(){
   a.push({id:Date.now(), name, date, yearly:document.getElementById('anniv-yearly').checked});
   annivSave(a);
   document.getElementById('anniv-name').value = '';
-  renderAnnivModal(); renderAnniv();
+  renderAnnivModal(); renderAnniv(); if(currentTab==='cal') renderCal();
   toast('登録しました');
 }
 function annivDel(id){
   annivSave(annivList().filter(a=>a.id!==id));
-  renderAnnivModal(); renderAnniv();
+  renderAnnivModal(); renderAnniv(); if(currentTab==='cal') renderCal();
 }
 function fmtDate(s){ if(!s) return ''; const p=s.split('-'); return p.length===3 ? `${p[0]}年${+p[1]}月${+p[2]}日` : s; }
 
@@ -780,12 +785,10 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme
 
 /* ----- タブ ----- */
 let currentTab = 'zukan';
-const TAB_SUBS = {zukan:'あなたの「好き」をしまう帳面', banzuke:'なんでもランキング番付', haiku:'一日一句のすすめ', settings:'設定', cal:'趣味ごよみ — 記録カレンダー'};
 function switchTab(tab){
   currentTab = tab;
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+tab));
   document.querySelectorAll('#tabbar button').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
-  document.getElementById('topbar-sub').textContent = TAB_SUBS[tab]||'';
   updateFab();
 }
 function showCal(){
@@ -1806,8 +1809,23 @@ function bzCompose(s, cv){
 }
 
 /* --- canvas共有/保存 --- */
+function canvasToDataURL(cv){ return cv.toDataURL('image/png'); }
 async function shareCanvas(canvasOrId, baseName){
   const cv = typeof canvasOrId==='string' ? document.getElementById(canvasOrId) : canvasOrId;
+  const P = window.Capacitor && window.Capacitor.Plugins;
+  const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  // ネイティブ: 画像を一時ファイルに書き出して共有シートを開く(端末の標準共有)
+  if(isNative && P && P.Filesystem && P.Share){
+    try{
+      const dataUrl = canvasToDataURL(cv);
+      const fname = baseName+'_'+Date.now()+'.png';
+      const w = await P.Filesystem.writeFile({ path: fname, data: dataUrl.split(',')[1], directory: 'CACHE' });
+      const uri = w && w.uri ? w.uri : (await P.Filesystem.getUri({ path: fname, directory: 'CACHE' })).uri;
+      await P.Share.share({ title:'趣味帳Fav', text:'趣味帳Favで作った画像', files:[uri] });
+      return;
+    }catch(e){ if(e && /cancel/i.test(e.message||'')) return; console.error('native share', e); }
+  }
+  // Web/フォールバック: 標準共有 or ダウンロード保存
   cv.toBlob(async blob=>{
     const file = new File([blob], baseName+'_'+Date.now()+'.png', {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -2166,9 +2184,18 @@ async function calData(){
   banzuke.filter(s=>s.onCal!==false && s.date).forEach(s=>{
     push(s.date, {kind:'番付', color:'#7a5230', hex:'#7a5230', label:s.title||'(無題の番付)', go:`calGoBz(${s.id})`});
   });
+  // イベント・記念日(localStorage)も連動表示。毎年は前後の年も入れて月またぎに対応
+  annivList().forEach(a=>{
+    const p = a.date.split('-').map(Number);
+    const e = {kind:'記念日', color:'#e67e22', hex:'#e67e22', label:a.name, go:'openAnnivModal()'};
+    if(a.yearly!==false){
+      [calY-1, calY, calY+1].forEach(Y=>push(`${Y}-${String(p[1]).padStart(2,'0')}-${String(p[2]).padStart(2,'0')}`, e));
+    } else push(a.date, e);
+  });
   return ev;
 }
 async function renderCal(){
+  renderStreak();
   const ev = await calData();
   document.getElementById('cal-title').textContent = `${calY}年 ${calM}月`;
   const hol = holidaysOf(calY);
@@ -2604,22 +2631,11 @@ function initMochiCanvas(cv, src){
       // 限界到達: 超過した指の動きで全体をスライド(指1本のときだけ。2本なら引っ張り合い優先)
       const act = [...ptrs.values()].filter(z=>!z.up);
       if(act.length===1){
+        // 限界を超えた分は画像のスクロール/パンに使う(作品の切替はしない=ギミックの邪魔をしない)
         const sc = cv.closest('.modal-box');
-        if(typeof glZoomActive==='function' && glZoomActive(cv)){
-          // ズーム中: 前後の作品送りではなく、拡大画像のパン(縦横スクロール)
-          const body = document.getElementById('gl-body');
-          if(body) body.scrollLeft -= (e.clientX-p.px);
-          if(sc) sc.scrollTop -= (e.clientY-p.py);
-        } else {
-          if(sc) sc.scrollTop -= (e.clientY-p.py); // 縦: 画面スクロール
-          cumX += (e.clientX-p.px);                 // 横: たまったら前後の作品へ
-          if(!flipDone && Math.abs(cumX)>90){
-            flipDone = true;
-            const dir = cumX<0 ? 1 : -1;
-            if(document.getElementById('modal-gallery').classList.contains('open')) galleryMove(dir);
-            else if(document.getElementById('modal-diary').classList.contains('open')) diaryMove(dir);
-          }
-        }
+        const body = document.getElementById('gl-body');
+        if(glZoomActive && glZoomActive(cv) && body) body.scrollLeft -= (e.clientX-p.px);
+        if(sc) sc.scrollTop -= (e.clientY-p.py);
       }
       ndx *= lim/m; ndy *= lim/m;
       p.gx = q.x-ndx; p.gy = q.y-ndy; // つかみ位置が指に追従(くっつき感を維持)
@@ -2702,6 +2718,10 @@ function galleryShow(){
   document.getElementById('gl-pos').textContent = `${glIdx+1}/${glList.length}`;
   const names = {zukan:'📚 図鑑', deco:'📖 軌跡', haiku:'🖌️ 俳句', banzuke:'🏆 番付'};
   document.getElementById('gl-title').textContent = `${names[glKind]}　${o.date?fmtDate(o.date):''}`;
+  // 餅スライダー・範囲指定・ズームは餅で遊べる図鑑/軌跡だけ表示(番付/俳句では隠す)
+  const playable = (glKind==='zukan' || glKind==='deco');
+  document.getElementById('gl-mochi-ctl').style.display = playable ? '' : 'none';
+  document.getElementById('gl-zoom-row').style.display = playable ? '' : 'none';
   const body = document.getElementById('gl-body');
   let html = '';
   if(glKind==='zukan'){
@@ -2812,20 +2832,7 @@ function galleryZoom(v){
   }
 }
 function glZoomActive(cv){ return glZoom>100 && cv && cv.closest && !!cv.closest('#gl-body'); }
-function galleryInitSwipe(){
-  const box = document.querySelector('#modal-gallery .modal-box');
-  let sx = null, sy = null;
-  box.addEventListener('touchstart', e=>{
-    if(e.target.closest('.dy-bz,.dy-mochi')){ sx=null; return; } // ギミック対象の上ではめくらない
-    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
-  }, {passive:true});
-  box.addEventListener('touchend', e=>{
-    if(sx==null) return;
-    const dx = e.changedTouches[0].clientX-sx, dy = e.changedTouches[0].clientY-sy;
-    sx = null;
-    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.5) galleryMove(dx<0?1:-1);
-  }, {passive:true});
-}
+function galleryInitSwipe(){ /* 左右フリックでの作品切替は廃止(ギミック操作の邪魔・ズーム誤爆のため)。切替は◀▶ボタンで */ }
 function calGoItem(bookId, itemId){ switchTab('zukan'); openBook(bookId).then(()=>openItemForm(itemId)); }
 function calGoHaiku(id){ switchTab('haiku'); viewHaiku(id); }
 function calGoDeco(id){ switchTab('zukan'); decoOpen(id); }
@@ -2957,6 +2964,8 @@ function initAdMob(){
   document.getElementById('set-notif-time').value = notifTime();
   document.getElementById('set-notif-time-row').style.display = notifEnabled() ? '' : 'none';
   if(notifEnabled()) notifReschedule();
+  // ホーム=カレンダー(3機能の共通ハブ)。連続記録バッジもここに出す
+  showCal();
   initAdMob();
 })();
 </script>

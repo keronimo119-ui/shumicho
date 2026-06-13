@@ -102,6 +102,21 @@ cd android; .\gradlew.bat assembleDebug
 
 ## 7. 経緯ダイジェスト
 
+### UI刷新・共有実装(2026-06-13 まとめ更新)
+- **アプリ名を「趣味帳Fav」に改名**(UI app-title + Android strings.xml app_name/title_activity_main)。Fav=お気に入り/推し活の差別化。
+- **ホーム=カレンダー**に変更(init末尾`showCal()`)。3機能(図鑑/番付/俳句)の共通ハブがカレンダーのため。currentTab初期'zukan'だが起動でcalへ。
+- **連続記録バッジをカレンダーにも表示**: `#streak-bar`→class`.streak-bar`化、page-calにも設置、`renderStreak()`は全`.streak-bar`更新、renderCalで呼ぶ。
+- **記念日→「イベント・記念日」に改称**+**カレンダー連動**: `calData()`に`annivList()`をpush(毎年は calY-1..+1、色#e67e22、go=openAnnivModal)。annivAdd/Delでcal更新。
+- topbarサブタイトル削除(TAB_SUBS/topbar-sub撤去)。**こよみボタン**を accent グラデ+pulse で目立たせ「📅こよみ」表記。
+- **`.back-link`をボタン風**(枠+カード背景+角丸)に。
+- **観覧モードの左右フリック切替を廃止**(`galleryInitSwipe`空に)+餅の限界スライドの横ページ送りも廃止(縦スクロール/ズーム時パンのみ)。ズームスライダー誤爆も解消。
+- **番付/俳句の観覧では餅スライダー・範囲指定・ズームを非表示**(`gl-mochi-ctl`/`gl-zoom-row`をplayable=zukan/decoのみ表示)。餅強さラベルの🍡は削除済み。
+- **画像シェアをネイティブ対応**: WebViewは`navigator.share`非対応だった(既存の番付/俳句シェアも実質不動作)。
+  `@capacitor/share@8`+`@capacitor/filesystem@8`導入。`shareCanvas()`はネイティブ時に Filesystem.writeFile(CACHE,base64)→getUri→Share.share(files)で**端末標準の共有シート**を開く。Web時は従来のnavigator.share/DLにフォールバック。実機で共有シート表示確認。
+- 全項目 実機検証・スクショ確認済み。
+
+
+
 ### 「ユーザー目線の改善」シリーズ(2026-06-13〜、毎日開く=広告収益を狙う)
 順番に実装中。①毎日開くきっかけ ②自慢シェア ③写真込みバックアップ ④餅技術の遊び転用。
 ※新規の文言は宗教を連想させる語を避ける(季語DBは伝統の歳時記なので変更しない/通知に出す時だけ配慮)。
