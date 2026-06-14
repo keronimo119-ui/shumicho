@@ -597,10 +597,7 @@ img.ph{object-fit:cover;display:block}
       <span style="white-space:nowrap">範囲<b class="mval-r" style="color:var(--accent)"></b></span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
       <button class="tool-btn mini" id="dy-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
     </div>
-    <div id="dy-zoom-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">🔍ズーム</span><input type="range" id="dy-zoom" min="100" max="300" value="100" oninput="galleryZoom(this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
-      <span id="dy-zoom-val" style="white-space:nowrap;min-width:34px;text-align:right">100%</span>
-    </div>
+    <div id="dy-zoom-row" style="margin-top:4px;font-size:.66rem;font-weight:800;color:var(--text2)">🔍 画像を2本指でつまむと拡大・縮小できます</div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="dy-prev" onclick="diaryMove(-1)">◀ 前の記録日</button>
       <span class="muted" id="dy-pos" style="font-size:.78rem"></span>
@@ -620,10 +617,7 @@ img.ph{object-fit:cover;display:block}
       <span style="white-space:nowrap">範囲<b class="mval-r" style="color:var(--accent)"></b></span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
       <button class="tool-btn mini" id="gl-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
     </div>
-    <div id="gl-zoom-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">🔍ズーム</span><input type="range" id="gl-zoom" min="100" max="300" value="100" oninput="galleryZoom(this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
-      <span id="gl-zoom-val" style="white-space:nowrap;min-width:34px;text-align:right">100%</span>
-    </div>
+    <div id="gl-zoom-row" style="margin-top:4px;font-size:.66rem;font-weight:800;color:var(--text2)">🔍 画像を2本指でつまむと拡大・縮小できます</div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="gl-prev" onclick="galleryMove(-1)">◀ 前の作品</button>
       <span class="muted" id="gl-pos" style="font-size:.78rem"></span>
@@ -2307,11 +2301,9 @@ async function openDiary(ds){
   // スライダー類を観覧モードと同じに(餅対応画像がある日だけ表示)。ズーム・範囲指定は毎回リセット
   const hasMochi = mochiMetas.length>0;
   document.getElementById('dy-mochi-ctl').style.display = hasMochi ? 'flex' : 'none';
-  document.getElementById('dy-zoom-row').style.display = hasMochi ? 'flex' : 'none';
+  document.getElementById('dy-zoom-row').style.display = hasMochi ? '' : 'none';
   mochiCtlSync(); // スライダーの値と数値表示を最新に
   glZoom = 100;
-  document.getElementById('dy-zoom').value = 100;
-  document.getElementById('dy-zoom-val').textContent = '100%';
   document.getElementById('dy-body').style.overflowX = '';
   if(mochiZoneEdit){ mochiZoneEdit=false; const zb=document.getElementById('dy-zone-btn'); zb.textContent='✏️範囲指定'; zb.classList.remove('on'); }
   openModal('modal-diary');
@@ -2326,20 +2318,7 @@ function diaryMove(dir){
   calSelDate = target; renderCal(); // 後ろのカレンダーも追従
   openDiary(target);
 }
-function diaryInitSwipe(){
-  const box = document.querySelector('#modal-diary .modal-box');
-  let sx = null, sy = null;
-  box.addEventListener('touchstart', e=>{
-    if(e.target.closest('.dy-bz,.dy-mochi')){ sx=null; return; } // ギミック対象の上ではめくらない
-    sx=e.touches[0].clientX; sy=e.touches[0].clientY;
-  }, {passive:true});
-  box.addEventListener('touchend', e=>{
-    if(sx==null) return;
-    const dx = e.changedTouches[0].clientX-sx, dy = e.changedTouches[0].clientY-sy;
-    sx = null;
-    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.5) diaryMove(dx<0?1:-1); // 左へ払う=次の日
-  }, {passive:true});
-}
+function diaryInitSwipe(){ /* 左右フリックでの日付切替は廃止(俳句など画像の上で誤爆するため)。日付の前後移動は◀▶ボタンで */ }
 /* 観覧モードギミック: 剣(番付を素早く払う)・波紋(俳句をタップ)。餅はmochify()でcanvas化 */
 function initGimmicks(body){
   // 波紋: タップ点から自然な水の輪が3重に広がる+中心のしぶき
@@ -2500,8 +2479,21 @@ function initMochiCanvas(cv, src){
   const Rbase = Math.max(W,H)/3;        // 範囲100%のときの影響半径
   const R = ()=>Rbase*mochiCfg.r/100;   // 指を中心とした円の半径(範囲スライダー連動)
   const ptrs = new Map();     // 指ごとの状態(マルチタッチ): id -> {gx,gy,dx,dy,vx,vy,up,px,py}
-  let anim = 0, cumX = 0, flipDone = false, dirty = false, zoneTemp = null, zoneDrag = null;
+  let anim = 0, cumX = 0, flipDone = false, dirty = false, zoneTemp = null, zoneDrag = null, pinchSt = null;
   const meta = cv._meta || (cv._meta = {zones:[], save:null});
+  // ピンチズーム: 画像幅%を変えて拡大し、つまんだ中心を保つ(スクロールで追従)
+  function pinchApply(newZoom, oldX, oldY, newX, newY){
+    const body = cv.closest('#gl-body, #dy-body'), sc = cv.closest('.modal-box');
+    const r0 = cv.getBoundingClientRect();
+    const cfx = r0.width ? (oldX-r0.left)/r0.width : 0.5;
+    const cfy = r0.height ? (oldY-r0.top)/r0.height : 0.5;
+    glZoom = Math.max(100, Math.min(400, newZoom));
+    if(body) body.style.overflowX = glZoom>100 ? 'auto' : '';
+    cv.style.width = glZoom+'%'; cv.style.maxWidth = 'none';
+    const r1 = cv.getBoundingClientRect(); // 読み取りで再レイアウト
+    if(body) body.scrollLeft += (r1.left + cfx*r1.width) - newX;
+    if(sc) sc.scrollTop += (r1.top + cfy*r1.height) - newY;
+  }
   function requestDraw(){ // 1フレーム1回だけ描く(無駄な多重描画をなくし反応を安定させる)
     if(dirty) return;
     dirty = true;
@@ -2652,6 +2644,19 @@ function initMochiCanvas(cv, src){
     }
     const p = ptrs.get(e.pointerId);
     if(!p || p.up) return;
+    p.px = e.clientX; p.py = e.clientY;
+    // 指2本=ピンチズーム+パン(餅の変形はしない)。1本に戻ると餅に復帰
+    const act = [...ptrs.values()].filter(z=>!z.up);
+    if(act.length>=2){
+      const a=act[0], b=act[1];
+      const dist=Math.hypot(a.px-b.px, a.py-b.py), mx=(a.px+b.px)/2, my=(a.py+b.py)/2;
+      if(pinchSt && pinchSt.dist>0) pinchApply(glZoom*dist/pinchSt.dist, pinchSt.mx, pinchSt.my, mx, my);
+      pinchSt = {dist, mx, my};
+      for(const z of act){ const cp=pos({clientX:z.px, clientY:z.py}); z.gx=cp.x; z.gy=cp.y; z.dx=0; z.dy=0; } // 餅変形を消し掴み位置を現在地へ(指が減っても跳ねない)
+      requestDraw();
+      return;
+    }
+    pinchSt = null;
     const q = pos(e);
     let ndx = q.x-p.gx, ndy = q.y-p.gy;
     const m = Math.hypot(ndx, ndy), lim = R()*1.0; // 引っ張り限界(餅らしくぐーっと伸びる長さ・範囲スライダー連動)
@@ -2686,6 +2691,7 @@ function initMochiCanvas(cv, src){
     }
     const p = ptrs.get(e.pointerId);
     if(!p) return;
+    pinchSt = null; // 指が減ったらピンチ状態は作り直す(残った指は餅に復帰)
     p.up = true; // この指の分だけばねでぷるんと戻す(他の指は触り続けられる)
     cancelAnimationFrame(anim);
     const spring = ()=>{
@@ -2737,8 +2743,6 @@ function galleryShow(){
     zb.textContent = '✏️範囲指定'; zb.classList.remove('on');
   }
   glZoom = 100; // 作品を変えたらズームは戻す
-  document.getElementById('gl-zoom').value = 100;
-  document.getElementById('gl-zoom-val').textContent = '100%';
   document.getElementById('gl-body').style.overflowX = '';
   glUrls.forEach(u=>URL.revokeObjectURL(u)); glUrls = [];
   const single = glList.length<2; // 1作品だけのときは送りボタン無効、それ以外はループ可
@@ -2750,7 +2754,7 @@ function galleryShow(){
   // 餅スライダー・範囲指定・ズームは餅で遊べる図鑑/軌跡だけ表示(番付/俳句では隠す)
   const playable = (glKind==='zukan' || glKind==='deco');
   document.getElementById('gl-mochi-ctl').style.display = playable ? 'flex' : 'none'; // flexに戻す('']だとblockになりwidth:0のバーが消える)
-  document.getElementById('gl-zoom-row').style.display = playable ? 'flex' : 'none';
+  document.getElementById('gl-zoom-row').style.display = playable ? '' : 'none';
   const body = document.getElementById('gl-body');
   let html = '';
   if(glKind==='zukan'){
@@ -2849,33 +2853,11 @@ async function galleryShare(){
 function galViewer(){
   const inDiary = document.getElementById('modal-diary').classList.contains('open');
   return inDiary
-    ? {body:document.getElementById('dy-body'), zoomVal:'dy-zoom-val', zoneBtn:'dy-zone-btn'}
-    : {body:document.getElementById('gl-body'), zoomVal:'gl-zoom-val', zoneBtn:'gl-zone-btn'};
+    ? {body:document.getElementById('dy-body'), zoneBtn:'dy-zone-btn'}
+    : {body:document.getElementById('gl-body'), zoneBtn:'gl-zone-btn'};
 }
-function galMainEl(body){ return body.querySelector('canvas.dy-mochi') || body.querySelector('.dy-bz') || body.querySelector('.dy-haiku') || body.querySelector('img.dy-mochi') || body.firstElementChild; }
-/* 画像全体ズーム。100%超は餅を止めてつまんでスクロール。表示中心を保ったまま拡大(中心固定) */
+/* ズームは画像のピンチ操作(initMochiCanvas内)で行う。glZoomは現在の拡大率% */
 let glZoom = 100;
-function galleryZoom(v){
-  const vw = galViewer(), body = vw.body, sc = body.closest('.modal-box');
-  const main = galMainEl(body);
-  glZoom = +v;
-  const valEl = document.getElementById(vw.zoomVal); if(valEl) valEl.textContent = glZoom+'%';
-  if(!main) return;
-  // 拡大前: いま画面中央に来ているコンテンツ上の点を覚える
-  const r0 = main.getBoundingClientRect();
-  const vpCx = (body.getBoundingClientRect().left) + body.clientWidth/2;
-  const vpCy = sc ? (sc.getBoundingClientRect().top + sc.clientHeight/2) : (r0.top+r0.height/2);
-  const fx = r0.width ? (vpCx - r0.left)/r0.width : 0.5;
-  const fy = r0.height ? (vpCy - r0.top)/r0.height : 0.5;
-  body.style.overflowX = glZoom>100 ? 'auto' : '';
-  main.style.maxWidth = 'none';
-  main.style.width = glZoom+'%';
-  requestAnimationFrame(()=>{ // 拡大後: その点を再び画面中央へ(中心がずれない)
-    const r1 = main.getBoundingClientRect();
-    body.scrollLeft += (r1.left + fx*r1.width) - vpCx;
-    if(sc) sc.scrollTop += (r1.top + fy*r1.height) - vpCy;
-  });
-}
 function glZoomActive(cv){ return glZoom>100 && cv && cv.closest && !!cv.closest('#gl-body, #dy-body'); }
 function galleryInitSwipe(){ /* 左右フリックでの作品切替は廃止(ギミック操作の邪魔・ズーム誤爆のため)。切替は◀▶ボタンで */ }
 function calGoItem(bookId, itemId){ switchTab('zukan'); openBook(bookId).then(()=>openItemForm(itemId)); }
