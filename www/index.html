@@ -235,7 +235,7 @@ img.ph{object-fit:cover;display:block}
     <div id="zukan-list-view" class="subview active">
       <div class="hero"><h2>📚 マイ図鑑</h2><p>グッズ・カード・昆虫・なんでも。写真とメモで自分だけの図鑑を作ろう</p></div>
       <div class="streak-bar" style="display:none;text-align:center;font-size:.82rem;font-weight:900;color:var(--accent);background:var(--accent-light);border-radius:12px;padding:8px;margin-bottom:10px"></div>
-      <div id="anniv-home" style="margin-bottom:10px"></div>
+      <div class="anniv-home" style="margin-bottom:10px"></div>
       <button class="btn sub wide" style="margin-bottom:10px" onclick="galleryOpen('zukan')">👀 観覧モード(集めた写真をめくって眺める)</button>
       <div class="card book-card" onclick="showDecoList()">
         <div class="book-emoji">📖</div>
@@ -398,6 +398,7 @@ img.ph{object-fit:cover;display:block}
     <div id="cal-grid"></div>
     <div class="sec-title" id="cal-day-title"></div>
     <div id="cal-day-list"></div>
+    <div class="anniv-home" style="margin-top:12px"></div>
   </section>
 
   <!-- ============ 設定 ============ -->
@@ -572,7 +573,7 @@ img.ph{object-fit:cover;display:block}
 <!-- 記念日カウントダウン管理 -->
 <div class="modal" id="modal-anniv">
   <div class="modal-box">
-    <h3>🎂 イベント・記念日</h3>
+    <h3>🎂 イベント登録</h3>
     <div class="muted" style="font-size:.8rem">誕生日やイベントの日を登録すると、ホームとカレンダーに「あと○日」を表示します</div>
     <div id="anniv-list" style="margin-top:10px"></div>
     <div class="row" style="margin-top:12px">
@@ -591,9 +592,14 @@ img.ph{object-fit:cover;display:block}
   <div class="modal-box">
     <h3 id="dy-title" class="serif"></h3>
     <div class="muted" id="dy-sub"></div>
-    <div class="mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">強さ</span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;height:26px;margin:0;padding:0;touch-action:pan-y">
-      <span style="white-space:nowrap">範囲</span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;height:26px;margin:0;padding:0;touch-action:pan-y">
+    <div class="mochi-ctl" id="dy-mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
+      <span style="white-space:nowrap">餅 強さ<b class="mval-k" style="color:var(--accent)"></b></span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
+      <span style="white-space:nowrap">範囲<b class="mval-r" style="color:var(--accent)"></b></span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
+      <button class="tool-btn mini" id="dy-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
+    </div>
+    <div id="dy-zoom-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.68rem;font-weight:800;color:var(--text2)">
+      <span style="white-space:nowrap">🔍ズーム</span><input type="range" id="dy-zoom" min="100" max="300" value="100" oninput="galleryZoom(this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
+      <span id="dy-zoom-val" style="white-space:nowrap;min-width:34px;text-align:right">100%</span>
     </div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="dy-prev" onclick="diaryMove(-1)">◀ 前の記録日</button>
@@ -610,8 +616,8 @@ img.ph{object-fit:cover;display:block}
   <div class="modal-box">
     <h3 id="gl-title" class="serif"></h3>
     <div class="mochi-ctl" id="gl-mochi-ctl" style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.68rem;font-weight:800;color:var(--text2)">
-      <span style="white-space:nowrap">餅 強さ<b id="mval-k" style="color:var(--accent)"></b></span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
-      <span style="white-space:nowrap">範囲<b id="mval-r" style="color:var(--accent)"></b></span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
+      <span style="white-space:nowrap">餅 強さ<b class="mval-k" style="color:var(--accent)"></b></span><input type="range" data-k="k" min="10" max="100" oninput="mochiSet('k',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
+      <span style="white-space:nowrap">範囲<b class="mval-r" style="color:var(--accent)"></b></span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
       <button class="tool-btn mini" id="gl-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
     </div>
     <div id="gl-zoom-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:.68rem;font-weight:800;color:var(--text2)">
@@ -729,14 +735,15 @@ function annivWithDays(){
 }
 function annivLabel(d){ return d===0 ? '当日' : 'あと'+d+'日'; }
 function renderAnniv(){
-  const el = document.getElementById('anniv-home'); if(!el) return;
+  const els = document.querySelectorAll('.anniv-home'); if(!els.length) return;
   const list = annivWithDays();
   const rows = list.slice(0,3).map(a=>
     `<div class="cal-item" style="cursor:default"><span class="tag" style="background:var(--accent)">${annivLabel(a.d)}</span>
      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.name)}</span></div>`).join('');
-  el.innerHTML = `<div class="card"><div class="row between"><div class="sec-title" style="margin:0">🎂 イベント・記念日</div>
+  const html = `<div class="card"><div class="row between"><div class="sec-title" style="margin:0">🎂 イベント登録</div>
     <button class="tool-btn mini" onclick="openAnnivModal()">＋編集</button></div>
     ${rows || '<div class="muted" style="font-size:.8rem;margin-top:6px">誕生日やイベントを登録してカウントダウン</div>'}</div>`;
+  els.forEach(el=>el.innerHTML = html);
 }
 function renderAnnivModal(){
   const list = annivWithDays();
@@ -2199,6 +2206,7 @@ async function calData(){
 }
 async function renderCal(){
   renderStreak();
+  renderAnniv();
   const ev = await calData();
   document.getElementById('cal-title').textContent = `${calY}年 ${calM}月`;
   const hol = holidaysOf(calY);
@@ -2266,7 +2274,7 @@ async function openDiary(ds){
   // 軌跡ページ(デコ+書き込み枠)
   for(const p of deco.filter(p=>p.onCal!==false && p.date===ds)){
     let img = '';
-    if(p.thumb){ const u=URL.createObjectURL(p.thumb); diaryUrls.push(u); img=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px" alt="">`; mochiMetas.push({zones:(p.mochiZones||[]).slice(), save:null}); }
+    if(p.thumb){ const u=URL.createObjectURL(p.thumb); diaryUrls.push(u); img=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px" alt="">`; mochiMetas.push({zones:(p.mochiZones||[]).slice(), save:async zs=>{ p.mochiZones=zs; await dbPut('deco', p); }}); }
     const notes = (p.notes||[]).filter(n=>n.text).map(n=>
       `<div style="margin-top:8px"><span class="chip" style="color:var(--accent);background:var(--accent-light)">${esc(n.cat)}</span>
       <div class="serif" style="white-space:pre-wrap;font-size:.94rem;margin-top:4px;line-height:1.8">${esc(n.text)}</div></div>`).join('');
@@ -2284,7 +2292,7 @@ async function openDiary(ds){
   for(const i of items.filter(i=>i.onCal!==false && i.date===ds)){
     const b = bookMap[i.bookId];
     let ph='';
-    if(i.photo){ const u=URL.createObjectURL(i.photo); diaryUrls.push(u); ph=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px;margin-top:6px" alt="">`; mochiMetas.push({zones:(i.mochiZones||[]).slice(), save:null}); }
+    if(i.photo){ const u=URL.createObjectURL(i.photo); diaryUrls.push(u); ph=`<img src="${u}" class="dy-mochi" style="width:100%;border-radius:10px;margin-top:6px" alt="">`; mochiMetas.push({zones:(i.mochiZones||[]).slice(), save:async zs=>{ i.mochiZones=zs; await dbPut('items', i); }}); }
     html += `<div class="card"><div class="sec-title" style="margin-top:0">${b?b.emoji:'📚'} ${esc(i.name)} <span class="muted">${esc(b?b.name:'')}</span></div>${ph}
       <div class="muted" style="margin-top:4px"><span style="color:var(--gold)">${'★'.repeat(i.rating||0)}</span>${i.place?' / '+esc(i.place):''}${i.got?'':' / 🔜未入手'}</div>
       ${i.memo?`<div style="font-size:.88rem;white-space:pre-wrap;margin-top:4px">${esc(i.memo)}</div>`:''}</div>`;
@@ -2296,6 +2304,16 @@ async function openDiary(ds){
   }
   if(!html) html = '<div class="empty">この日の記録はありません</div>';
   document.getElementById('dy-body').innerHTML = html;
+  // スライダー類を観覧モードと同じに(餅対応画像がある日だけ表示)。ズーム・範囲指定は毎回リセット
+  const hasMochi = mochiMetas.length>0;
+  document.getElementById('dy-mochi-ctl').style.display = hasMochi ? 'flex' : 'none';
+  document.getElementById('dy-zoom-row').style.display = hasMochi ? 'flex' : 'none';
+  mochiCtlSync(); // スライダーの値と数値表示を最新に
+  glZoom = 100;
+  document.getElementById('dy-zoom').value = 100;
+  document.getElementById('dy-zoom-val').textContent = '100%';
+  document.getElementById('dy-body').style.overflowX = '';
+  if(mochiZoneEdit){ mochiZoneEdit=false; const zb=document.getElementById('dy-zone-btn'); zb.textContent='✏️範囲指定'; zb.classList.remove('on'); }
   openModal('modal-diary');
   requestAnimationFrame(()=>document.querySelectorAll('#dy-body img.dy-mochi').forEach((img,ix)=>{
     img._mochiMeta = mochiMetas[ix] || {zones:[], save:null};
@@ -2420,8 +2438,8 @@ function slashSplit(card, midX, midY, ang){
 /* 餅の好み設定(強さ=バネ・範囲=指を中心とした円の半径)。スライダーで変更し保存 */
 const mochiCfg = (()=>{ try{ const o = JSON.parse(localStorage.getItem('sc_mochi')||'{}'); return {k:+o.k||90, r:+o.r||100}; }catch(e){ return {k:90, r:100}; } })();
 function mochiValShow(){
-  const k=document.getElementById('mval-k'), r=document.getElementById('mval-r');
-  if(k) k.textContent = ' '+mochiCfg.k; if(r) r.textContent = ' '+mochiCfg.r;
+  document.querySelectorAll('.mval-k').forEach(k=>k.textContent=' '+mochiCfg.k);
+  document.querySelectorAll('.mval-r').forEach(r=>r.textContent=' '+mochiCfg.r);
 }
 function mochiSet(key, v){
   mochiCfg[key] = +v;
@@ -2436,10 +2454,11 @@ function mochiCtlSync(){
 /* 範囲指定モード: 円を複数描き、円の中だけ餅にする(作品ごとに保存) */
 let mochiZoneEdit = false;
 function mochiZoneToggle(){
-  const cv = document.querySelector('#gl-body canvas.dy-mochi');
+  const vw = galViewer();
+  const cv = vw.body.querySelector('canvas.dy-mochi');
   if(!cv){ toast('この作品に餅対応の画像がありません'); return; }
   mochiZoneEdit = !mochiZoneEdit;
-  const btn = document.getElementById('gl-zone-btn');
+  const btn = document.getElementById(vw.zoneBtn);
   btn.textContent = mochiZoneEdit ? '✅完了' : '✏️範囲指定';
   btn.classList.toggle('on', mochiZoneEdit);
   if(mochiZoneEdit){
@@ -2642,7 +2661,7 @@ function initMochiCanvas(cv, src){
       if(act.length===1){
         // 限界を超えた分は画像のスクロール/パンに使う(作品の切替はしない=ギミックの邪魔をしない)
         const sc = cv.closest('.modal-box');
-        const body = document.getElementById('gl-body');
+        const body = cv.closest('#gl-body, #dy-body');
         if(glZoomActive && glZoomActive(cv) && body) body.scrollLeft -= (e.clientX-p.px);
         if(sc) sc.scrollTop -= (e.clientY-p.py);
       }
@@ -2826,21 +2845,38 @@ async function galleryShare(){
     else if(glKind==='zukan'){ if(!o.photo){ toast('写真がありません'); return; } const cv=await zukanCompose(o); shareCanvas(cv,'zukan'); }
   }catch(e){ console.error('share', e); toast('画像の作成に失敗しました'); }
 }
-/* 画像全体ズーム(観覧モード)。100%超では餅は止めて、つまんでスクロール可能にする */
+/* 今開いている閲覧モーダル(観覧モード or 手帳プレビュー)を返す */
+function galViewer(){
+  const inDiary = document.getElementById('modal-diary').classList.contains('open');
+  return inDiary
+    ? {body:document.getElementById('dy-body'), zoomVal:'dy-zoom-val', zoneBtn:'dy-zone-btn'}
+    : {body:document.getElementById('gl-body'), zoomVal:'gl-zoom-val', zoneBtn:'gl-zone-btn'};
+}
+function galMainEl(body){ return body.querySelector('canvas.dy-mochi') || body.querySelector('.dy-bz') || body.querySelector('.dy-haiku') || body.querySelector('img.dy-mochi') || body.firstElementChild; }
+/* 画像全体ズーム。100%超は餅を止めてつまんでスクロール。表示中心を保ったまま拡大(中心固定) */
 let glZoom = 100;
 function galleryZoom(v){
+  const vw = galViewer(), body = vw.body, sc = body.closest('.modal-box');
+  const main = galMainEl(body);
   glZoom = +v;
-  document.getElementById('gl-zoom-val').textContent = glZoom+'%';
-  const body = document.getElementById('gl-body');
+  const valEl = document.getElementById(vw.zoomVal); if(valEl) valEl.textContent = glZoom+'%';
+  if(!main) return;
+  // 拡大前: いま画面中央に来ているコンテンツ上の点を覚える
+  const r0 = main.getBoundingClientRect();
+  const vpCx = (body.getBoundingClientRect().left) + body.clientWidth/2;
+  const vpCy = sc ? (sc.getBoundingClientRect().top + sc.clientHeight/2) : (r0.top+r0.height/2);
+  const fx = r0.width ? (vpCx - r0.left)/r0.width : 0.5;
+  const fy = r0.height ? (vpCy - r0.top)/r0.height : 0.5;
   body.style.overflowX = glZoom>100 ? 'auto' : '';
-  const main = body.querySelector('canvas.dy-mochi') || body.querySelector('.dy-bz') || body.querySelector('.dy-haiku') || body.querySelector('img.dy-mochi') || body.firstElementChild;
-  if(main){
-    main.style.width = glZoom+'%';
-    main.style.maxWidth = 'none';
-    // touch-actionはnoneのまま(餅を有効に保つ)。パンは餅の引っ張り限界スライドで行う
-  }
+  main.style.maxWidth = 'none';
+  main.style.width = glZoom+'%';
+  requestAnimationFrame(()=>{ // 拡大後: その点を再び画面中央へ(中心がずれない)
+    const r1 = main.getBoundingClientRect();
+    body.scrollLeft += (r1.left + fx*r1.width) - vpCx;
+    if(sc) sc.scrollTop += (r1.top + fy*r1.height) - vpCy;
+  });
 }
-function glZoomActive(cv){ return glZoom>100 && cv && cv.closest && !!cv.closest('#gl-body'); }
+function glZoomActive(cv){ return glZoom>100 && cv && cv.closest && !!cv.closest('#gl-body, #dy-body'); }
 function galleryInitSwipe(){ /* 左右フリックでの作品切替は廃止(ギミック操作の邪魔・ズーム誤爆のため)。切替は◀▶ボタンで */ }
 function calGoItem(bookId, itemId){ switchTab('zukan'); openBook(bookId).then(()=>openItemForm(itemId)); }
 function calGoHaiku(id){ switchTab('haiku'); viewHaiku(id); }

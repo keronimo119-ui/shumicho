@@ -129,6 +129,19 @@ cd android; .\gradlew.bat assembleDebug
 - カレンダー寿命: 月送り・曜日・固定祝日・ハッピーマンデーは**任意の年で正常**。春分/秋分の近似式(`vernalDay`/`autumnDay`)は
   **1980〜2099年で正確**(数十年は問題なし)。2100年以降は1日ずれる可能性→必要なら係数追加で拡張可。
 
+### 手帳プレビュー強化・中心ズーム・イベント登録共有(2026-06-13 追補2)
+- **手帳プレビュー(modal-diary)に観覧モードと同じコントロール一式**: 餅強さ/範囲スライダー(値表示`.mval-k/.mval-r`)+
+  ✏️範囲指定(`dy-zone-btn`)+🔍ズーム(`dy-zoom`)。餅対応画像がある日だけ表示(`mochiMetas.length>0`)。openDiaryで毎回リセット。
+  範囲指定は手帳でも保存(openDiaryのmochiMetasに`save`コールバック追加→deco/itemにmochiZones永続化)。
+- **共通化**: `galViewer()`が開いているモーダル(gl-body/dy-body)を返し、`galleryZoom`/`mochiZoneToggle`/`glZoomActive`/
+  餅パンが両モーダルで動く。値表示`mochiValShow`はクラスベース。
+- **ズーム中心固定**: 旧=左上アンカー→拡大前に画面中央のコンテンツ点を覚え拡大後に同じ点を中央へ戻す(`galleryZoom`のrect計算+rAF)。
+  観覧/手帳どちらもscrollLeft/Topが中央へ寄るのを実機確認。パンで中心移動も可。
+- **「イベント・記念日」→「イベント登録」改名**+**図鑑とカレンダー両方に表示**(`anniv-home`をid→class化、`renderAnniv`が
+  全`.anniv-home`更新、renderCalでも呼ぶ)。localStorage共有で両ページ同内容・どちらで編集しても反映。
+- 実機検証済み(両ページのイベント登録・手帳のスライダー一式・中心ズーム・範囲指定・観覧モード回帰なし)。
+- ⚠️ワイヤレスadbはIP/ポートが変わりやすく再ペア要(`adb mdns services`で発見可)。
+
 
 
 ### 「ユーザー目線の改善」シリーズ(2026-06-13〜、毎日開く=広告収益を狙う)
