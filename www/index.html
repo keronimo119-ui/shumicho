@@ -597,7 +597,6 @@ img.ph{object-fit:cover;display:block}
       <span style="white-space:nowrap">範囲<b class="mval-r" style="color:var(--accent)"></b></span><input type="range" data-k="r" min="4" max="100" oninput="mochiSet('r',this.value)" style="flex:1;width:0;min-width:0;height:26px;margin:0;padding:0;touch-action:pan-y">
       <button class="tool-btn mini" id="dy-zone-btn" onclick="mochiZoneToggle()" style="white-space:nowrap">✏️範囲指定</button>
     </div>
-    <div id="dy-zoom-row" style="margin-top:4px;font-size:.66rem;font-weight:800;color:var(--text2)">🔍 画像を2本指でつまむと拡大・縮小できます</div>
     <div class="row between" style="margin-top:8px">
       <button class="tool-btn" id="dy-prev" onclick="diaryMove(-1)">◀ 前の記録日</button>
       <span class="muted" id="dy-pos" style="font-size:.78rem"></span>
@@ -2301,7 +2300,6 @@ async function openDiary(ds){
   // スライダー類を観覧モードと同じに(餅対応画像がある日だけ表示)。ズーム・範囲指定は毎回リセット
   const hasMochi = mochiMetas.length>0;
   document.getElementById('dy-mochi-ctl').style.display = hasMochi ? 'flex' : 'none';
-  document.getElementById('dy-zoom-row').style.display = hasMochi ? '' : 'none';
   mochiCtlSync(); // スライダーの値と数値表示を最新に
   glZoom = 100;
   document.getElementById('dy-body').style.overflowX = '';
