@@ -55,6 +55,10 @@ stores: books/items/banzuke/haiku/deco)。Capacitor 8 + @capacitor-community/adm
 
 ## 5. 今後の作業予定
 
+> **やりかけ作業: なし**(2026-06-13時点。直近の機能追加・UI修正はすべて完了・実機検証・push済み)。
+> **次回の最初の一手(別PC)**: `git pull` → `npm install` → `npx cap sync android` → `android/local.properties` をそのPCのSDKパスで作成 → デバッグビルドで起動確認。その後は下記「短期」を上から。
+> ⚠️失敗の試行ログは「7.経緯ダイジェスト」の各⚠️行(desynchronized canvasは画面に映らない/display=''でflex行が壊れる/touch-action:noneでスライダーが掴めない/ワイヤレスadbはポートが変わり再ペア要 等)。
+
 ### 短期(出品まで)
 1. ユーザーの実機確認→フィードバック反映
 2. AdMobコンソールで「趣味帳」アプリ+バナーユニット発行(ユーザー作業)
