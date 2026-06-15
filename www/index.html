@@ -2953,13 +2953,13 @@ function initAdMob(){
       if(lastAdH>0) document.documentElement.style.setProperty('--ad-h', lastAdH+'px');
     }).catch(()=>{});
   };
-  AdMob.initialize({ initializeForTesting: true })
+  AdMob.initialize({ initializeForTesting: false })
     .then(()=> AdMob.showBanner({
-      adId: 'ca-app-pub-3940256099942544/6300978111', // ★テストID。本番化は docs/RELEASE.md 参照
+      adId: 'ca-app-pub-5082973443766226/8091985262', // 本番バナーユニットID(趣味帳Fav)
       adSize: 'ADAPTIVE_BANNER',
       position: 'BOTTOM_CENTER',
       margin: 0,
-      isTesting: true
+      isTesting: false
     }))
     .then(()=>{ adShown = true; })
     .catch(e=>console.error('AdMob banner error:', e));

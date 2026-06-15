@@ -2,6 +2,7 @@ node_modules/
 android/app/build/
 android/build/
 android/.gradle/
+android/.kotlin/
 android/local.properties
 android/keystore.properties
 *.jks

@@ -21,10 +21,10 @@
             </intent-filter>
         </activity>
 
-        <!-- AdMobアプリID(現在はGoogle公式テストID。本番化はdocs/RELEASE.md参照) -->
+        <!-- AdMobアプリID(本番・趣味帳Fav) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"
+            android:value="ca-app-pub-5082973443766226~5744981967"
         />
 
         <provider
