@@ -1,6 +1,34 @@
 # 趣味帳(Shumicho) 引き継ぎ書
 
-最終更新: 2026-06-12 / 作成PC: s-mini2（06-12にs-sigpcでも環境構築済み）
+最終更新: 2026-06-15 / 作成PC: s-mini2（s-sigpcでも環境構築済み）
+
+---
+
+## ★最新状況（2026-06-15）— クローズドテスト配信中
+
+**この日の成果（すべてGitHub mainにpush済み・最新コミット起点 acbfeb2 から本番化）:**
+- s-mini2をorigin/main(acbfeb2)にff追従 → `npm install` → `npx cap sync android`（プラグイン4種認識）
+- **AdMob本番ID化完了**: アプリID `ca-app-pub-5082973443766226~5744981967` / バナー `ca-app-pub-5082973443766226/8091985262`（手値Teneと同じpubアカウント内の別アプリ/別ユニット）。`www/index.html`の`initializeForTesting:false`/`isTesting:false`、AndroidManifestのAPPLICATION_ID本番化。
+- **versionCode 2 / versionName 1.0.1** で署名済みAAB再ビルド成功（`android/app/build/outputs/bundle/release/app-release.aab`）。
+- GitHub Pages（keronimo119-ui.github.io）を「趣味帳Fav」に統一・**BISUKEも一覧に追加**（bisuke-privacy.html新設で3アプリ揃い）・ポリシーに写真撮影/通知を追記。
+- **Play Console: アプリ作成→各種申告→掲載情報→クローズドテスト(Alpha)にAAB→審査送信** まで完了。
+- **2026-06-15 13:38 にAlphaトラックへ「選択したテスターに公開されました」**＝クローズドテスト配信中。テスター=手値のメーリングリストを再利用。国=日本。
+- ストアスクショ: 実機にCDP(`tools/cdp.mjs`)でデモデータ投入し撮影→広告帯除去。携帯=`docs/store/01-04`(1080x2160)、タブレット=`docs/store/tablet/01-04`(1215x2160=9:16・帯なしフィル)。掲載文=`docs/store-listing.md`(趣味帳Fav+最新機能に更新済)。
+- **`keronimo119-ui/shumicho` を Public に変更**（他アプリと統一。秘密ファイルは追跡外で安全）。
+
+**注意点:**
+- ⚠️ 本番ID版APK/AABは**実機で動かさない**（自分の広告枠への無効トラフィック=ポリシー違反リスク）。動作確認はテストID/デバッグ版で。
+- ⚠️ アプリ一覧の「アップデート状況」列は反映が遅くキャッシュ表示のことあり。真の状態は **テストとリリース→テスト→クローズドテスト** のトラック画面で確認。
+- ⚠️ 実機にスクショ用デモデータ（おやつ図鑑等）が残存（ユーザー了承の上そのまま）。
+- 個人アカウントの製品版公開には「クローズドテスト12名×14日」要件がある点に留意。
+
+**次回の作業予定:**
+1. テスターに触ってもらう（テスター数タブのオプトインURLを共有）→フィードバック反映。
+2. 問題なければ **製品版(一般公開)へ昇格**（クローズドテスト→製品版にプロモート、または新リリース）。要件(12名/14日)を満たしてから。
+3. 余力で機能追加: カレンダーウィジェット（背景画像セット可・連動 なし/3つとも/選択式。Javaネイティブ実装）、手帳プレビューの画像書き出し 等（下記「5.今後の作業予定」参照）。
+
+**スクショ再生成の手順（CDP・別PCでも可）:**
+`adb pair/connect`→`adb shell pidof io.github.keronimo119ui.shumicho`→`adb forward tcp:9222 localabstract:webview_devtools_remote_<pid>`→`node tools\cdp.mjs "<JS式>"`または`@ファイル`でWebViewに評価（`switchTab`/`openBook`/`bzPreview`/`openDiary`で画面遷移=ブラインドタップ不要）→`adb exec-out screencap -p > file.png`→System.Drawingで広告帯除去&Play規定比（縦は幅の2倍以内、タブレット9:16）に整形。
 
 ---
 
